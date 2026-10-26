@@ -3,4 +3,5 @@ __pycache__/
 .venv/
 _site/
 /blog/
+/sitemap.xml
 !.gitignore
