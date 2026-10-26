@@ -53,5 +53,9 @@ def main():
     body='<a class="back-link" href="/">← Home</a><p class="section-index" style="margin-top:40px">WRITING / NOTES</p><h1>Thoughts in progress<span style="color:var(--accent)">.</span></h1><p class="blog-description">Technical experiments, project notes, and occasional reflections — kept deliberately simple.</p><div style="margin-top:40px">'+(entries or '<p>No articles published yet.</p>')+'</div>'
     (OUTPUT/"index.html").write_text(render("Writing","Technical writing and project notes",BASE+"/blog/",body),encoding="utf-8")
     (OUTPUT/"posts.json").write_text(json.dumps(posts,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+    from xml.sax.saxutils import escape as xml_escape
+    pages=[BASE+"/", BASE+"/blog/"]+[BASE+p["url"] for p in posts]
+    sitemap='<?xml version="1.0" encoding="UTF-8"?>\\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\\n'+''.join("<url><loc>"+xml_escape(url)+"</loc></url>\\n" for url in pages)+"</urlset>\\n"
+    (ROOT/"sitemap.xml").write_text(sitemap,encoding="utf-8")
     print("Built",len(posts),"articles")
 if __name__=="__main__":main()
