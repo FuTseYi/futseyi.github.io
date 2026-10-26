@@ -2,6 +2,4 @@ __pycache__/
 *.py[cod]
 .venv/
 _site/
-/blog/
 /sitemap.xml
-!.gitignore
