@@ -1,38 +1,104 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="FuTseYi (Shine) — MPhil student at HKUST(GZ). Interested in AI, robotics, computer vision and edge intelligence.">
-<title>FuTseYi | Personal Homepage</title>
-<link rel="canonical" href="https://futseyi.github.io/">
-<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-<style>
-:root{--ink:#252525;--muted:#565656;--link:#1264ab;--line:#dedede;--bg:#fff}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.72 Arial,Helvetica,"PingFang SC","Microsoft YaHei",sans-serif}a{color:var(--link);text-decoration:none}a:hover{text-decoration:underline}a:focus-visible{outline:2px solid var(--link);outline-offset:3px}.page{max-width:980px;padding:0 27px;margin:0 auto}.skip{position:absolute;left:-9999px}.skip:focus{left:15px;top:10px;background:#fff;padding:10px;z-index:10}.topbar{display:flex;align-items:center;justify-content:space-between;padding:24px 0 15px;border-bottom:1px solid var(--line);gap:15px}.brand{font-size:19px;font-weight:700;letter-spacing:-.3px;color:#222}.topbar nav{display:flex;align-items:center;gap:19px;flex-wrap:wrap}.topbar nav a{font-size:13px;color:#454545}.topbar nav a:hover{color:var(--link)}.identity{display:grid;grid-template-columns:1fr 210px;gap:42px;align-items:start;padding:38px 0 25px}.identity h1{font-family:Georgia,"Times New Roman",serif;font-size:35px;line-height:1.18;margin:0 0 13px;font-weight:700}.cn{font-size:22px;font-weight:400}.role{font-size:16px;color:#333;margin:0 0 15px}.identity p{margin:0 0 12px}.identity strong{font-weight:700}.links{display:flex;gap:14px;flex-wrap:wrap;margin-top:16px}.portrait{width:210px;max-width:100%;aspect-ratio:4/5;background:#f0f2f5;border:1px solid #dcdfe3;border-radius:2px;display:flex;align-items:center;justify-content:center;flex-direction:column;color:#7b8492;text-align:center}.portrait svg{width:75px;height:75px;opacity:.55}.portrait span{font-size:11px;margin-top:8px}.note{font-size:13px;color:var(--muted)}section{margin:19px 0 31px;scroll-margin-top:16px}h2{font-size:21px;font-family:Georgia,"Times New Roman",serif;line-height:1.4;color:#292929;margin:0 0 13px;padding-bottom:6px;border-bottom:1px solid #bdbdbd}h3{font-size:16px;margin:0 0 4px}.item{display:grid;grid-template-columns:104px 1fr;gap:15px;margin:15px 0}.item-date{font-size:13px;color:#666}.item p,.project p{margin:3px 0}.research-list{padding-left:20px;margin:8px 0}.research-list li{padding:3px 0}.project{padding:7px 0 13px;margin-bottom:8px}.project small{color:#666}.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:5px}.chips span{font-size:12px;color:#636363;background:#f4f5f6;padding:1px 7px;border-radius:3px}.post-list{list-style:none;padding:0;margin:0}.post-list li{padding:10px 0;border-bottom:1px solid #ededed;display:flex;gap:20px;align-items:baseline}.post-list time{font-size:12px;color:#666;min-width:88px}.view-all{margin-top:14px}.footer{border-top:1px solid var(--line);font-size:12px;color:#777;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;padding:20px 0 35px;margin-top:48px}@media(max-width:650px){.page{padding:0 20px}.topbar{align-items:flex-start;flex-direction:column;gap:7px}.topbar nav{gap:12px}.identity{grid-template-columns:1fr;gap:17px;padding-top:24px}.identity h1{font-size:29px}.portrait{width:130px;aspect-ratio:1;grid-row:1;display:none}.item{grid-template-columns:1fr;gap:2px}.post-list li{display:block}.post-list time{display:block}.footer{margin-top:28px}}@media print{.topbar nav,.portrait,.footer{display:none}.page{max-width:none}.identity{display:block}a{color:inherit}}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="description" content="FuTseYi (Shine) — MPhil student at HKUST(GZ). Interested in embodied intelligence, computer vision, robotics and edge AI.">
+  <meta property="og:title" content="FuTseYi · Personal Homepage">
+  <meta property="og:description" content="Building practical AI systems at the intersection of perception, intelligence and engineering.">
+  <meta property="og:type" content="website">
+  <title>FuTseYi · Personal Homepage</title>
+  <link rel="canonical" href="https://futseyi.github.io/">
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/style.css">
 </head>
 <body>
-<a class="skip" href="#main">Skip to content</a>
-<div class="page">
-<header class="topbar"><a class="brand" href="/">FuTseYi</a><nav aria-label="Primary"><a href="#about">About</a><a href="#education">Education</a><a href="#research">Research</a><a href="#projects">Projects</a><a href="/blog/">Writing</a><a href="#contact">Contact</a></nav></header>
-<main id="main">
-<div class="identity" id="about"><div>
-<h1>FuTseYi <span class="cn">/ Shine</span></h1>
-<p class="role"><strong>Red Bird MPhil Student</strong> at <a href="https://www.hkust-gz.edu.cn/" target="_blank" rel="noopener noreferrer">The Hong Kong University of Science and Technology (Guangzhou)</a></p>
-<p>Hi! I'm <strong>FuTseYi</strong>, also known as <strong>Shine</strong>. My interests lie at the intersection of artificial intelligence, robotics, and real-world engineering. With a background in automation, I enjoy building systems that bring intelligent algorithms from research to practical deployment.</p>
-<p>I'm particularly interested in <strong>Embodied AI, Computer Vision, Edge Intelligence,</strong> and intelligent robotic systems.</p>
-<div class="links"><a href="https://github.com/FuTseYi" target="_blank" rel="noopener noreferrer">GitHub</a><a href="https://www.linkedin.com/in/futseyi" target="_blank" rel="noopener noreferrer">LinkedIn</a><a href="mailto:hello@futseyi.com">Email</a><a href="/blog/">Writing</a></div>
-</div><div class="portrait" aria-label="Portrait placeholder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="8" r="4"/><path d="M4 22c0-5 3.5-8 8-8s8 3 8 8"/></svg><span>Portrait placeholder</span></div></div>
-<section id="education"><h2>Education</h2><div class="item"><div class="item-date">2026 – Present</div><div><strong>The Hong Kong University of Science and Technology (Guangzhou)</strong><p>Master of Philosophy (MPhil), Red Bird MPhil Program</p></div></div><div class="item"><div class="item-date">2022 – 2026</div><div><strong>University of Emergency Management</strong><p>Bachelor's Degree in Automation</p></div></div></section>
-<section id="research"><h2>Research Interests</h2><ul class="research-list"><li><strong>Embodied AI & Robotics:</strong> intelligent agents, physical interaction, and autonomous systems.</li><li><strong>Computer Vision:</strong> object detection, multimodal perception, and visual intelligence.</li><li><strong>Edge AI:</strong> efficient inference, embedded deployment, and hardware–software integration.</li></ul></section>
-<section id="projects"><h2>Selected Projects</h2>
-<div class="project"><h3><a href="https://github.com/FuTseYi/RK3588-Edge-AI">RK3588 Edge AI ↗</a></h3><p>Computer vision and on-device model deployment on RK3588-based edge hardware, integrating YOLO, RKNN, and local language models.</p><div class="chips"><span>RK3588</span><span>Computer Vision</span><span>Edge Deployment</span></div></div>
-<div class="project"><h3><a href="https://github.com/FuTseYi/CropLens">CropLens ↗</a></h3><p>An AI-assisted crop disease detection application combining visual recognition and web technologies.</p><div class="chips"><span>AI Applications</span><span>Computer Vision</span></div></div>
-<div class="project"><h3><a href="https://github.com/FuTseYi/Cloudflare-D1-Visit-Counter">Cloudflare D1 Visit Counter ↗</a></h3><p>Open-source, lightweight visitor analytics built with Cloudflare Workers and D1.</p><div class="chips"><span>Open Source</span><span>Cloudflare</span></div></div>
-<p class="note">More projects and source code are available on <a href="https://github.com/FuTseYi">GitHub</a>.</p></section>
-<section id="writing"><h2>Writing & Notes</h2><p>Occasional notes on AI, engineering, open-source tools, and things I've learned while building.</p><ul class="post-list"><li><time datetime="2026-10-26">2026-10-26</time><a href="/blog/welcome/">A simpler space to build and share</a></li></ul><p class="view-all"><a href="/blog/">View all writing →</a></p></section>
-<section id="contact"><h2>Contact</h2><p>I'm happy to connect about research, projects, open source, and collaboration. Feel free to reach me at <a href="mailto:hello@futseyi.com">hello@futseyi.com</a>.</p></section>
-</main>
-<footer class="footer"><span>© 2026 FuTseYi. All rights reserved.</span><span>Built with plain HTML & CSS · <a href="/blog/">Writing</a></span></footer>
-</div></body></html>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="container">
+    <header class="site-header">
+      <a class="brand" href="/" aria-label="FuTseYi homepage">FuTseYi<span class="brand-dot">.</span></a>
+      <nav aria-label="Primary navigation">
+        <a class="current" href="#about">About</a>
+        <a href="#education">Education</a>
+        <a href="#interests">Interests</a>
+        <a href="#projects">Projects</a>
+        <a href="/blog/">Writing</a>
+      </nav>
+    </header>
+
+    <main id="main">
+      <section class="intro-section" id="about" aria-labelledby="name">
+        <div class="intro-copy">
+          <div class="overline"><span class="blue-dot"></span> PERSONAL HOMEPAGE</div>
+          <h1 id="name">Hi, I'm <span>FuTseYi.</span></h1>
+          <p class="subtitle">Also known as <strong>Shine</strong> <span class="separator">·</span> MPhil Student <span class="separator">·</span> AI & Engineering</p>
+          <p class="lead">I'm an MPhil student in the <a href="https://cft.hkust-gz.edu.cn/department/red-bird-mphil/" target="_blank" rel="noopener noreferrer">Red Bird MPhil Program</a> at <a href="https://www.hkust-gz.edu.cn/" target="_blank" rel="noopener noreferrer">The Hong Kong University of Science and Technology (Guangzhou)</a>, with a background in automation.</p>
+          <p>I’m interested in making artificial intelligence useful beyond the lab — from computer vision and efficient edge inference to robotic systems that perceive, reason, and interact with the physical world. I enjoy turning ideas into things that actually work.</p>
+          <div class="social-links" aria-label="Profile and contact links">
+            <a href="mailto:hello@futseyi.com">Email <span aria-hidden="true">↗</span></a>
+            <a href="https://github.com/FuTseYi" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true">↗</span></a>
+            <a href="https://www.linkedin.com/in/futseyi" target="_blank" rel="noopener noreferrer">LinkedIn <span aria-hidden="true">↗</span></a>
+            <a href="/blog/">Writing <span aria-hidden="true">↗</span></a>
+          </div>
+        </div>
+        <figure class="profile-photo">
+          <img src="https://avatars.githubusercontent.com/u/131243303?v=4" alt="FuTseYi's GitHub profile avatar" width="240" height="240">
+          <figcaption>FuTseYi / Shine</figcaption>
+        </figure>
+      </section>
+
+      <section class="content-section" id="education" aria-labelledby="education-heading">
+        <div class="section-heading"><span class="section-count">01</span><h2 id="education-heading">Education</h2></div>
+        <div class="section-body">
+          <div class="timeline-entry">
+            <div class="timeline-main"><h3><a href="https://www.hkust-gz.edu.cn/" target="_blank" rel="noopener noreferrer">The Hong Kong University of Science and Technology (Guangzhou)</a></h3><p>Master of Philosophy · Red Bird MPhil Program</p><p class="entry-location">Guangzhou, China</p></div>
+            <span class="timeline-date">2026 – Present</span>
+          </div>
+          <div class="timeline-entry">
+            <div class="timeline-main"><h3>University of Emergency Management</h3><p>Bachelor's Degree · Automation</p><p class="entry-location">China</p></div>
+            <span class="timeline-date">2022 – 2026</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="content-section" id="interests" aria-labelledby="interests-heading">
+        <div class="section-heading"><span class="section-count">02</span><h2 id="interests-heading">Research Interests</h2></div>
+        <div class="section-body">
+          <p class="section-intro">My interests focus on the connection between intelligent algorithms and physical systems.</p>
+          <ul class="interest-list">
+            <li><strong>Embodied AI & Robotics.</strong> Learning, reasoning, and acting in real-world environments.</li>
+            <li><strong>Computer Vision.</strong> Visual perception, object detection, and multimodal intelligence.</li>
+            <li><strong>Edge Intelligence.</strong> Efficient on-device AI, embedded deployment, and resource-constrained systems.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="content-section" id="projects" aria-labelledby="projects-heading">
+        <div class="section-heading"><span class="section-count">03</span><h2 id="projects-heading">Selected Projects</h2></div>
+        <div class="section-body">
+          <article class="project-entry"><div><h3><a href="https://github.com/FuTseYi/RK3588-Edge-AI" target="_blank" rel="noopener noreferrer">RK3588 Edge AI <span aria-hidden="true">↗</span></a></h3><p>Computer vision and local model deployment on RK3588 edge hardware, including YOLO, RKNN and language-model inference.</p><div class="project-meta">Edge AI <span>·</span> Computer Vision <span>·</span> Embedded Systems</div></div><span class="project-index">01</span></article>
+          <article class="project-entry"><div><h3><a href="https://github.com/FuTseYi/CropLens" target="_blank" rel="noopener noreferrer">CropLens <span aria-hidden="true">↗</span></a></h3><p>An AI-powered crop disease detection project connecting computer vision models with a practical web application.</p><div class="project-meta">Computer Vision <span>·</span> AI Applications</div></div><span class="project-index">02</span></article>
+          <article class="project-entry"><div><h3><a href="https://github.com/FuTseYi/Cloudflare-D1-Visit-Counter" target="_blank" rel="noopener noreferrer">Cloudflare D1 Visit Counter <span aria-hidden="true">↗</span></a></h3><p>A lightweight, open-source pageview and visitor counter built with Cloudflare Workers and D1.</p><div class="project-meta">Open Source <span>·</span> Cloudflare Workers <span>·</span> D1</div></div><span class="project-index">03</span></article>
+          <a class="more-link" href="https://github.com/FuTseYi?tab=repositories" target="_blank" rel="noopener noreferrer">More projects on GitHub <span aria-hidden="true">↗</span></a>
+        </div>
+      </section>
+
+      <section class="content-section" id="writing" aria-labelledby="writing-heading">
+        <div class="section-heading"><span class="section-count">04</span><h2 id="writing-heading">Writing</h2></div>
+        <div class="section-body">
+          <p class="section-intro">Notes on technology, open source, and lessons learned while building. I publish occasionally, whenever there's something worth sharing.</p>
+          <div class="writing-preview"><time datetime="2026-10-26">Oct 26, 2026</time><a href="/blog/welcome/">A simpler space to build and share <span aria-hidden="true">↗</span></a></div>
+          <a class="more-link" href="/blog/">View all writing <span aria-hidden="true">→</span></a>
+        </div>
+      </section>
+
+      <section class="contact-section" id="contact">
+        <div><span class="section-count">05 / CONTACT</span><h2>Let's connect.</h2><p>Open to conversations about research, engineering, open source, and new ideas.</p></div>
+        <a class="contact-email" href="mailto:hello@futseyi.com">hello@futseyi.com <span aria-hidden="true">↗</span></a>
+      </section>
+    </main>
+    <footer class="site-footer"><span>© 2026 FuTseYi.</span><span>Made to be simple. Built to last.</span><a href="#main">Back to top ↑</a></footer>
+  </div>
+</body>
+</html>
