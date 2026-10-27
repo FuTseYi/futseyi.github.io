@@ -16,6 +16,8 @@ concurrency:
 jobs:
   synchronize:
     runs-on: ubuntu-latest
+    env:
+      PROFILE_README_TOKEN: ${{ secrets.PROFILE_README_TOKEN }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -38,11 +40,7 @@ jobs:
           fi
       - name: Synchronize GitHub Profile README
         if: ${{ env.PROFILE_README_TOKEN != '' }}
-        env:
-          PROFILE_README_TOKEN: ${{ secrets.PROFILE_README_TOKEN }}
         run: python .github/scripts/sync_readme.py --sync-profile
       - name: Explain missing cross-repository authorization
         if: ${{ env.PROFILE_README_TOKEN == '' }}
-        env:
-          PROFILE_README_TOKEN: ${{ secrets.PROFILE_README_TOKEN }}
         run: echo "::warning::Set the repository secret PROFILE_README_TOKEN (fine-grained token with FuTseYi/FuTseYi Contents write) to enable future automatic cross-repo synchronization."
