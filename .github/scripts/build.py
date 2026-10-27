@@ -7,6 +7,7 @@ No client-side JavaScript, CMS, Node.js, or frontend build framework.
 from __future__ import annotations
 import json
 import re
+import shutil
 from datetime import date
 from html import escape
 from pathlib import Path
@@ -49,7 +50,10 @@ def pretty_date(value: str) -> str:
     return date.fromisoformat(value).strftime("%b %d, %Y").replace(" 0", " ")
 
 def main() -> None:
-    OUTPUT.mkdir(exist_ok=True)
+    # Discard previous generated pages: deleted/renamed articles must not survive.
+    if OUTPUT.exists():
+        shutil.rmtree(OUTPUT)
+    OUTPUT.mkdir(parents=True)
     posts: list[dict] = []
     parser = markdown.Markdown(extensions=["extra", "sane_lists", "toc"])
     for path in sorted(SOURCE.glob("*.md")):
@@ -80,6 +84,9 @@ def main() -> None:
     urls = [SITE + "/", SITE + "/blog/"] + [SITE + post["url"] for post in posts]
     sitemap = '<?xml version="1.0" encoding="utf-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + "".join(f"<url><loc>{xml_escape(url)}</loc></url>\n" for url in urls) + "</urlset>\n"
     (ROOT / "sitemap.xml").write_text(sitemap, encoding="utf-8")
+    # Confirm that every published article has an HTML page and the index is sound.
+    assert (OUTPUT / "index.html").is_file()
+    assert all((OUTPUT / post["slug"] / "index.html").is_file() for post in posts)
     print(f"Writing: generated {len(posts)} article(s)")
 
 if __name__ == "__main__":

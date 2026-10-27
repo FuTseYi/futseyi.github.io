@@ -33,7 +33,8 @@ jobs:
           touch _site/.nojekyll
           test -s _site/index.html
           test -s _site/blog/index.html
-          test -s _site/blog/welcome/index.html
+          test -s _site/blog/posts.json
+          test -s _site/sitemap.xml
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
