@@ -17,3 +17,5 @@ The goal is a **small, durable, professional academic homepage**. Avoid adding a
 
 - Homepage Writing section links to the blog index intentionally; do not hardcode the latest article in the homepage.
 - Images for Markdown articles belong in `assets/images/` with root-absolute paths. Keep alt text and use optimized image files.
+
+- Profile README: `.github/scripts/sync_readme.py` derives `README.md` from `index.html`'s `.bio`, public mailto/canonical URL, and non-draft `posts/*.md`. The two repository READMEs must be byte-for-byte identical; never manually edit a generated README. GitHub Actions pushes a changed README locally; remote updates require `PROFILE_README_TOKEN` secret scoped only to `FuTseYi/FuTseYi` Contents write.

@@ -1,0 +1,48 @@
+name: Synchronize profile README
+on:
+  push:
+    branches: [main]
+    paths:
+      - index.html
+      - posts/**
+      - .github/scripts/sync_readme.py
+      - .github/workflows/sync-readme.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: readme-sync
+  cancel-in-progress: false
+jobs:
+  synchronize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Generate README from homepage and posts
+        run: python .github/scripts/sync_readme.py
+      - name: Commit website README if changed
+        run: |
+          if git diff --quiet -- README.md; then
+            echo "README unchanged"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add README.md
+            git commit -m "docs: refresh README from homepage and Writing"
+            git push
+          fi
+      - name: Synchronize GitHub Profile README
+        if: ${{ env.PROFILE_README_TOKEN != '' }}
+        env:
+          PROFILE_README_TOKEN: ${{ secrets.PROFILE_README_TOKEN }}
+        run: python .github/scripts/sync_readme.py --sync-profile
+      - name: Explain missing cross-repository authorization
+        if: ${{ env.PROFILE_README_TOKEN == '' }}
+        env:
+          PROFILE_README_TOKEN: ${{ secrets.PROFILE_README_TOKEN }}
+        run: echo "::warning::Set the repository secret PROFILE_README_TOKEN (fine-grained token with FuTseYi/FuTseYi Contents write) to enable future automatic cross-repo synchronization."
