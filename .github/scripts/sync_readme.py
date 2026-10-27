@@ -24,7 +24,17 @@ def read_home():
     email=re.search(r'href="mailto:([^"]+)"',html)
     canonical=re.search(r'<link\s+rel="canonical"\s+href="([^"]+)"',html)
     if not paragraphs or not email or not canonical: raise ValueError("index.html: missing bio, email or canonical")
-    return paragraphs,email[1],canonical[1].rstrip("/")
+    note=re.search(r'<p class="profile-note">(.*?)</p>',html,re.S)
+    languages=re.search(r'<p class="profile-languages">.*?</span>(.*?)</p>',html,re.S)
+    roles=re.findall(r'<span class="role-label">(.*?)</span><span>(.*?)</span>',html,re.S)
+    motto=re.search(r'<div class="profile-motto">(.*?)</div>\\s*</div>',html,re.S)
+    name=re.search(r'<h1 id="person-name">(.*?)</h1>',html,re.S)
+    avatar=re.search(r'<figure class="portrait">\\s*<img src="([^"]+)"',html,re.S)
+    if not (note and languages and roles and motto and name and avatar):
+        raise ValueError("Missing shared profile elements in homepage")
+    quotes=[md(x) for x in re.findall(r"<p>(.*?)</p>",motto[1],re.S)]
+    if len(quotes)<2: raise ValueError("Missing motto lines in homepage")
+    return paragraphs,email[1],canonical[1].rstrip("/"),md(note[1]),md(languages[1]),roles,quotes,md(name[1]),avatar[1]
 def read_posts():
     found=[]
     for file in (ROOT/"posts").glob("*.md"):
@@ -44,7 +54,7 @@ def read_posts():
     found.sort(reverse=True)
     return [f"- [{title}]({SITE}/blog/{slug}/)" for _,slug,title in found[:3]]
 def render():
-    paragraphs,email,website=read_home()
+    paragraphs,email,website,note,languages,roles,quotes,name,avatar=read_home()
     posts=read_posts()
     return (
       '## *About* ![](https://raw.githubusercontent.com/FuTseYi/FuTseYi/main/assets/i-am-Shine.svg)\n\n'
@@ -75,10 +85,32 @@ def sync_profile(text,token):
         print("Profile README already matches.");return
     request("PUT",url,token,{"message":"docs: sync README from personal website","branch":"main","sha":current["sha"],"content":base64.b64encode(text.encode("utf-8")).decode("ascii")})
     print("Updated FuTseYi/FuTseYi README")
+
+def update_site():
+    """Inject the same latest-post list into the deployed homepage, not source HTML."""
+    from html import escape as html_escape
+    from datetime import datetime
+    output=ROOT/"_site"/"index.html"
+    html=output.read_text(encoding="utf-8")
+    if "<!-- LATEST-POSTS -->" not in html:
+        raise ValueError("Missing homepage Latest Posts slot")
+    posts=read_posts()
+    entries=[]
+    for line in posts:
+        match=re.fullmatch(r"- \\[(.*?)\\]\\((https://[^)]+)\\)",line)
+        if not match:continue
+        entries.append('<a class="latest-post-link" href="'+html_escape(match[2],quote=True)+'"><span>Latest article</span><span>'+html_escape(match[1])+' ↗</span></a>')
+    html=html.replace("<!-- LATEST-POSTS -->","".join(entries))
+    output.write_text(html,encoding="utf-8")
+    print("Injected latest writing into deployed homepage.")
+
 def main():
     arg=argparse.ArgumentParser()
     arg.add_argument("--sync-profile",action="store_true")
+    arg.add_argument("--update-site",action="store_true")
     args=arg.parse_args()
+    if args.update_site:
+        update_site();return
     text=render();path=ROOT/"README.md"
     if not path.exists() or path.read_text(encoding="utf-8")!=text:
         path.write_text(text,encoding="utf-8");print("Generated website README")
