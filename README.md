@@ -54,6 +54,6 @@ For AI maintenance instructions, see [AGENTS.md](AGENTS.md). The previous websit
 
 ## Images and local links
 
-Upload images into `assets/images/` (create the folder as needed) and use a root-relative URL in Markdown, for example `![Experiment output](/assets/images/example.webp)`. The deployment verifies that referenced local files exist. External images and links remain external. Keep images reasonably compressed and provide meaningful alt text.
+Upload images into `assets/images/` (create the folder as needed) and use a root-relative URL in Markdown, for example `![Experiment output](/assets/images/example.webp)`. The deployment verifies referenced local images (including responsive `srcset` images) and site links; malformed article metadata stops publication before regeneration. External images and links remain external. Keep images reasonably compressed and provide meaningful alt text.
 
 The homepage links directly to Writing rather than hardcoding a particular newest post. `posts/` is the single source for the article list, which is refreshed on every deployment.

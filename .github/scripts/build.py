@@ -50,19 +50,25 @@ def pretty_date(value: str) -> str:
     return date.fromisoformat(value).strftime("%b %d, %Y").replace(" 0", " ")
 
 def main() -> None:
-    # Discard previous generated pages: deleted/renamed articles must not survive.
-    if OUTPUT.exists():
-        shutil.rmtree(OUTPUT)
-    OUTPUT.mkdir(parents=True)
-    posts: list[dict] = []
-    parser = markdown.Markdown(extensions=["extra", "sane_lists", "toc"])
+    # Validate every source before replacing the generated website.
+    # A malformed post must not erase an otherwise usable local preview.
+    source_posts: list[tuple[str, dict[str, str], str]] = []
     for path in sorted(SOURCE.glob("*.md")):
         slug = path.stem
         if not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", slug):
             raise ValueError(f"Post filename must be a lowercase URL slug: {path.name}")
         meta, source = get_post(path)
-        if meta.get("draft", "").lower() == "true":
-            continue
+        if meta.get("draft", "").lower() not in ("", "true", "false"):
+            raise ValueError(f"{path}: draft must be true or false")
+        if meta.get("draft", "").lower() != "true":
+            source_posts.append((slug, meta, source))
+
+    if OUTPUT.exists():
+        shutil.rmtree(OUTPUT)
+    OUTPUT.mkdir(parents=True)
+    posts: list[dict] = []
+    parser = markdown.Markdown(extensions=["extra", "sane_lists", "toc"])
+    for slug, meta, source in source_posts:
         url = f"/blog/{slug}/"
         item = dict(slug=slug, url=url, title=meta["title"], date=meta["date"], description=meta["description"], tags=[t.strip() for t in meta.get("tags", "").split(",") if t.strip()])
         parser.reset()

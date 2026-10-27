@@ -25,6 +25,11 @@ class Page(HTMLParser):
             self.links.append(attrs["href"])
         if tag in ("img", "source", "script") and attrs.get("src"):
             self.links.append(attrs["src"])
+        if tag in ("img", "source") and attrs.get("srcset"):
+            for candidate in attrs["srcset"].split(","):
+                src = candidate.strip().split()
+                if src:
+                    self.links.append(src[0])
 
 
 def local_target(page: Path, link: str) -> tuple[Path, str] | None:
