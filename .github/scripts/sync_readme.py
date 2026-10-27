@@ -27,9 +27,9 @@ def read_home():
     note=re.search(r'<p class="profile-note">(.*?)</p>',html,re.S)
     languages=re.search(r'<p class="profile-languages">.*?</span>(.*?)</p>',html,re.S)
     roles=re.findall(r'<span class="role-label">(.*?)</span><span>(.*?)</span>',html,re.S)
-    motto=re.search(r'<div class="profile-motto">(.*?)</div>\\s*</div>',html,re.S)
+    motto=re.search(r'<div class="profile-motto">(.*?)</div>\s*</div>',html,re.S)
     name=re.search(r'<h1 id="person-name">(.*?)</h1>',html,re.S)
-    avatar=re.search(r'<figure class="portrait">\\s*<img src="([^"]+)"',html,re.S)
+    avatar=re.search(r'<figure class="portrait">\s*<img src="([^"]+)"',html,re.S)
     if not (note and languages and roles and motto and name and avatar):
         raise ValueError("Missing shared profile elements in homepage")
     quotes=[md(x) for x in re.findall(r"<p>(.*?)</p>",motto[1],re.S)]
@@ -56,18 +56,21 @@ def read_posts():
 def render():
     paragraphs,email,website,note,languages,roles,quotes,name,avatar=read_home()
     posts=read_posts()
+    role_rows="".join(f"- **{md(label)}:** {md(value)}\n" for label,value in roles)
     return (
-      '## *About* ![](https://raw.githubusercontent.com/FuTseYi/FuTseYi/main/assets/i-am-Shine.svg)\n\n'
-      '- ***Currently exploring new things, occasionally pretending I know what I’m doing.***\n'
+      f'# {name}\n\n'
+      +f'<img src="{avatar}" align="right" width="160" alt="Profile photo">\n\n'
+      +'## *About* ![](https://raw.githubusercontent.com/FuTseYi/FuTseYi/main/assets/i-am-Shine.svg)\n\n'
+      +f'- ***{note}***\n'
       +''.join(f"- {paragraph}\n" for paragraph in paragraphs)
-      +'- *Lang: English, Mandarin, Cantonese.*\n'
-      +f'- *Contact: [{email}](mailto:{email})*\n\n'
+      +f'- *Lang: {languages}*\n'
+      +f'- *Contact: [{email}](mailto:{email})*\n'
+      +role_rows+'\n'
       +'## *Website*\n\n'
       +f'- Visit 『*[{website.removeprefix("https://")}]({website}/)*』 to learn more about me.\n\n'
       +'## *Motto*\n\n'
       +'<img src="https://raw.githubusercontent.com/FuTseYi/FuTseYi/main/assets/emoji-wink.png" align="right" width="6%" alt="Winking emoji">\n\n'
-      +'- *Freiheit als Autonomie — Freedom through autonomy.*\n'
-      +'- *People can retire, but the spirit cannot retire. - Gundam*\n\n'
+      +''.join(f'- *{quote}*\n' for quote in quotes)+'\n'
       +'## Latest Posts\n\n'
       +'\n'.join(posts or ["No published articles yet."])+'\n\n'
       +'<a href="https://visit-counter.futseyi.workers.dev/status?path=https%3A%2F%2Fgithub.com%2FFuTseYi" target="_blank" rel="noopener noreferrer">\n'
@@ -97,7 +100,7 @@ def update_site():
     posts=read_posts()
     entries=[]
     for line in posts:
-        match=re.fullmatch(r"- \\[(.*?)\\]\\((https://[^)]+)\\)",line)
+        match=re.fullmatch(r"- \[(.*?)\]\((https://[^)]+)\)",line)
         if not match:continue
         entries.append('<a class="latest-post-link" href="'+html_escape(match[2],quote=True)+'"><span>Latest article</span><span>'+html_escape(match[1])+' ↗</span></a>')
     html=html.replace("<!-- LATEST-POSTS -->","".join(entries))
