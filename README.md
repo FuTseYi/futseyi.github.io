@@ -11,7 +11,6 @@ A clean academic-style personal website with an integrated Markdown-based Writin
 ├── index.html                  # Personal homepage
 ├── assets/                     # Shared CSS and favicon
 ├── posts/                      # Author your articles here (Markdown)
-├── blog/                       # Generated HTML (temporary branch-mode fallback)
 ├── .github/
 │   ├── scripts/               # Markdown builder and link validator
 │   └── workflows/deploy.yml    # Publish on push
@@ -36,7 +35,7 @@ tags: Technology, Notes
 Write normally using **Markdown**.
 ```
 
-Commit the file to `main`; GitHub Actions will generate the Writing index and the post page. The GitHub Pages source **must be set to GitHub Actions** in Settings → Pages. The current tracked `blog/` pages are retained as an interim fallback because GitHub still reports branch-based Pages builds. **Do not delete them until Settings → Pages → Source is confirmed as GitHub Actions.** Once confirmed, generated HTML can be untracked safely; the workflow will recreate it. When you add or delete articles, the Pages Actions workflow always generates a clean blog tree from `posts/`.
+Commit the file to `main`; GitHub Actions will generate the Writing index and the post page. The GitHub Pages source **must be set to GitHub Actions** in Settings → Pages. The `blog/` output is generated automatically during GitHub Actions deployment and is intentionally ignored by Git. Add or edit articles only in `posts/`; do not commit generated HTML.
 
 ## Local preview
 
