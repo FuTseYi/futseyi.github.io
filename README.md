@@ -9,7 +9,7 @@ A clean academic-style personal website with an integrated Markdown-based Writin
 ```text
 .
 ├── index.html                  # Personal homepage
-├── assets/                     # Shared CSS and favicon
+├── assets/                     # Shared CSS, navigation script and favicon
 ├── posts/                      # Author your articles here (Markdown)
 ├── .github/
 │   ├── scripts/               # Markdown builder and link validator
@@ -37,17 +37,13 @@ Write normally using **Markdown**.
 
 Commit the file to `main`; GitHub Actions will generate the Writing index and the post page. The GitHub Pages source **must be set to GitHub Actions** in Settings → Pages. The `blog/` output is generated automatically during GitHub Actions deployment and is intentionally ignored by Git. Add or edit articles only in `posts/`; do not commit generated HTML.
 
-## Local preview
+## Local preview (Windows and macOS)
 
-```bash
-python -m pip install "Markdown>=3.7,<4"
-python .github/scripts/build.py
-mkdir -p _site && cp index.html robots.txt sitemap.xml _site/ && cp -r assets blog _site/
-python .github/scripts/verify.py
-python -m http.server 8000
-```
+Open `index.html` directly in your browser. **No installation, terminal or local server is required** to preview the homepage, styling, section navigation or mobile menu. The Writing links open the published website because Markdown posts are built by GitHub Actions. This offline preview does not rebuild Writing.
 
-Open http://localhost:8000. To edit your introduction or projects, modify `index.html`; for visual styling, modify `assets/style.css`.
+To change your bio or projects, edit `index.html`; for appearance, edit `assets/style.css`. Push to `main` to publish your site and build Writing automatically.
+
+For optional build verification when developing the blog, use the same steps as `.github/workflows/deploy.yml`, which runs on GitHub Actions (Ubuntu). There is no platform-specific preview script to maintain.
 
 For AI maintenance instructions, see [AGENTS.md](AGENTS.md). The previous website at `FuTseYi/My-Website` remains untouched.
 
