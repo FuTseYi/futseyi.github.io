@@ -13,7 +13,7 @@ A clean academic-style personal website with an integrated Markdown-based Writin
 ├── posts/                      # Author your articles here (Markdown)
 ├── blog/                       # Generated HTML (temporary branch-mode fallback)
 ├── .github/
-│   ├── scripts/build.py        # Markdown → HTML + sitemap
+│   ├── scripts/               # Markdown builder and link validator
 │   └── workflows/deploy.yml    # Publish on push
 ├── AGENTS.md                   # Instructions for AI maintainers
 └── README.md
@@ -43,9 +43,17 @@ Commit the file to `main`; GitHub Actions will generate the Writing index and th
 ```bash
 python -m pip install "Markdown>=3.7,<4"
 python .github/scripts/build.py
+mkdir -p _site && cp index.html robots.txt sitemap.xml _site/ && cp -r assets blog _site/
+python .github/scripts/verify.py
 python -m http.server 8000
 ```
 
 Open http://localhost:8000. To edit your introduction or projects, modify `index.html`; for visual styling, modify `assets/style.css`.
 
 For AI maintenance instructions, see [AGENTS.md](AGENTS.md). The previous website at `FuTseYi/My-Website` remains untouched.
+
+## Images and local links
+
+Upload images into `assets/images/` (create the folder as needed) and use a root-relative URL in Markdown, for example `![Experiment output](/assets/images/example.webp)`. The deployment verifies that referenced local files exist. External images and links remain external. Keep images reasonably compressed and provide meaningful alt text.
+
+The homepage links directly to Writing rather than hardcoding a particular newest post. `posts/` is the single source for the article list, which is refreshed on every deployment.
