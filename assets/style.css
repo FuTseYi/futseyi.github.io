@@ -143,6 +143,8 @@ strong{font-weight:650}
  .hero-grid{grid-template-columns:minmax(0,1fr) 160px;gap:34px}
  .portrait img{width:160px;height:160px}
  .portrait{margin-top:50px}
+ html:not(.js) .header-inner{flex-wrap:wrap;padding-top:10px;padding-bottom:10px}
+ html:not(.js) .nav-links{width:100%;max-width:100%;overflow-x:auto;gap:16px;white-space:nowrap}
  .js .nav-toggle{display:flex}
  .js .nav-links{display:none;position:absolute;top:calc(var(--nav-height) - 1px);left:0;right:0;background:rgba(255,255,255,.97);border-bottom:1px solid var(--line);box-shadow:0 20px 28px -26px rgba(26,45,65,.6);padding:12px 24px 18px;max-height:70dvh;overflow-y:auto;flex-direction:column;align-items:stretch;gap:0}
  .js .site-header.menu-open .nav-links{display:flex}
