@@ -42,9 +42,28 @@ def get_post(path: Path) -> tuple[dict[str, str], str]:
 def layout(title: str, description: str, url: str, content: str) -> str:
     title, description, url = (escape(value, quote=True) for value in (title, description, url))
     return f"""<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#ffffff"><meta name="description" content="{description}"><title>{title} · FuTseYi</title><link rel="canonical" href="{url}"><link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="{CSS}"></head>
-<body><a class="skip-link" href="#main">Skip to content</a><div class="site-shell"><header class="header"><a class="wordmark" href="/">FuTseYi<span class="brand-dot">.</span></a><nav aria-label="Primary navigation"><a href="/">Home</a><a href="/#education">Education</a><a href="/#interests">Interests</a><a href="/#projects">Projects</a><a class="active" href="/blog/">Writing</a></nav></header><main class="blog-container" id="main">{content}</main><footer class="footer"><span>© 2026 FuTseYi.</span><span>Made to be simple. Built to last.</span><a href="/">Home ↑</a></footer></div></body></html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#ffffff"><meta name="description" content="{description}">
+<title>{title} · FuTseYi</title><link rel="canonical" href="{url}">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="{CSS}"><script src="/assets/site.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header" id="site-header"><div class="header-inner">
+  <a class="brand" href="/" aria-label="FuTseYi homepage">FuTseYi<span class="brand-dot">.</span></a>
+  <button class="nav-toggle" type="button" aria-controls="primary-navigation" aria-expanded="false" aria-label="Open navigation menu"><span class="menu-icon" aria-hidden="true"><span></span><span></span><span></span></span></button>
+  <nav class="nav-links" id="primary-navigation" aria-label="Main navigation">
+    <a href="/#about">About</a><a href="/#education">Education</a><a href="/#interests">Research</a><a href="/#projects">Projects</a><a class="is-active" href="/blog/" aria-current="page">Writing</a><a href="/#contact">Contact</a>
+  </nav>
+</div></header>
+<main class="blog-container" id="main">{content}</main>
+<footer class="site-footer"><div class="blog-footer"><span>© 2026 FuTseYi.</span><span>Made to be simple. Built to last.</span><a href="/">Home ↑</a></div></footer>
+</body></html>
 """
+
 
 def pretty_date(value: str) -> str:
     return date.fromisoformat(value).strftime("%b %d, %Y").replace(" 0", " ")
