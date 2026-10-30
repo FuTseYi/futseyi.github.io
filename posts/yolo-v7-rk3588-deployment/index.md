@@ -86,7 +86,7 @@ python convert.py ../model/best.onnx rk3588
 ```bash
 #烧入镜像后修改 orangepi 初始密码并通过 orange-config 设置串口 0/1
 
-sudo passwd orangepi  改成 423  #修改的是orangepi这个账户密码
+sudo passwd orangepi  # 按提示设置独立的强密码
 
 #赋予整个文件夹执行权限
 
