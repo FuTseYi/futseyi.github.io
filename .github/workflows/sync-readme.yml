@@ -2,6 +2,7 @@ name: Synchronize profile README
 on:
   push:
     branches: [main]
+    paths-ignore: [README.md]
   workflow_dispatch:
 permissions:
   contents: write
