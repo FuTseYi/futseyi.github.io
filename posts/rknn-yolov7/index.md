@@ -16,7 +16,6 @@ tags: 目标检测, RKNN
 
 - 以 RKNN 系列模型为例，训练一个 yolov7 的目标检测模型。
 - 通过 SSH 进入计算服务器的 Docker 中，按照 readme 文件进行模型训练。
-- <http://10.1.0.100:9000/> user:cnb keyword:cnb423423
 - docker attach yolov7-gzq
 - 通常情况下将标注好的数据放入 yolov7-rknn/datasets 文件夹中，修改
 yolov7-rknn/data 文件夹中的数据集配置文件，在 yolov7-rknn 文件夹
