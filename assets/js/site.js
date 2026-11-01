@@ -248,33 +248,33 @@
   document.querySelectorAll('[data-expandable]').forEach((list) => {
     const extra = [...list.querySelectorAll(':scope > .project-item')].slice(3);
     if (!extra.length) return;
+    const panel = document.createElement('div');
+    panel.className = 'expandable-panel';
+    panel.id = `${list.id}-extra`;
+    const clip = document.createElement('div');
+    clip.className = 'expandable-clip';
+    clip.append(...extra);
+    panel.append(clip);
+    list.append(panel);
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'list-toggle';
-    button.setAttribute('aria-controls', list.id);
+    button.setAttribute('aria-controls', panel.id);
     const setExpanded = (expanded) => {
-      extra.forEach((item) => { item.hidden = !expanded; });
+      list.classList.toggle('is-open', expanded);
+      panel.inert = !expanded;
       button.setAttribute('aria-expanded', String(expanded));
       button.textContent = expanded ? 'Show less' : 'Show more';
     };
     setExpanded(false);
-    let animation;
     button.addEventListener('click', () => {
-      const expanded = button.getAttribute('aria-expanded') !== 'true';
-      animation?.cancel();
-      const from = list.getBoundingClientRect().height;
-      setExpanded(expanded);
-      const to = list.getBoundingClientRect().height;
+      setExpanded(!list.classList.contains('is-open'));
       releaseTarget();
-      if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-      animation = list.animate([{ height: `${from}px` }, { height: `${to}px` }], { duration: 240, easing: 'ease' });
-      list.style.overflow = 'hidden';
-      animation.onfinish = () => {
-        list.style.overflow = '';
-        animation = null;
-        if (expanded) scrollExpandedIntoView(list);
-      };
-      animation.oncancel = () => { list.style.overflow = ''; };
+    });
+    panel.addEventListener('transitionend', (event) => {
+      if (event.target === panel && event.propertyName === 'grid-template-rows' && list.classList.contains('is-open')) {
+        scrollExpandedIntoView(list);
+      }
     });
     list.after(button);
   });
