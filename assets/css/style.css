@@ -699,8 +699,8 @@ section.section { padding: 32px 0; }
 
 .article-toc-inline{margin:0 0 30px;border-bottom:1px solid var(--line-soft)}
 .article-toc-toggle{display:flex;align-items:center;justify-content:space-between;width:100%;padding:12px 6px;font:inherit;font-size:15px;font-weight:500;color:var(--ink-soft);background:none;border:0;text-align:left;cursor:pointer;transition:color .2s}
-.article-toc-toggle::after,.web-evolution-toggle::after,.list-toggle::after{content:"";display:block;flex:none;width:12px;height:12px;background:linear-gradient(currentColor 0 0) center/10px 1.5px no-repeat,linear-gradient(currentColor 0 0) center/1.5px 10px no-repeat;transition:background-size .24s ease}
-.article-toc-inline.is-open .article-toc-toggle::after,.web-evolution.is-open .web-evolution-toggle::after,.list-toggle[aria-expanded="true"]::after{background-size:10px 1.5px,1.5px 0}
+.article-toc-toggle::after,.web-evolution-toggle::after,.list-toggle::after{content:"";display:block;flex:none;width:10px;height:10px;background:linear-gradient(currentColor 0 0) center/8px 1.5px no-repeat,linear-gradient(currentColor 0 0) center/1.5px 8px no-repeat;transition:background-size .24s ease}
+.article-toc-inline.is-open .article-toc-toggle::after,.web-evolution.is-open .web-evolution-toggle::after,.list-toggle[aria-expanded="true"]::after{background-size:8px 1.5px,1.5px 0}
 .article-toc-toggle:is(:hover,:focus-visible),.article-toc-inline.is-open .article-toc-toggle,.article-toc-inline nav a:is(:hover,:focus-visible){color:var(--gold-ink)}
 .article-toc-panel{display:grid;grid-template-rows:1fr}
 .js .article-toc-panel,.js .web-evolution-panel{grid-template-rows:0fr;transition:grid-template-rows .24s ease}
