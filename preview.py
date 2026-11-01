@@ -332,6 +332,11 @@ def main():
         ensure_dependencies()
     except (OSError, subprocess.CalledProcessError) as error:
         parser.exit(1, f"Dependency setup failed: {error}. Check network access and Python venv/pip support.\n")
+    if args.build_only:
+        discard_stale_builds()
+        if not rebuild(initial=True, refresh_activity=args.refresh_activity):
+            sys.exit(1)
+        return
     handler = partial(PreviewHandler, directory=str(SITE))
     try:
         server = PreviewServer(("127.0.0.1", args.port), handler)
@@ -340,10 +345,6 @@ def main():
     with server:
         discard_stale_builds()
         previous = source_state()
-        if args.build_only:
-            if not rebuild(initial=True, refresh_activity=args.refresh_activity):
-                sys.exit(1)
-            return
         rebuild(initial=True, refresh_activity=args.refresh_activity)
         print(paint(f"{mark('→', '->')} http://127.0.0.1:{args.port}/", CYAN), flush=True)
         print(paint("  保存文件后自动生成，浏览器需手动刷新。 / Saving rebuilds the site; refresh the browser manually.", DIM), flush=True)
