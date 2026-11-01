@@ -110,10 +110,10 @@ html {
   }
 html.is-ready { scroll-behavior: smooth; }
 /* Reveal document content after shared navigation state is initialized. */
-.js:not(.is-ready) main{opacity:0}
-.js.is-ready main{animation:page-enter .2s ease-out both}
+.js:not(.is-ready) :is(main,.site-header){opacity:0}
+.js.is-ready :is(main,.site-header){animation:page-enter .2s ease-out both}
 @keyframes page-enter{from{opacity:0}to{opacity:1}}
-@media(prefers-reduced-motion:reduce){.js:not(.is-ready) main{opacity:1}.js.is-ready main{animation:none}}
+@media(prefers-reduced-motion:reduce){.js:not(.is-ready) :is(main,.site-header){opacity:1}.js.is-ready :is(main,.site-header){animation:none}}
 
 
 html { overflow-x: clip; }
