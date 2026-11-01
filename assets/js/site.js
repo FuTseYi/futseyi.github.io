@@ -464,6 +464,7 @@
       header.classList.toggle('is-scrolled', window.scrollY > 6);
     };
     swup.hooks.on('visit:abort', finishVisit);
+    swup.hooks.on('content:scroll', finishVisit);
     swup.hooks.on('content:replace', (visit) => {
       cleanupPage();
       pendingPage = true;
@@ -483,7 +484,7 @@
       pendingPage = false;
       cleanupPage = initPage();
       syncNavigation();
-      finishVisit();
+      header.classList.toggle('is-scrolled', window.scrollY > 6);
     });
   }
 })();
