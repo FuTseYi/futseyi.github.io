@@ -81,7 +81,7 @@ def check_search(page):
     dialog = page.locator("#search-dialog")
     assert dialog.evaluate("(el) => el.open")
     search = page.locator("#blog-search")
-    assert search.is_focused()
+    assert search.evaluate("(el) => document.activeElement === el")
     search.fill("PyTorch")
     result = page.locator("#search-results a")
     result.first.wait_for(timeout=15000)
