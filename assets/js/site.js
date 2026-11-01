@@ -47,27 +47,15 @@
     readingProgress.setAttribute('aria-hidden', 'true');
     document.body.prepend(readingProgress);
   }
-  const exitSurface = document.createElement('div');
-  exitSurface.className = 'navigation-exit';
-  exitSurface.setAttribute('aria-hidden', 'true');
-  let exitPending = false;
   document.addEventListener('click', (event) => {
     const link = event.target.closest('a[href]');
-    if (!link || exitPending || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || link.hasAttribute('download') || (link.target && link.target !== '_self')) return;
-    if (link.origin !== location.origin || (link.pathname === location.pathname && link.search === location.search)) return;
-    navigationProgress.classList.add('is-loading');
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    event.preventDefault();
-    exitPending = true;
-    document.body.append(exitSurface);
-    requestAnimationFrame(() => exitSurface.classList.add('is-active'));
-    setTimeout(() => location.assign(link.href), 170);
+    if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || link.hasAttribute('download') || (link.target && link.target !== '_self')) return;
+    if (link.origin === location.origin && (link.pathname !== location.pathname || link.search !== location.search)) {
+      navigationProgress.classList.add('is-loading');
+    }
   }, true);
   window.addEventListener('pageshow', (event) => {
     navigationProgress.classList.remove('is-loading');
-    exitPending = false;
-    exitSurface.remove();
-    exitSurface.classList.remove('is-active');
     if (event.persisted) {
       header.classList.add('nav-reset');
       setOpen(false);
