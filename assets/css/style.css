@@ -551,7 +551,6 @@ section.section { padding: 38px 0; }
 #recent-blog .contribution-date{grid-column:2;grid-row:1}
 #recent-blog .project-item > div{grid-column:1;grid-row:1}
 #recent-blog .project-item h3 a{background-image:none}
-#recent-blog .project-item h3 .link-arrow{vertical-align:middle}
 .contribution-date{font-size:11px;color:var(--ink-faint);font-variant-numeric:tabular-nums;padding-top:4px;white-space:nowrap}
 #contributions .project-tags{margin-top:5px;gap:8px}
 .project-item[hidden]{display:none}
@@ -790,7 +789,6 @@ html:not(.js) .search-open,html:not(.js) .search-dialog{display:none}
 .blog-entry .post-date,.post-date{font-size:12px;color:var(--ink-faint)}
 .blog-entry .post-date.is-active{color:var(--gold-ink)}
 .blog-entry h3,#search-results li a{font-weight:500;font-size:15px;color:var(--ink);line-height:1.5}
-.blog-entry h3 .link-arrow{vertical-align:3px}
 .blog-sidebar{position:sticky;top:82px;align-self:start;max-height:calc(100vh - 100px);overflow:auto;scrollbar-width:none}
 .blog-sidebar::-webkit-scrollbar{display:none}
 .blog-sidebar h2{font-size:19px;font-weight:600;margin-bottom:16px}
@@ -895,7 +893,7 @@ html:not(.js) .search-open,html:not(.js) .search-dialog{display:none}
 @media(prefers-reduced-motion:reduce){html.is-ready{scroll-behavior:auto}*,*::before,*::after{transition:none!important;animation:none!important}}
 
 /* ELPA link chevrons: a short nudge on hover or keyboard focus. */
-.link-arrow{display:inline-block;flex:0 0 auto;width:7px;height:7px;margin-left:3px;border-top:1.5px solid currentColor;border-right:1.5px solid currentColor;transform:rotate(45deg);transition:transform .16s ease}
+.link-arrow{display:inline-block;vertical-align:middle;flex:0 0 auto;width:7px;height:7px;margin-left:3px;border-top:1.5px solid currentColor;border-right:1.5px solid currentColor;transform:rotate(45deg);transition:transform .16s ease}
 a:is(:hover,:focus-visible) .link-arrow{transform:translateX(3px) rotate(45deg)}
 .link-arrow-left{transform:rotate(225deg)}
 a:is(:hover,:focus-visible) .link-arrow-left{transform:translateX(-3px) rotate(225deg)}
