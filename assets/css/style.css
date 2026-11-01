@@ -101,6 +101,8 @@
 
 * { margin: 0; padding: 0; }
 *,*::before,*::after{box-sizing:border-box}
+/* Suppress browser tap flashes without changing authored interaction states. */
+a,button,summary,[role="button"]{-webkit-tap-highlight-color:transparent}
 
 html {
     scroll-behavior: auto;
