@@ -442,6 +442,7 @@
     swup.hooks.on('visit:start', async (visit) => {
       root.classList.add('is-navigating');
       visit.animation.animate = false;
+      visit.scroll.animate = false;
       header.classList.remove('nav-reset');
       if (!header.classList.contains('menu-open')) return;
       const bar = header.querySelector('.header-inner');
