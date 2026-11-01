@@ -270,12 +270,23 @@
       button.textContent = expanded ? 'Show less' : 'Show more';
     };
     setExpanded(false);
+    let animation;
     button.addEventListener('click', () => {
       const expanded = button.getAttribute('aria-expanded') !== 'true';
+      animation?.cancel();
+      const from = list.getBoundingClientRect().height;
       setExpanded(expanded);
+      const to = list.getBoundingClientRect().height;
       releaseTarget();
-      const target = expanded ? extra[0] : list.closest('section');
-      target.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' });
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      animation = list.animate([{ height: `${from}px` }, { height: `${to}px` }], { duration: 240, easing: 'ease' });
+      list.style.overflow = 'hidden';
+      animation.onfinish = () => {
+        list.style.overflow = '';
+        animation = null;
+        if (expanded) scrollExpandedIntoView(list);
+      };
+      animation.oncancel = () => { list.style.overflow = ''; };
     });
     list.after(button);
   });
