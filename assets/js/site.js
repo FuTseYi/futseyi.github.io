@@ -437,7 +437,7 @@
   };
   syncNavigation();
   if (window.Swup) {
-    const swup = new Swup({ containers: ['#main'], animationSelector: false });
+    const swup = new Swup({ containers: ['#main'] });
     swup.hooks.on('visit:start', async (visit) => {
       visit.animation.animate = false;
       if (!header.classList.contains('menu-open')) return;
@@ -455,6 +455,7 @@
         bar.addEventListener('transitionend', done);
       });
     });
+    swup.hooks.on('visit:abort', () => navigationProgress.classList.remove('is-loading'));
     swup.hooks.on('content:replace', (visit) => {
       cleanupPage();
       const incoming = visit.to.document;
@@ -469,6 +470,7 @@
       }
     }, { before: true });
     swup.hooks.on('page:view', () => {
+      navigationProgress.classList.remove('is-loading');
       cleanupPage = initPage();
       syncNavigation();
       header.classList.toggle('is-scrolled', window.scrollY > 6);
