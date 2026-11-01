@@ -173,8 +173,8 @@ def assemble(root, refresh_activity=False):
     origin = re.search(r'<link rel="canonical" href="([^"]+)"',
                        (root / "index.html").read_text(encoding="utf-8"))[1].rstrip("/")
     robots = site / "robots.txt"
-    robots.write_text(re.sub(r"(?m)^Sitemap:.*$", "Sitemap: " + origin + "/sitemap.xml",
-                             robots.read_text(encoding="utf-8")), encoding="utf-8")
+    robots.write_text(robots.read_text(encoding="utf-8").rstrip("\n") +
+                      "\nSitemap: " + origin + "/sitemap.xml\n", encoding="utf-8")
     for page in site.rglob("*.html"):
         html = page.read_text(encoding="utf-8")
         html = re.sub(r'(<a\b[^>]*\bhref=[\'"])' + re.escape(origin) + r'(?=/)', r'\1', html)
