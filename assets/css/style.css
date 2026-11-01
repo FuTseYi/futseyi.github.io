@@ -551,6 +551,7 @@ section.section { padding: 38px 0; }
 #recent-blog .contribution-date{grid-column:2;grid-row:1}
 #recent-blog .project-item > div{grid-column:1;grid-row:1}
 #recent-blog .project-item h3 a{background-image:none}
+#recent-blog .project-item h3 .link-arrow{vertical-align:middle}
 .contribution-date{font-size:11px;color:var(--ink-faint);font-variant-numeric:tabular-nums;padding-top:4px;white-space:nowrap}
 #contributions .project-tags{margin-top:5px;gap:8px}
 .project-item[hidden]{display:none}
@@ -605,7 +606,7 @@ footer {
 .footer-license,.footer-back-top,.footer-brand{color:var(--ink-faint)}
 .footer-license:is(:hover,:focus-visible),.footer-back-top:is(:hover,:focus-visible),.footer-brand:is(:hover,:focus-visible){color:var(--gold-ink);text-decoration:none}
 .footer-back-top{display:inline-flex;align-items:center;gap:6px;margin-left:auto;white-space:nowrap}
-.footer-back-top .link-arrow{position:relative;top:2px;margin-left:0}
+.footer-back-top .link-arrow{margin-left:0}
 .footer-back-top .link-arrow{animation:footer-back-top 1.4s ease-in-out infinite}
 @keyframes footer-back-top{50%{transform:translateY(-3px) rotate(-45deg)}}
 .footer-divider{border-top:1px solid var(--line);margin-top:16px;padding-top:16px}
