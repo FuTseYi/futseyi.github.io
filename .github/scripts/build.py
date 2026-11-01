@@ -17,12 +17,12 @@ from html import escape, unescape
 from pathlib import Path
 from xml.sax.saxutils import escape as xml_escape
 import markdown
-from asset_urls import version_assets
+from asset_urls import version_assets, site_url
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "posts"
 OUTPUT = ROOT / "blog"
-SITE = "https://futseyi.github.io"
+SITE = site_url(ROOT)
 
 def get_post(path: Path) -> tuple[dict[str, str], str]:
     raw = path.read_text(encoding="utf-8")
