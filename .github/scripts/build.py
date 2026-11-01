@@ -51,7 +51,7 @@ def layout(title: str, description: str, url: str, content: str, body_class: str
     header = re.sub(r'(aria-label="[^"]*), back to top"', r'\1 homepage"', header)
     header = re.sub(r'href="#([^"]+)"', r'href="/#\1"', header)
     header = header.replace('src="assets/icons/favicon.svg"', 'src="/assets/icons/favicon.svg"')
-    header = header.replace(f'href="{SITE}/blog/"', 'href="/blog/" class="is-active" aria-current="page"')
+    header = header.replace('href="/blog/"', 'href="/blog/" class="is-active" aria-current="page"')
     if url == f"{SITE}/blog/":
         header = header.replace('href="/blog/" class="is-active"', 'href="#main" class="is-active"')
     footer = re.search(r'<footer class="site-footer">.*?</footer>', home, re.S)[0]
