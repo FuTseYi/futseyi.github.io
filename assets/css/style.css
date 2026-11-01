@@ -719,7 +719,7 @@ section.section { padding: 32px 0; }
 
 /* A small, manually maintained history within About. */
 .web-evolution{max-width:790px;margin-top:22px}
-.web-evolution-toggle{display:inline-flex;align-items:center;gap:6px;padding:0;background:none;border:0;color:var(--ink-soft);font:500 13px/1.75 var(--font);text-align:left;cursor:pointer}
+.web-evolution-toggle{display:inline-flex;align-items:center;gap:6px;padding:0;background:none;border:0;color:var(--ink);font:500 13px/1.75 var(--font);text-align:left;cursor:pointer}
 .web-evolution-toggle:is(:hover,:focus-visible){color:var(--gold-ink)}
 
 .web-evolution-panel{display:grid;grid-template-rows:1fr}
