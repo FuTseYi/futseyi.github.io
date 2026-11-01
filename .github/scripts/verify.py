@@ -6,10 +6,10 @@ from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import unquote, urljoin, urlsplit
 from xml.etree import ElementTree
-from asset_urls import version_assets
+from asset_urls import version_assets, site_url
 
 ROOT = Path(__file__).resolve().parents[2] / "_site"
-ORIGIN = "https://futseyi.github.io"
+ORIGIN = site_url(ROOT.parent)
 
 
 class Page(HTMLParser):
@@ -103,7 +103,7 @@ def local_target(page: Path, link: str) -> tuple[Path, str] | None:
         if parsed.scheme in ("mailto", "tel", "data"):
             return None
         raise ValueError(f"Unsupported link scheme in {page}: {link}")
-    if parsed.netloc and parsed.netloc not in ("futseyi.github.io",):
+    if parsed.netloc and parsed.netloc != urlsplit(ORIGIN).netloc:
         return None
     if not parsed.path and not parsed.netloc:
         target = page
