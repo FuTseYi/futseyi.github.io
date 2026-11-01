@@ -548,6 +548,7 @@ section.section { padding: 38px 0; }
 #recent-blog .project-item{grid-template-columns:minmax(0,1fr) auto;column-gap:32px}
 #recent-blog .contribution-date{grid-column:2;grid-row:1}
 #recent-blog .project-item > div{grid-column:1;grid-row:1}
+#recent-blog .project-item h3 a{background-image:none}
 .contribution-date{font-size:11px;color:var(--ink-faint);font-variant-numeric:tabular-nums;padding-top:4px;white-space:nowrap}
 #contributions .project-tags{margin-top:5px;gap:8px}
 .project-item[hidden]{display:none}
@@ -884,7 +885,7 @@ a:is(:hover,:focus-visible){color:var(--gold-ink)}
     -webkit-box-decoration-break:clone;box-decoration-break:clone;
     transition:background-size .48s cubic-bezier(.22,1,.36,1),color .3s ease;
   }
-:where(a:not(:has(img),.blog-entry,.post-neighbor,.page-toc a,#search-results li a),.theme-control,.list-toggle,.search-open):is(:hover,:focus-visible),:is(.education-list .education-item,.project-item):is(:hover,:focus-within) a,.blog-entry:is(:hover,:focus-visible) .link-label,#search-results li a:is(:hover,:focus-visible) .link-label,.post-neighbor:is(:hover,:focus-visible) strong{
+:where(a:not(:has(img),.blog-entry,.post-neighbor,.page-toc a,#search-results li a),.theme-control,.list-toggle,.search-open):is(:hover,:focus-visible),:is(.education-list .education-item,.project-item):is(:hover,:focus-within) a,:is(.education-list .education-item,.project-item):is(:hover,:focus-within) .link-label,.blog-entry:is(:hover,:focus-visible) .link-label,#search-results li a:is(:hover,:focus-visible) .link-label,.post-neighbor:is(:hover,:focus-visible) strong{
     --underline-width:100%;
   }
 .nav-links a,.theme-control{--underline-offset:2px}
