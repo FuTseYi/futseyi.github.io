@@ -115,6 +115,11 @@
     new ResizeObserver(syncHint).observe(content);
     return syncHint;
   };
+  const scrollExpandedIntoView = (element) => {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const overflow = element.getBoundingClientRect().bottom - (window.innerHeight - 24);
+    if (overflow > 0) window.scrollBy({ top: overflow, behavior: 'smooth' });
+  };
   const inlineToc = document.querySelector('.article-toc-inline');
   if (inlineToc) {
     const button = inlineToc.querySelector('.article-toc-toggle');
@@ -127,12 +132,11 @@
       syncInlineHint();
     };
     setTocOpen(false);
-    button.addEventListener('click', () => {
-      const open = !inlineToc.classList.contains('is-open');
-      setTocOpen(open);
-    });
+    button.addEventListener('click', () => setTocOpen(!inlineToc.classList.contains('is-open')));
     panel.addEventListener('transitionend', (event) => {
-      if (event.target === panel && event.propertyName === 'grid-template-rows') syncInlineHint();
+      if (event.target !== panel || event.propertyName !== 'grid-template-rows' || !inlineToc.classList.contains('is-open')) return;
+      syncInlineHint();
+      scrollExpandedIntoView(inlineToc);
     });
   }
   const evolution = document.querySelector('.web-evolution');
@@ -145,9 +149,11 @@
       panel.inert = !expanded;
     };
     setExpanded(false);
-    button.addEventListener('click', () => {
-      const open = !evolution.classList.contains('is-open');
-      setExpanded(open);
+    button.addEventListener('click', () => setExpanded(!evolution.classList.contains('is-open')));
+    panel.addEventListener('transitionend', (event) => {
+      if (event.target === panel && event.propertyName === 'grid-template-rows' && evolution.classList.contains('is-open')) {
+        scrollExpandedIntoView(evolution);
+      }
     });
   }
   const toc = document.querySelector('.page-toc');
@@ -278,6 +284,7 @@
       animation.onfinish = () => {
         list.style.overflow = '';
         animation = null;
+        if (expanded) scrollExpandedIntoView(list);
       };
       animation.oncancel = () => { list.style.overflow = ''; };
     });
