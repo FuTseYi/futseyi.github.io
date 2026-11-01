@@ -78,7 +78,7 @@
       header.classList.add('nav-reset');
       setOpen(false);
       if (location.hash) history.replaceState(history.state, '', location.pathname + location.search);
-      window.scrollTo({ top: 0, behavior: 'instant' });
+      window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
       requestAnimationFrame(() => header.classList.remove('nav-reset'));
     }
   });
