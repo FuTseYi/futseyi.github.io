@@ -267,7 +267,7 @@
     const setExpanded = (expanded) => {
       extra.forEach((item) => { item.hidden = !expanded; });
       button.setAttribute('aria-expanded', String(expanded));
-      button.textContent = expanded ? 'Show less ↑' : 'Show more ↓';
+      button.textContent = expanded ? 'Show less' : 'Show more';
     };
     setExpanded(false);
     button.addEventListener('click', () => {
