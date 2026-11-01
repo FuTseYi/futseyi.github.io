@@ -268,7 +268,7 @@ def dependencies_valid():
     """Check the installed packages against the shared requirements file."""
     try:
         for requirement in REQUIREMENTS:
-            match = re.fullmatch(r"([a-zA-Z0-9_-]+)(?:\\[[^]]+\\])?((?:[<>=]+[0-9.]+)(?:,[<>=]+[0-9.]+)*)", requirement)
+            match = re.fullmatch(r"([a-zA-Z0-9_-]+)(?:\[[^]]+\])?((?:[<>=]+[0-9.]+)(?:,[<>=]+[0-9.]+)*)", requirement)
             if not match:
                 raise ValueError(f"Unsupported requirement: {requirement}")
             installed = tuple(int(part) for part in version(match[1]).split(".")[:3])
