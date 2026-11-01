@@ -715,12 +715,12 @@ section.section { padding: 32px 0; }
 @media(min-width:1600px){.article-toc-inline{display:none}}
 
 /* A small, manually maintained history within About. */
-.web-evolution{max-width:790px;margin-top:44px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-.web-evolution-toggle{display:flex;align-items:center;justify-content:space-between;gap:20px;width:100%;padding:16px 0;background:none;border:0;color:var(--ink);font:600 16px/1.5 var(--font);text-align:left;cursor:pointer}
+.web-evolution{max-width:790px;margin-top:22px}
+.web-evolution-toggle{display:inline-flex;align-items:center;gap:9px;padding:0;background:none;border:0;color:var(--ink-soft);font:500 13px/1.75 var(--font);text-align:left;cursor:pointer}
 .web-evolution-toggle:is(:hover,:focus-visible){color:var(--gold-ink)}
 .web-evolution-panel{display:grid;grid-template-rows:1fr}
 .web-evolution-clip{min-height:0;overflow:hidden}
-.web-evolution-content{padding:0 0 20px}
+.web-evolution-content{padding:14px 0 0}
 .web-evolution-intro{margin:0 0 22px;color:var(--ink-soft);font-size:13px;font-style:italic}
 .web-evolution-history{list-style:none;display:grid;gap:15px;margin:0;padding:0}
 .web-evolution-history li{display:grid;grid-template-columns:104px minmax(0,1fr);gap:12px;font-size:13px;line-height:1.7;color:var(--ink-soft)}
@@ -728,7 +728,7 @@ section.section { padding: 32px 0; }
 .web-evolution-stack{margin-top:24px;padding-top:18px;border-top:1px solid var(--line)}
 .web-evolution-stack h2{font-size:14px;font-weight:600;margin:0 0 8px}
 .web-evolution-stack p{font-size:13px;line-height:1.75;color:var(--ink-soft)}
-@media(max-width:680px){.web-evolution{margin-top:34px}.web-evolution-history li{grid-template-columns:82px minmax(0,1fr);gap:10px}}
+@media(max-width:680px){.web-evolution{margin-top:18px}.web-evolution-history li{grid-template-columns:82px minmax(0,1fr);gap:10px}}
 @media(prefers-reduced-motion:reduce){.web-evolution-panel,.web-evolution-toggle::after{transition:none}}
 
 /* Blog: shared page width, navigation and footer. */
