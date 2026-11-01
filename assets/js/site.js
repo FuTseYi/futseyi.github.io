@@ -115,13 +115,6 @@
     new ResizeObserver(syncHint).observe(content);
     return syncHint;
   };
-  const scrollExpandedIntoView = (element, growth = 0) => {
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const bounds = element.getBoundingClientRect();
-    const overflow = bounds.bottom + growth - (window.innerHeight - 24);
-    const available = Math.max(0, bounds.top - (header.getBoundingClientRect().height + 24));
-    if (overflow > 0 && available > 0) window.scrollBy({ top: Math.min(overflow, available), behavior: 'smooth' });
-  };
   const inlineToc = document.querySelector('.article-toc-inline');
   if (inlineToc) {
     const button = inlineToc.querySelector('.article-toc-toggle');
@@ -137,7 +130,6 @@
     button.addEventListener('click', () => {
       const open = !inlineToc.classList.contains('is-open');
       setTocOpen(open);
-      if (open) scrollExpandedIntoView(inlineToc, panel.scrollHeight - panel.getBoundingClientRect().height);
     });
     panel.addEventListener('transitionend', (event) => {
       if (event.target === panel && event.propertyName === 'grid-template-rows') syncInlineHint();
@@ -156,7 +148,6 @@
     button.addEventListener('click', () => {
       const open = !evolution.classList.contains('is-open');
       setExpanded(open);
-      if (open) scrollExpandedIntoView(evolution, panel.scrollHeight - panel.getBoundingClientRect().height);
     });
   }
   const toc = document.querySelector('.page-toc');
@@ -282,7 +273,6 @@
       const to = list.getBoundingClientRect().height;
       releaseTarget();
       if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-      if (expanded) scrollExpandedIntoView(list, Math.max(0, to - from));
       animation = list.animate([{ height: `${from}px` }, { height: `${to}px` }], { duration: 240, easing: 'ease' });
       list.style.overflow = 'hidden';
       animation.onfinish = () => {
