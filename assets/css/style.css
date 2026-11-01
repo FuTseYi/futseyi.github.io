@@ -726,7 +726,6 @@ section.section { padding: 32px 0; }
 .web-evolution-toggle:is(:hover,:focus-visible){color:var(--gold-ink)}
 .expandable-panel,.web-evolution-panel{display:grid;grid-template-rows:1fr}
 .expandable-clip{min-height:0;overflow:hidden}
-.web-evolution-panel{display:grid;grid-template-rows:1fr}
 .web-evolution-clip{min-height:0;overflow:hidden}
 .web-evolution-content{padding:14px 0 0}
 .web-evolution-intro{margin:0 0 22px;color:var(--ink-soft);font-size:13px;font-style:italic}
