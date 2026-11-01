@@ -119,7 +119,7 @@ def update_site():
     content='<div class="project-list" id="latest-posts">'+"".join(entries)+'</div>'
     if len(posts)>6 or not posts:
         label="View all articles" if posts else "Browse recent articles"
-        content+=f'<a class="blog-all-link" href="{SITE}/blog/">{label} <span class="link-arrow" aria-hidden="true"></span></a>'
+        content+=f'<a class="list-toggle" href="{SITE}/blog/">{label} <span class="link-arrow" aria-hidden="true"></span></a>'
     html=re.sub(r"<!-- LATEST-POSTS -->.*?<!-- /LATEST-POSTS -->",lambda _: content,html,flags=re.S)
     output.write_text(version_assets(html, ROOT),encoding="utf-8")
     print("Injected latest blog posts into deployed homepage.")
