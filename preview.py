@@ -177,7 +177,7 @@ def assemble(root, refresh_activity=False):
                              robots.read_text(encoding="utf-8")), encoding="utf-8")
     for page in site.rglob("*.html"):
         html = page.read_text(encoding="utf-8")
-        html = re.sub(r'(<a\\b[^>]*\\bhref=[\\\'"])' + re.escape(origin) + r'(?=/)', r'\\1', html)
+        html = re.sub(r'(<a\b[^>]*\bhref=[\'"])' + re.escape(origin) + r'(?=/)', r'\1', html)
         page.write_text(html, encoding="utf-8")
     # Pagefind's banner and progress lines are noise on success; surface them on failure.
     result = subprocess.run([sys.executable, "-m", "pagefind", "--site", str(site), "--force-language", "zh"],
