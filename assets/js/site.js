@@ -40,13 +40,6 @@
   navigationProgress.className = 'navigation-progress';
   navigationProgress.setAttribute('aria-hidden', 'true');
   document.body.prepend(navigationProgress);
-  const article = document.querySelector('.article');
-  const readingProgress = article && document.createElement('div');
-  if (readingProgress) {
-    readingProgress.className = 'reading-progress';
-    readingProgress.setAttribute('aria-hidden', 'true');
-    document.body.prepend(readingProgress);
-  }
   document.addEventListener('click', (event) => {
     const link = event.target.closest('a[href]');
     if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || link.hasAttribute('download') || (link.target && link.target !== '_self')) return;
@@ -109,6 +102,19 @@
     setOpen(window.innerWidth <= 860 && header.classList.contains('menu-open'));
   }, { passive: true });
 
+  const initPage = () => {
+    const controller = new AbortController();
+    const observers = [];
+    const listen = (target, type, callback, options = {}) =>
+      target.addEventListener(type, callback, { ...options, signal: controller.signal });
+    const article = document.querySelector('.article');
+    const readingProgress = article && document.createElement('div');
+    if (readingProgress) {
+      readingProgress.className = 'reading-progress';
+      readingProgress.setAttribute('aria-hidden', 'true');
+      document.body.prepend(readingProgress);
+    }
+
   const addScrollHint = (content, container, isEnabled = () => true) => {
     const hint = document.createElement('div');
     hint.className = 'scroll-hint';
@@ -118,7 +124,9 @@
       hint.classList.toggle('is-visible', isEnabled() && content.scrollHeight - content.clientHeight - content.scrollTop > 2);
     };
     content.addEventListener('scroll', syncHint, { passive: true });
-    new ResizeObserver(syncHint).observe(content);
+    const observer = new ResizeObserver(syncHint);
+    observer.observe(content);
+    observers.push(observer);
     return syncHint;
   };
   const scrollExpandedIntoView = (element) => {
@@ -159,7 +167,9 @@
     addScrollHint(tocContent, toc);
   }
   if (toc?.classList.contains('article-toc')) {
-    new ResizeObserver(() => toc.style.setProperty('--toc-height', `${toc.offsetHeight}px`)).observe(toc);
+    const observer = new ResizeObserver(() => toc.style.setProperty('--toc-height', `${toc.offsetHeight}px`));
+    observer.observe(toc);
+    observers.push(observer);
   }
   const tocLinks = [...document.querySelectorAll('.page-toc a[href^="#"]')];
   const links = toc?.classList.contains('archive-toc') ? tocLinks : [...document.querySelectorAll('.nav-links a[href^="#"]'), ...tocLinks];
@@ -181,14 +191,15 @@
   };
   links.forEach((link) => link.addEventListener('click', () => selectTarget(decodeURIComponent(link.hash.slice(1)))));
   const releaseTarget = () => { clickedTarget = null; schedule(); };
-  window.addEventListener('wheel', releaseTarget, { passive: true });
-  window.addEventListener('touchstart', releaseTarget, { passive: true });
-  document.addEventListener('keydown', (event) => {
+  listen(window, 'wheel', releaseTarget, { passive: true });
+  listen(window, 'touchstart', releaseTarget, { passive: true });
+  listen(document, 'keydown', (event) => {
     if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(event.key)) releaseTarget();
   });
   let scheduled = false;
   const sync = () => {
     scheduled = false;
+    if (controller.signal.aborted) return;
     if (readingProgress) {
       const remaining = document.documentElement.scrollHeight - window.innerHeight;
       readingProgress.style.transform = `scaleX(${remaining > 0 ? Math.max(0, Math.min(1, window.scrollY / remaining)) : 1})`;
@@ -239,18 +250,16 @@
     });
   };
   const schedule = () => {
-    if (!scheduled) {
+    if (!scheduled && !controller.signal.aborted) {
       scheduled = true;
       window.requestAnimationFrame(sync);
     }
   };
-  window.addEventListener('scroll', schedule, { passive: true });
-  window.addEventListener('resize', releaseTarget, { passive: true });
-  window.addEventListener('hashchange', () => selectTarget(decodeURIComponent(location.hash.slice(1))));
-  window.addEventListener('load', () => {
-    if (location.hash) selectTarget(decodeURIComponent(location.hash.slice(1)));
-    else schedule();
-  });
+  listen(window, 'scroll', schedule, { passive: true });
+  listen(window, 'resize', releaseTarget, { passive: true });
+  listen(window, 'hashchange', () => selectTarget(decodeURIComponent(location.hash.slice(1))));
+  if (location.hash) selectTarget(decodeURIComponent(location.hash.slice(1)));
+  else schedule();
   document.querySelectorAll('[data-expandable]').forEach((list) => {
     const extra = [...list.querySelectorAll(':scope > .project-item')].slice(3);
     if (!extra.length) return;
@@ -293,8 +302,8 @@
       group.open = true;
       requestAnimationFrame(() => group.scrollIntoView({ behavior: 'instant', block: 'start' }));
     };
-    window.addEventListener('hashchange', openTag);
-    window.addEventListener('pageshow', openTag);
+    listen(window, 'hashchange', openTag);
+    listen(window, 'pageshow', openTag);
     openTag();
   }
   const searchInput = document.getElementById('blog-search');
@@ -318,7 +327,7 @@
       syncScrollHint();
     };
     openButton.addEventListener('click', openSearch);
-    window.addEventListener('resize', () => { if (dialog.open) positionSearch(); });
+    listen(window, 'resize', () => { if (dialog.open) positionSearch(); });
     dialog.addEventListener('close', () => {
       ++sequence;
       searchInput.value = '';
@@ -328,7 +337,7 @@
     });
     dialog.querySelector('.search-close').addEventListener('click', () => dialog.close());
     dialog.addEventListener('click', (event) => { if (event.target === dialog) dialog.close(); });
-    document.addEventListener('keydown', (event) => {
+    listen(document, 'keydown', (event) => {
       if (event.key === 'Escape' && dialog.open) {
         event.preventDefault();
         dialog.close();
@@ -348,11 +357,11 @@
       try {
         const pagefind = await loadSearch();
         const found = await pagefind.debouncedSearch(query);
-        if (request !== sequence || !found) return;
+        if (controller.signal.aborted || request !== sequence || !found) return;
         results.replaceChildren();
         if (!found.results.length) { results.textContent = 'No articles found.'; return; }
         const items = await Promise.all(found.results.map((item) => item.data()));
-        if (request !== sequence) return;
+        if (controller.signal.aborted || request !== sequence) return;
         const titleQuery = query.normalize('NFKC').toLowerCase();
         const titleMatch = (item) => item.meta.title.normalize('NFKC').toLowerCase().includes(titleQuery);
         items.sort((a, b) => Number(titleMatch(b)) - Number(titleMatch(a)));
@@ -371,7 +380,7 @@
         results.append(list);
         syncScrollHint();
       } catch (error) {
-        if (request === sequence) results.textContent = 'Search is unavailable. Please refresh and try again.';
+        if (!controller.signal.aborted && request === sequence) results.textContent = 'Search is unavailable. Please refresh and try again.';
       }
     });
   }
@@ -408,5 +417,61 @@
     toolbar.append(copy);
     container.prepend(toolbar);
   });
-  schedule();
+    return () => {
+      controller.abort();
+      observers.forEach(observer => observer.disconnect());
+      const dialog = document.getElementById('search-dialog');
+      if (dialog?.open) dialog.close();
+      readingProgress?.remove();
+    };
+  };
+  let cleanupPage = initPage();
+  const syncNavigation = () => {
+    const home = location.pathname === '/' || location.pathname === '/index.html';
+    header.querySelectorAll('.nav-links a').forEach(link => {
+      const active = link.pathname === '/blog/' && !home;
+      link.classList.toggle('is-active', active);
+      if (active) link.setAttribute('aria-current', 'page');
+      else link.removeAttribute('aria-current');
+    });
+  };
+  syncNavigation();
+  if (window.Swup) {
+    const swup = new Swup({ containers: ['#main'], animationSelector: false });
+    swup.hooks.on('visit:start', async (visit) => {
+      visit.animation.animate = false;
+      if (!header.classList.contains('menu-open')) return;
+      setOpen(false);
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const bar = header.querySelector('.header-inner');
+      await new Promise(resolve => {
+        const done = (event) => {
+          if (event && (event.target !== bar || event.propertyName !== 'grid-template-rows')) return;
+          bar.removeEventListener('transitionend', done);
+          clearTimeout(timeout);
+          resolve();
+        };
+        const timeout = setTimeout(() => done(), 300);
+        bar.addEventListener('transitionend', done);
+      });
+    });
+    swup.hooks.on('content:replace', (visit) => {
+      cleanupPage();
+      const incoming = visit.to.document;
+      if (incoming) {
+        document.body.className = incoming.body.className;
+        document.documentElement.lang = incoming.documentElement.lang;
+        for (const selector of ['link[rel="canonical"]', 'meta[name="description"]']) {
+          const current = document.head.querySelector(selector);
+          const next = incoming.head.querySelector(selector);
+          if (current && next) current.replaceWith(next.cloneNode(true));
+        }
+      }
+    }, { before: true });
+    swup.hooks.on('page:view', () => {
+      cleanupPage = initPage();
+      syncNavigation();
+      header.classList.toggle('is-scrolled', window.scrollY > 6);
+    });
+  }
 })();
