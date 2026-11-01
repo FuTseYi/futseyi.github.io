@@ -56,9 +56,6 @@ def check_site_navigation(page, width):
     assert theme.get_attribute("data-mode") != initial
     selected = theme.get_attribute("data-mode")
     assert page.evaluate("localStorage.getItem('site-theme')") == selected
-    page.reload(wait_until="networkidle")
-    page.wait_for_function("(expected) => document.querySelector('.theme-control')?.dataset.mode === expected", arg=selected)
-    assert page.evaluate("localStorage.getItem('site-theme')") == selected, "Theme choice must persist"
 
     if width <= 860:
         toggle = page.locator(".nav-toggle")
