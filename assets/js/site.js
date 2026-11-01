@@ -52,14 +52,14 @@
     if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || link.hasAttribute('download') || (link.target && link.target !== '_self')) return;
     if (link.origin === location.origin && (link.pathname !== location.pathname || link.search !== location.search)) {
       navigationProgress.classList.add('is-loading');
-      if (header.classList.contains('menu-open')) {
-        header.classList.add('nav-reset');
-        setOpen(false);
-      }
     }
   }, true);
-  window.addEventListener('pageshow', () => {
+  window.addEventListener('pageshow', (event) => {
     navigationProgress.classList.remove('is-loading');
+    if (event.persisted) {
+      header.classList.add('nav-reset');
+      setOpen(false);
+    }
     requestAnimationFrame(() => {
       header.classList.toggle('is-scrolled', window.scrollY > 6);
       header.classList.remove('nav-reset');
@@ -91,10 +91,6 @@
     const link = event.target.closest('a[href]');
     if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || (link.target && link.target !== '_self')) return;
     if (link.origin === location.origin && link.pathname === location.pathname && link.search === location.search) setOpen(false);
-  });
-  window.addEventListener('pagehide', () => {
-    header.classList.add('nav-reset');
-    setOpen(false);
   });
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && header.classList.contains('menu-open')) {
