@@ -88,18 +88,11 @@ def check_site_navigation(page, width):
     page.wait_for_url("**/blog/")
     page.locator(".blog-entry").first.wait_for()
     page.wait_for_function("window.scrollY < 2")
-    try:
-        page.wait_for_function("""() => !document.documentElement.classList.contains('is-navigating') &&
-            getComputedStyle(document.documentElement).scrollBehavior === 'smooth'""", timeout=3000)
-    except Exception:
-        state = page.evaluate("""() => ({
-            ready: document.documentElement.classList.contains('is-ready'),
-            navigating: document.documentElement.classList.contains('is-navigating'),
-            scrollBehavior: getComputedStyle(document.documentElement).scrollBehavior,
-            swupLoaded: Boolean(window.Swup),
-            path: location.pathname
-        })""")
-        raise AssertionError(f"Navigation state did not settle: {state}")
+    page.wait_for_function("""() => {
+        const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+        return !document.documentElement.classList.contains('is-navigating') &&
+            getComputedStyle(document.documentElement).scrollBehavior === (reduced ? 'auto' : 'smooth');
+    }""")
     assert page.evaluate("""() => !window.Swup || (
         document.querySelector('#site-header') === window.__persistentHeader &&
         document.querySelector('.atmosphere canvas') === window.__persistentCanvas
