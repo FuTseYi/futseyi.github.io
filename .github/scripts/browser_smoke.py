@@ -65,6 +65,10 @@ def check_site_navigation(page, width):
     selected = theme.get_attribute("data-mode")
     assert page.evaluate("localStorage.getItem('site-theme')") == selected
 
+    page.evaluate("""() => {
+        window.__persistentHeader = document.querySelector('#site-header');
+        window.__persistentCanvas = document.querySelector('.atmosphere canvas');
+    }""")
     if width <= 860:
         toggle = page.locator(".nav-toggle")
         assert toggle.is_visible()
@@ -80,7 +84,11 @@ def check_site_navigation(page, width):
     else:
         page.locator("#primary-navigation a[href='/blog/']").click()
     page.wait_for_url("**/blog/")
-    assert page.locator(".blog-entry").count() > 0
+    page.locator(".blog-entry").first.wait_for()
+    assert page.evaluate("""() => !window.Swup || (
+        document.querySelector('#site-header') === window.__persistentHeader &&
+        document.querySelector('.atmosphere canvas') === window.__persistentCanvas
+    )""")
 
 
 def check_search(page):
