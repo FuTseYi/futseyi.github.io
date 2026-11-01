@@ -441,10 +441,11 @@
     const swup = new Swup({ containers: ['#main'] });
     swup.hooks.on('visit:start', async (visit) => {
       visit.animation.animate = false;
+      header.classList.remove('nav-reset');
       if (!header.classList.contains('menu-open')) return;
+      const bar = header.querySelector('.header-inner');
       setOpen(false);
       if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-      const bar = header.querySelector('.header-inner');
       await new Promise(resolve => {
         const done = (event) => {
           if (event && (event.target !== bar || event.propertyName !== 'grid-template-rows')) return;
@@ -452,7 +453,7 @@
           clearTimeout(timeout);
           resolve();
         };
-        const timeout = setTimeout(() => done(), 300);
+        const timeout = setTimeout(() => done(), 320);
         bar.addEventListener('transitionend', done);
       });
     });
@@ -477,7 +478,7 @@
       navigationProgress.classList.remove('is-loading');
       cleanupPage = initPage();
       syncNavigation();
-      header.classList.toggle('is-scrolled', window.scrollY > 6);
+      requestAnimationFrame(() => header.classList.toggle('is-scrolled', window.scrollY > 6));
     });
   }
 })();
