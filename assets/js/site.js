@@ -115,10 +115,12 @@
     new ResizeObserver(syncHint).observe(content);
     return syncHint;
   };
-  const scrollExpandedIntoView = (element) => {
+  const scrollExpandedIntoView = (element, growth = 0) => {
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const overflow = element.getBoundingClientRect().bottom - (window.innerHeight - 24);
-    if (overflow > 0) window.scrollBy({ top: overflow, behavior: 'smooth' });
+    const bounds = element.getBoundingClientRect();
+    const overflow = bounds.bottom + growth - (window.innerHeight - 24);
+    const available = Math.max(0, bounds.top - (header.getBoundingClientRect().height + 24));
+    if (overflow > 0 && available > 0) window.scrollBy({ top: Math.min(overflow, available), behavior: 'smooth' });
   };
   const inlineToc = document.querySelector('.article-toc-inline');
   if (inlineToc) {
@@ -132,11 +134,13 @@
       syncInlineHint();
     };
     setTocOpen(false);
-    button.addEventListener('click', () => setTocOpen(!inlineToc.classList.contains('is-open')));
+    button.addEventListener('click', () => {
+      const open = !inlineToc.classList.contains('is-open');
+      setTocOpen(open);
+      if (open) scrollExpandedIntoView(inlineToc, panel.scrollHeight - panel.getBoundingClientRect().height);
+    });
     panel.addEventListener('transitionend', (event) => {
-      if (event.target !== panel || event.propertyName !== 'grid-template-rows' || !inlineToc.classList.contains('is-open')) return;
-      syncInlineHint();
-      scrollExpandedIntoView(inlineToc);
+      if (event.target === panel && event.propertyName === 'grid-template-rows') syncInlineHint();
     });
   }
   const evolution = document.querySelector('.web-evolution');
@@ -149,11 +153,10 @@
       panel.inert = !expanded;
     };
     setExpanded(false);
-    button.addEventListener('click', () => setExpanded(!evolution.classList.contains('is-open')));
-    panel.addEventListener('transitionend', (event) => {
-      if (event.target === panel && event.propertyName === 'grid-template-rows' && evolution.classList.contains('is-open')) {
-        scrollExpandedIntoView(evolution);
-      }
+    button.addEventListener('click', () => {
+      const open = !evolution.classList.contains('is-open');
+      setExpanded(open);
+      if (open) scrollExpandedIntoView(evolution, panel.scrollHeight - panel.getBoundingClientRect().height);
     });
   }
   const toc = document.querySelector('.page-toc');
@@ -279,12 +282,12 @@
       const to = list.getBoundingClientRect().height;
       releaseTarget();
       if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      if (expanded) scrollExpandedIntoView(list, Math.max(0, to - from));
       animation = list.animate([{ height: `${from}px` }, { height: `${to}px` }], { duration: 240, easing: 'ease' });
       list.style.overflow = 'hidden';
       animation.onfinish = () => {
         list.style.overflow = '';
         animation = null;
-        if (expanded) scrollExpandedIntoView(list);
       };
       animation.oncancel = () => { list.style.overflow = ''; };
     });
