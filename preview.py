@@ -172,7 +172,9 @@ def assemble(root):
     log += run(root, "sync_activity.py")
     for page in site.rglob("*.html"):
         html = page.read_text(encoding="utf-8")
-        html = re.sub(r'(<a\b[^>]*\bhref=[\'"])https://futseyi\.github\.io(?=/)', r'\1', html)
+        from asset_urls import site_url
+        origin = site_url(root)
+        html = re.sub(r'(<a\b[^>]*\bhref=[\'"])' + re.escape(origin) + r'(?=/)', r'\1', html)
         page.write_text(html, encoding="utf-8")
     # Pagefind's banner and progress lines are noise on success; surface them on failure.
     result = subprocess.run([sys.executable, "-m", "pagefind", "--site", str(site), "--force-language", "zh"],
