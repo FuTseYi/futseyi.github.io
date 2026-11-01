@@ -116,6 +116,11 @@
     new ResizeObserver(syncHint).observe(content);
     return syncHint;
   };
+  const inlineToc = document.querySelector('.article-toc-inline');
+  if (inlineToc) {
+    const syncInlineHint = addScrollHint(inlineToc.querySelector('nav'), inlineToc);
+    inlineToc.addEventListener('toggle', syncInlineHint);
+  }
   const toc = document.querySelector('.page-toc');
   const tocContent = toc && document.createElement('div');
   if (toc) {
