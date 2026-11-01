@@ -88,7 +88,8 @@ def check_site_navigation(page, width):
     page.wait_for_url("**/blog/")
     page.locator(".blog-entry").first.wait_for()
     page.wait_for_function("window.scrollY < 2")
-    assert page.evaluate("getComputedStyle(document.documentElement).scrollBehavior === 'smooth'")
+    page.wait_for_function("""() => !document.documentElement.classList.contains('is-navigating') &&
+        getComputedStyle(document.documentElement).scrollBehavior === 'smooth'""")
     assert page.evaluate("""() => !window.Swup || (
         document.querySelector('#site-header') === window.__persistentHeader &&
         document.querySelector('.atmosphere canvas') === window.__persistentCanvas
