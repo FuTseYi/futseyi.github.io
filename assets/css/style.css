@@ -705,8 +705,8 @@ section.section { padding: 32px 0; }
 :is(.article-toc-inline.is-open .article-toc-toggle,.web-evolution.is-open .web-evolution-toggle,button.list-toggle[aria-expanded="true"]):is(:hover,:focus-visible)::after{transform:translateX(-3px) rotate(225deg)}
 .article-toc-toggle:is(:hover,:focus-visible),.article-toc-inline.is-open .article-toc-toggle,.article-toc-inline nav a:is(:hover,:focus-visible){color:var(--gold-ink)}
 .article-toc-panel{display:grid;grid-template-rows:1fr}
-.js .article-toc-panel,.js .web-evolution-panel{grid-template-rows:0fr;transition:grid-template-rows .24s ease}
-.js .article-toc-inline.is-open .article-toc-panel,.js .web-evolution.is-open .web-evolution-panel{grid-template-rows:1fr}
+.js .article-toc-panel,.js .web-evolution-panel,.js .expandable-panel{grid-template-rows:0fr;transition:grid-template-rows .24s ease}
+.js .article-toc-inline.is-open .article-toc-panel,.js .web-evolution.is-open .web-evolution-panel,.js .project-list.is-open .expandable-panel{grid-template-rows:1fr}
 .article-toc-clip{min-height:0;overflow:hidden}
 .article-toc-inline nav{display:flex;flex-direction:column;gap:0;max-height:50vh;overflow-y:auto;scrollbar-width:none;padding:8px 6px 12px}
 .article-toc-inline nav::-webkit-scrollbar{display:none}
@@ -721,6 +721,8 @@ section.section { padding: 32px 0; }
 .web-evolution{max-width:790px;margin-top:22px}
 .web-evolution-toggle{display:inline-flex;align-items:center;gap:6px;padding:0;background:none;border:0;color:var(--ink);font:500 13px/1.75 var(--font);text-align:left;cursor:pointer}
 .web-evolution-toggle:is(:hover,:focus-visible){color:var(--gold-ink)}
+.expandable-panel,.web-evolution-panel{display:grid;grid-template-rows:1fr}
+.expandable-clip{min-height:0;overflow:hidden}
 .web-evolution-panel{display:grid;grid-template-rows:1fr}
 .web-evolution-clip{min-height:0;overflow:hidden}
 .web-evolution-content{padding:14px 0 0}
