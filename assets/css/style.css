@@ -775,7 +775,7 @@ html:not(.js) .search-open,html:not(.js) .search-dialog{display:none}
 .back-link,.all-tags-link{display:inline-flex}
 .back-link,.all-tags-link,.blog-tags-mobile{align-items:center;gap:8px;min-height:36px;color:var(--ink-soft);font-size:13px;font-weight:600;}
 .back-link:is(:hover,:focus-visible),.all-tags-link:is(:hover,:focus-visible),.blog-tags-mobile:is(:hover,:focus-visible){color:var(--gold-ink);text-decoration:none}
-.back-link .link-arrow,.all-tags-link .link-arrow,.blog-tags-mobile .link-arrow{margin:0}
+.back-link .link-arrow,.all-tags-link .link-arrow,.blog-tags-mobile .link-arrow{margin-left:6px}
 .blog-layout{display:grid;grid-template-columns:minmax(0,1fr) 190px;gap:28px 40px;width:min(100%,1000px);margin:0 auto}
 .blog-list{grid-column:1;min-width:0;display:flow-root}
 .archive-year{container-type:inline-size;margin-top:64px}
@@ -816,7 +816,7 @@ html:not(.js) .search-open,html:not(.js) .search-dialog{display:none}
 .post-neighbor.next{text-align:right;grid-column:2}
 .post-neighbor-label{display:flex;align-items:center;gap:9px;color:var(--ink-faint);font-size:12px;margin-bottom:4px}
 .post-neighbor.next .post-neighbor-label{justify-content:flex-end}
-.post-neighbor .link-arrow{margin:0}
+.post-neighbor .link-arrow{margin-left:6px}
 .post-neighbor strong{font-size:15px;font-weight:600;line-height:1.5}
 .post-neighbor:is(:hover,:focus-visible){text-decoration:none}
 .post-neighbor:is(:hover,:focus-visible) strong{color:var(--gold-ink)}
@@ -893,7 +893,7 @@ html:not(.js) .search-open,html:not(.js) .search-dialog{display:none}
 @media(prefers-reduced-motion:reduce){html.is-ready{scroll-behavior:auto}*,*::before,*::after{transition:none!important;animation:none!important}}
 
 /* ELPA link chevrons: a short nudge on hover or keyboard focus. */
-.link-arrow{display:inline-block;vertical-align:middle;flex:0 0 auto;width:7px;height:7px;margin-left:3px;border-top:1.5px solid currentColor;border-right:1.5px solid currentColor;transform:rotate(45deg);transition:transform .16s ease}
+.link-arrow{display:inline-block;vertical-align:middle;flex:0 0 auto;width:7px;height:7px;margin-left:6px;border-top:1.5px solid currentColor;border-right:1.5px solid currentColor;transform:rotate(45deg);transition:transform .16s ease}
 a:is(:hover,:focus-visible) .link-arrow{transform:translateX(3px) rotate(45deg)}
 .link-arrow-left{transform:rotate(225deg)}
 a:is(:hover,:focus-visible) .link-arrow-left{transform:translateX(-3px) rotate(225deg)}
