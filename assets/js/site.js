@@ -440,6 +440,7 @@
   if (window.Swup) {
     const swup = new Swup({ containers: ['#main'] });
     swup.hooks.on('visit:start', async (visit) => {
+      root.classList.add('is-navigating');
       visit.animation.animate = false;
       header.classList.remove('nav-reset');
       if (!header.classList.contains('menu-open')) return;
@@ -457,7 +458,13 @@
         bar.addEventListener('transitionend', done);
       });
     });
-    swup.hooks.on('visit:abort', () => navigationProgress.classList.remove('is-loading'));
+    const finishVisit = () => {
+      root.classList.remove('is-navigating');
+      navigationProgress.classList.remove('is-loading');
+      header.classList.toggle('is-scrolled', window.scrollY > 6);
+    };
+    swup.hooks.on('visit:end', finishVisit);
+    swup.hooks.on('visit:abort', finishVisit);
     swup.hooks.on('content:replace', (visit) => {
       cleanupPage();
       pendingPage = true;
