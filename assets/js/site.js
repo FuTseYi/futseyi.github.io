@@ -115,308 +115,308 @@
       document.body.prepend(readingProgress);
     }
 
-  const addScrollHint = (content, container, isEnabled = () => true) => {
-    const hint = document.createElement('div');
-    hint.className = 'scroll-hint';
-    hint.setAttribute('aria-hidden', 'true');
-    container.append(hint);
-    const syncHint = () => {
-      hint.classList.toggle('is-visible', isEnabled() && content.scrollHeight - content.clientHeight - content.scrollTop > 2);
+    const addScrollHint = (content, container, isEnabled = () => true) => {
+      const hint = document.createElement('div');
+      hint.className = 'scroll-hint';
+      hint.setAttribute('aria-hidden', 'true');
+      container.append(hint);
+      const syncHint = () => {
+        hint.classList.toggle('is-visible', isEnabled() && content.scrollHeight - content.clientHeight - content.scrollTop > 2);
+      };
+      content.addEventListener('scroll', syncHint, { passive: true });
+      const observer = new ResizeObserver(syncHint);
+      observer.observe(content);
+      observers.push(observer);
+      return syncHint;
     };
-    content.addEventListener('scroll', syncHint, { passive: true });
-    const observer = new ResizeObserver(syncHint);
-    observer.observe(content);
-    observers.push(observer);
-    return syncHint;
-  };
-  const scrollExpandedIntoView = (element) => {
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const overflow = element.getBoundingClientRect().bottom - (window.innerHeight - 24);
-    if (overflow > 0) window.scrollBy({ top: overflow, behavior: 'smooth' });
-  };
-  const setupDisclosure = (container, toggleSelector, panelSelector, onChange) => {
-    if (!container) return;
-    const button = container.querySelector(toggleSelector);
-    const panel = container.querySelector(panelSelector);
-    const setOpen = (open) => {
-      container.classList.toggle('is-open', open);
-      button.setAttribute('aria-expanded', String(open));
-      panel.inert = !open;
-      onChange?.();
+    const scrollExpandedIntoView = (element) => {
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const overflow = element.getBoundingClientRect().bottom - (window.innerHeight - 24);
+      if (overflow > 0) window.scrollBy({ top: overflow, behavior: 'smooth' });
     };
-    setOpen(false);
-    button.addEventListener('click', () => setOpen(!container.classList.contains('is-open')));
-    panel.addEventListener('transitionend', (event) => {
-      if (event.target !== panel || event.propertyName !== 'grid-template-rows' || !container.classList.contains('is-open')) return;
-      onChange?.();
-      scrollExpandedIntoView(container);
-    });
-  };
-  const inlineToc = document.querySelector('.article-toc-inline');
-  if (inlineToc) {
-    const syncInlineHint = addScrollHint(inlineToc.querySelector('nav'), inlineToc, () => inlineToc.classList.contains('is-open'));
-    setupDisclosure(inlineToc, '.article-toc-toggle', '.article-toc-panel', syncInlineHint);
-  }
-  setupDisclosure(document.querySelector('.web-evolution'), '.web-evolution-toggle', '.web-evolution-panel');
-  const toc = document.querySelector('.page-toc');
-  const tocContent = toc && document.createElement('div');
-  if (toc) {
-    tocContent.className = 'toc-content';
-    tocContent.append(...toc.childNodes);
-    toc.append(tocContent);
-    addScrollHint(tocContent, toc);
-  }
-  if (toc?.classList.contains('article-toc')) {
-    const observer = new ResizeObserver(() => toc.style.setProperty('--toc-height', `${toc.offsetHeight}px`));
-    observer.observe(toc);
-    observers.push(observer);
-  }
-  const tocLinks = [...document.querySelectorAll('.page-toc a[href^="#"]')];
-  const links = toc?.classList.contains('archive-toc') ? tocLinks : [...document.querySelectorAll('.nav-links a[href^="#"]'), ...tocLinks];
-  const targets = [...new Set(links
-    .map((link) => document.getElementById(decodeURIComponent(link.hash.slice(1))))
-    .filter(Boolean))];
-  let clickedTarget = null;
-  const selectTarget = (id) => {
-    const target = document.getElementById(id);
-    if (!targets.includes(target)) {
-      clickedTarget = null;
-      schedule();
-      return;
+    const setupDisclosure = (container, toggleSelector, panelSelector, onChange) => {
+      if (!container) return;
+      const button = container.querySelector(toggleSelector);
+      const panel = container.querySelector(panelSelector);
+      const setOpen = (open) => {
+        container.classList.toggle('is-open', open);
+        button.setAttribute('aria-expanded', String(open));
+        panel.inert = !open;
+        onChange?.();
+      };
+      setOpen(false);
+      button.addEventListener('click', () => setOpen(!container.classList.contains('is-open')));
+      panel.addEventListener('transitionend', (event) => {
+        if (event.target !== panel || event.propertyName !== 'grid-template-rows' || !container.classList.contains('is-open')) return;
+        onChange?.();
+        scrollExpandedIntoView(container);
+      });
+    };
+    const inlineToc = document.querySelector('.article-toc-inline');
+    if (inlineToc) {
+      const syncInlineHint = addScrollHint(inlineToc.querySelector('nav'), inlineToc, () => inlineToc.classList.contains('is-open'));
+      setupDisclosure(inlineToc, '.article-toc-toggle', '.article-toc-panel', syncInlineHint);
     }
-    const offset = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
-    const top = target.getBoundingClientRect().top + window.scrollY - offset;
-    clickedTarget = { id, top: Math.max(0, Math.min(top, document.documentElement.scrollHeight - window.innerHeight)), settled: false };
-    schedule();
-  };
-  links.forEach((link) => link.addEventListener('click', () => selectTarget(decodeURIComponent(link.hash.slice(1)))));
-  const releaseTarget = () => { clickedTarget = null; schedule(); };
-  listen(window, 'wheel', releaseTarget, { passive: true });
-  listen(window, 'touchstart', releaseTarget, { passive: true });
-  listen(document, 'keydown', (event) => {
-    if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(event.key)) releaseTarget();
-  });
-  let scheduled = false;
-  const sync = () => {
-    scheduled = false;
-    if (controller.signal.aborted) return;
-    if (readingProgress) {
-      const remaining = document.documentElement.scrollHeight - window.innerHeight;
-      readingProgress.style.transform = `scaleX(${remaining > 0 ? Math.max(0, Math.min(1, window.scrollY / remaining)) : 1})`;
-    }
-    header.classList.toggle('is-scrolled', window.scrollY > 6);
-    if (!targets.length) return;
-    const navHeight = header.getBoundingClientRect().height;
-    const probe = window.scrollY + navHeight + 28;
-    let active = targets[0].id;
-    const ordered = [...targets].sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top);
-    for (const el of ordered) {
-      if (el.getBoundingClientRect().top + window.scrollY <= probe) active = el.id;
-    }
-    if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 6) active = ordered[ordered.length - 1].id;
-    // Keep the clicked section selected through smooth scrolling and bottom clamping.
-    if (clickedTarget) {
-      if (Math.abs(window.scrollY - clickedTarget.top) <= 2) clickedTarget.settled = true;
-      else if (clickedTarget.settled) clickedTarget = null;
-      if (clickedTarget) active = clickedTarget.id;
-    }
+    setupDisclosure(document.querySelector('.web-evolution'), '.web-evolution-toggle', '.web-evolution-panel');
+    const toc = document.querySelector('.page-toc');
+    const tocContent = toc && document.createElement('div');
     if (toc) {
-      const visible = toc.classList.contains('article-toc') || (toc.classList.contains('archive-toc')
-        ? targets[0].getBoundingClientRect().top <= navHeight + 28
-        : targets[0].getBoundingClientRect().bottom <= navHeight + 28);
-      toc.classList.toggle('is-visible', visible);
-      toc.setAttribute('aria-hidden', String(!visible));
-      toc.inert = !visible;
+      tocContent.className = 'toc-content';
+      tocContent.append(...toc.childNodes);
+      toc.append(tocContent);
+      addScrollHint(tocContent, toc);
     }
-    if (toc?.classList.contains('archive-toc')) {
-      const period = clickedTarget?.id.replace(/^(year|month)-/, '');
-      document.querySelectorAll('.blog-entry .post-date').forEach((date) => {
-        date.classList.toggle('is-active', Boolean(period && date.dateTime.startsWith(`${period}-`)));
+    if (toc?.classList.contains('article-toc')) {
+      const observer = new ResizeObserver(() => toc.style.setProperty('--toc-height', `${toc.offsetHeight}px`));
+      observer.observe(toc);
+      observers.push(observer);
+    }
+    const tocLinks = [...document.querySelectorAll('.page-toc a[href^="#"]')];
+    const links = toc?.classList.contains('archive-toc') ? tocLinks : [...document.querySelectorAll('.nav-links a[href^="#"]'), ...tocLinks];
+    const targets = [...new Set(links
+      .map((link) => document.getElementById(decodeURIComponent(link.hash.slice(1))))
+      .filter(Boolean))];
+    let clickedTarget = null;
+    const selectTarget = (id) => {
+      const target = document.getElementById(id);
+      if (!targets.includes(target)) {
+        clickedTarget = null;
+        schedule();
+        return;
+      }
+      const offset = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
+      const top = target.getBoundingClientRect().top + window.scrollY - offset;
+      clickedTarget = { id, top: Math.max(0, Math.min(top, document.documentElement.scrollHeight - window.innerHeight)), settled: false };
+      schedule();
+    };
+    links.forEach((link) => link.addEventListener('click', () => selectTarget(decodeURIComponent(link.hash.slice(1)))));
+    const releaseTarget = () => { clickedTarget = null; schedule(); };
+    listen(window, 'wheel', releaseTarget, { passive: true });
+    listen(window, 'touchstart', releaseTarget, { passive: true });
+    listen(document, 'keydown', (event) => {
+      if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(event.key)) releaseTarget();
+    });
+    let scheduled = false;
+    const sync = () => {
+      scheduled = false;
+      if (controller.signal.aborted) return;
+      if (readingProgress) {
+        const remaining = document.documentElement.scrollHeight - window.innerHeight;
+        readingProgress.style.transform = `scaleX(${remaining > 0 ? Math.max(0, Math.min(1, window.scrollY / remaining)) : 1})`;
+      }
+      header.classList.toggle('is-scrolled', window.scrollY > 6);
+      if (!targets.length) return;
+      const navHeight = header.getBoundingClientRect().height;
+      const probe = window.scrollY + navHeight + 28;
+      let active = targets[0].id;
+      const ordered = [...targets].sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top);
+      for (const el of ordered) {
+        if (el.getBoundingClientRect().top + window.scrollY <= probe) active = el.id;
+      }
+      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 6) active = ordered[ordered.length - 1].id;
+      // Keep the clicked section selected through smooth scrolling and bottom clamping.
+      if (clickedTarget) {
+        if (Math.abs(window.scrollY - clickedTarget.top) <= 2) clickedTarget.settled = true;
+        else if (clickedTarget.settled) clickedTarget = null;
+        if (clickedTarget) active = clickedTarget.id;
+      }
+      if (toc) {
+        const visible = toc.classList.contains('article-toc') || (toc.classList.contains('archive-toc')
+          ? targets[0].getBoundingClientRect().top <= navHeight + 28
+          : targets[0].getBoundingClientRect().bottom <= navHeight + 28);
+        toc.classList.toggle('is-visible', visible);
+        toc.setAttribute('aria-hidden', String(!visible));
+        toc.inert = !visible;
+      }
+      if (toc?.classList.contains('archive-toc')) {
+        const period = clickedTarget?.id.replace(/^(year|month)-/, '');
+        document.querySelectorAll('.blog-entry .post-date').forEach((date) => {
+          date.classList.toggle('is-active', Boolean(period && date.dateTime.startsWith(`${period}-`)));
+        });
+      }
+      tocLinks.forEach((link) => {
+        const current = decodeURIComponent(link.hash.slice(1)) === active;
+        const changed = current && !link.classList.contains('is-active');
+        link.classList.toggle('is-active', current);
+        if (current) link.setAttribute('aria-current', 'location');
+        else link.removeAttribute('aria-current');
+        if (changed && tocContent.clientHeight) {
+          const item = link.getBoundingClientRect();
+          const bounds = tocContent.getBoundingClientRect();
+          if (item.top < bounds.top || item.bottom > bounds.bottom) {
+            tocContent.scrollTop += item.top - bounds.top - (tocContent.clientHeight - item.height) / 2;
+          }
+        }
+      });
+    };
+    const schedule = () => {
+      if (!scheduled && !controller.signal.aborted) {
+        scheduled = true;
+        window.requestAnimationFrame(sync);
+      }
+    };
+    listen(window, 'scroll', schedule, { passive: true });
+    listen(window, 'resize', releaseTarget, { passive: true });
+    listen(window, 'hashchange', () => selectTarget(decodeURIComponent(location.hash.slice(1))));
+    if (location.hash) selectTarget(decodeURIComponent(location.hash.slice(1)));
+    else schedule();
+    document.querySelectorAll('[data-expandable]').forEach((list) => {
+      const extra = [...list.querySelectorAll(':scope > .project-item')].slice(3);
+      if (!extra.length) return;
+      const panel = document.createElement('div');
+      panel.className = 'expandable-panel';
+      panel.id = `${list.id}-extra`;
+      const clip = document.createElement('div');
+      clip.className = 'expandable-clip';
+      clip.append(...extra);
+      panel.append(clip);
+      list.insertBefore(panel, list.querySelector(':scope > .activity-note'));
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'list-toggle';
+      button.setAttribute('aria-controls', panel.id);
+      const setExpanded = (expanded) => {
+        list.classList.toggle('is-open', expanded);
+        panel.inert = !expanded;
+        button.setAttribute('aria-expanded', String(expanded));
+        button.textContent = expanded ? 'Show less' : 'Show more';
+      };
+      setExpanded(false);
+      button.addEventListener('click', () => {
+        setExpanded(!list.classList.contains('is-open'));
+        releaseTarget();
+      });
+      panel.addEventListener('transitionend', (event) => {
+        if (event.target === panel && event.propertyName === 'grid-template-rows' && list.classList.contains('is-open')) {
+          scrollExpandedIntoView(list);
+        }
+      });
+      list.after(button);
+    });
+    const tagGroups = [...document.querySelectorAll('.tag-group')];
+    if (tagGroups.length) {
+      tagGroups.forEach((group) => { group.open = false; });
+      const openTag = () => {
+        const group = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+        if (!tagGroups.includes(group)) return;
+        group.open = true;
+        requestAnimationFrame(() => group.scrollIntoView({ behavior: 'instant', block: 'start' }));
+      };
+      listen(window, 'hashchange', openTag);
+      listen(window, 'pageshow', openTag);
+      openTag();
+    }
+    const searchInput = document.getElementById('blog-search');
+    if (searchInput) {
+      const dialog = document.getElementById('search-dialog');
+      dialog.tabIndex = -1;
+      dialog.autofocus = true;
+      const openButton = document.querySelector('.search-open');
+      const results = document.getElementById('search-results');
+      const syncScrollHint = addScrollHint(results, dialog);
+      let engine;
+      let sequence = 0;
+      const loadSearch = () => engine ??= import('/pagefind/pagefind.js');
+      const positionSearch = () => {
+        dialog.style.setProperty('--search-top', `${Math.round(openButton.getBoundingClientRect().bottom + 12)}px`);
+      };
+      const openSearch = () => {
+        positionSearch();
+        dialog.showModal();
+        searchInput.focus({ preventScroll: true });
+        syncScrollHint();
+      };
+      openButton.addEventListener('click', openSearch);
+      listen(window, 'resize', () => { if (dialog.open) positionSearch(); });
+      dialog.addEventListener('close', () => {
+        ++sequence;
+        searchInput.value = '';
+        results.replaceChildren();
+        syncScrollHint();
+        openButton.focus({ preventScroll: true });
+      });
+      dialog.querySelector('.search-close').addEventListener('click', () => dialog.close());
+      dialog.addEventListener('click', (event) => { if (event.target === dialog) dialog.close(); });
+      listen(document, 'keydown', (event) => {
+        if (event.key === 'Escape' && dialog.open) {
+          event.preventDefault();
+          dialog.close();
+        } else if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+          event.preventDefault();
+          if (dialog.open) dialog.close(); else openSearch();
+        }
+      });
+      searchInput.addEventListener('input', async () => {
+        const query = searchInput.value.trim();
+        const request = ++sequence;
+        results.replaceChildren();
+        results.scrollTop = 0;
+        syncScrollHint();
+        if (!query) return;
+        results.textContent = 'Searching…';
+        try {
+          const pagefind = await loadSearch();
+          const found = await pagefind.debouncedSearch(query);
+          if (controller.signal.aborted || request !== sequence || !found) return;
+          results.replaceChildren();
+          if (!found.results.length) { results.textContent = 'No articles found.'; return; }
+          const items = await Promise.all(found.results.map((item) => item.data()));
+          if (controller.signal.aborted || request !== sequence) return;
+          const titleQuery = query.normalize('NFKC').toLowerCase();
+          const titleMatch = (item) => item.meta.title.normalize('NFKC').toLowerCase().includes(titleQuery);
+          items.sort((a, b) => Number(titleMatch(b)) - Number(titleMatch(a)));
+          const list = document.createElement('ul');
+          items.forEach((item) => {
+            const row = document.createElement('li');
+            const link = document.createElement('a');
+            link.href = item.url;
+            const label = document.createElement('span');
+            label.className = 'link-label';
+            label.textContent = item.meta.title;
+            link.append(label);
+            row.append(link);
+            list.append(row);
+          });
+          results.append(list);
+          syncScrollHint();
+        } catch (error) {
+          if (!controller.signal.aborted && request === sequence) results.textContent = 'Search is unavailable. Please refresh and try again.';
+        }
       });
     }
-    tocLinks.forEach((link) => {
-      const current = decodeURIComponent(link.hash.slice(1)) === active;
-      const changed = current && !link.classList.contains('is-active');
-      link.classList.toggle('is-active', current);
-      if (current) link.setAttribute('aria-current', 'location');
-      else link.removeAttribute('aria-current');
-      if (changed && tocContent.clientHeight) {
-        const item = link.getBoundingClientRect();
-        const bounds = tocContent.getBoundingClientRect();
-        if (item.top < bounds.top || item.bottom > bounds.bottom) {
-          tocContent.scrollTop += item.top - bounds.top - (tocContent.clientHeight - item.height) / 2;
+    document.querySelectorAll('.article pre').forEach((pre) => {
+      const source = pre.querySelector('code') || pre;
+      const original = source.textContent;
+      const highlighted = pre.parentElement.classList.contains('codehilite') ? pre.parentElement : pre;
+      const container = document.createElement('div');
+      container.className = 'article-code';
+      highlighted.before(container);
+      container.append(highlighted);
+      const toolbar = document.createElement('div');
+      toolbar.className = 'article-code-header';
+      const copy = document.createElement('button');
+      copy.type = 'button';
+      copy.className = 'code-copy';
+      copy.textContent = 'Copy';
+      copy.setAttribute('aria-label', 'Copy code');
+      let resetTimer;
+      copy.addEventListener('click', async () => {
+        clearTimeout(resetTimer);
+        try {
+          await navigator.clipboard.writeText(original);
+          copy.textContent = 'Copied';
+        } catch {
+          copy.textContent = 'Copy failed';
         }
-      }
+        copy.setAttribute('aria-label', copy.textContent);
+        resetTimer = setTimeout(() => {
+          copy.textContent = 'Copy';
+          copy.setAttribute('aria-label', 'Copy code');
+        }, 2000);
+      });
+      toolbar.append(copy);
+      container.prepend(toolbar);
     });
-  };
-  const schedule = () => {
-    if (!scheduled && !controller.signal.aborted) {
-      scheduled = true;
-      window.requestAnimationFrame(sync);
-    }
-  };
-  listen(window, 'scroll', schedule, { passive: true });
-  listen(window, 'resize', releaseTarget, { passive: true });
-  listen(window, 'hashchange', () => selectTarget(decodeURIComponent(location.hash.slice(1))));
-  if (location.hash) selectTarget(decodeURIComponent(location.hash.slice(1)));
-  else schedule();
-  document.querySelectorAll('[data-expandable]').forEach((list) => {
-    const extra = [...list.querySelectorAll(':scope > .project-item')].slice(3);
-    if (!extra.length) return;
-    const panel = document.createElement('div');
-    panel.className = 'expandable-panel';
-    panel.id = `${list.id}-extra`;
-    const clip = document.createElement('div');
-    clip.className = 'expandable-clip';
-    clip.append(...extra);
-    panel.append(clip);
-    list.insertBefore(panel, list.querySelector(':scope > .activity-note'));
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'list-toggle';
-    button.setAttribute('aria-controls', panel.id);
-    const setExpanded = (expanded) => {
-      list.classList.toggle('is-open', expanded);
-      panel.inert = !expanded;
-      button.setAttribute('aria-expanded', String(expanded));
-      button.textContent = expanded ? 'Show less' : 'Show more';
-    };
-    setExpanded(false);
-    button.addEventListener('click', () => {
-      setExpanded(!list.classList.contains('is-open'));
-      releaseTarget();
-    });
-    panel.addEventListener('transitionend', (event) => {
-      if (event.target === panel && event.propertyName === 'grid-template-rows' && list.classList.contains('is-open')) {
-        scrollExpandedIntoView(list);
-      }
-    });
-    list.after(button);
-  });
-  const tagGroups = [...document.querySelectorAll('.tag-group')];
-  if (tagGroups.length) {
-    tagGroups.forEach((group) => { group.open = false; });
-    const openTag = () => {
-      const group = document.getElementById(decodeURIComponent(location.hash.slice(1)));
-      if (!tagGroups.includes(group)) return;
-      group.open = true;
-      requestAnimationFrame(() => group.scrollIntoView({ behavior: 'instant', block: 'start' }));
-    };
-    listen(window, 'hashchange', openTag);
-    listen(window, 'pageshow', openTag);
-    openTag();
-  }
-  const searchInput = document.getElementById('blog-search');
-  if (searchInput) {
-    const dialog = document.getElementById('search-dialog');
-    dialog.tabIndex = -1;
-    dialog.autofocus = true;
-    const openButton = document.querySelector('.search-open');
-    const results = document.getElementById('search-results');
-    const syncScrollHint = addScrollHint(results, dialog);
-    let engine;
-    let sequence = 0;
-    const loadSearch = () => engine ??= import('/pagefind/pagefind.js');
-    const positionSearch = () => {
-      dialog.style.setProperty('--search-top', `${Math.round(openButton.getBoundingClientRect().bottom + 12)}px`);
-    };
-    const openSearch = () => {
-      positionSearch();
-      dialog.showModal();
-      searchInput.focus({ preventScroll: true });
-      syncScrollHint();
-    };
-    openButton.addEventListener('click', openSearch);
-    listen(window, 'resize', () => { if (dialog.open) positionSearch(); });
-    dialog.addEventListener('close', () => {
-      ++sequence;
-      searchInput.value = '';
-      results.replaceChildren();
-      syncScrollHint();
-      openButton.focus({ preventScroll: true });
-    });
-    dialog.querySelector('.search-close').addEventListener('click', () => dialog.close());
-    dialog.addEventListener('click', (event) => { if (event.target === dialog) dialog.close(); });
-    listen(document, 'keydown', (event) => {
-      if (event.key === 'Escape' && dialog.open) {
-        event.preventDefault();
-        dialog.close();
-      } else if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
-        event.preventDefault();
-        if (dialog.open) dialog.close(); else openSearch();
-      }
-    });
-    searchInput.addEventListener('input', async () => {
-      const query = searchInput.value.trim();
-      const request = ++sequence;
-      results.replaceChildren();
-      results.scrollTop = 0;
-      syncScrollHint();
-      if (!query) return;
-      results.textContent = 'Searching…';
-      try {
-        const pagefind = await loadSearch();
-        const found = await pagefind.debouncedSearch(query);
-        if (controller.signal.aborted || request !== sequence || !found) return;
-        results.replaceChildren();
-        if (!found.results.length) { results.textContent = 'No articles found.'; return; }
-        const items = await Promise.all(found.results.map((item) => item.data()));
-        if (controller.signal.aborted || request !== sequence) return;
-        const titleQuery = query.normalize('NFKC').toLowerCase();
-        const titleMatch = (item) => item.meta.title.normalize('NFKC').toLowerCase().includes(titleQuery);
-        items.sort((a, b) => Number(titleMatch(b)) - Number(titleMatch(a)));
-        const list = document.createElement('ul');
-        items.forEach((item) => {
-          const row = document.createElement('li');
-          const link = document.createElement('a');
-          link.href = item.url;
-          const label = document.createElement('span');
-          label.className = 'link-label';
-          label.textContent = item.meta.title;
-          link.append(label);
-          row.append(link);
-          list.append(row);
-        });
-        results.append(list);
-        syncScrollHint();
-      } catch (error) {
-        if (!controller.signal.aborted && request === sequence) results.textContent = 'Search is unavailable. Please refresh and try again.';
-      }
-    });
-  }
-  document.querySelectorAll('.article pre').forEach((pre) => {
-    const source = pre.querySelector('code') || pre;
-    const original = source.textContent;
-    const highlighted = pre.parentElement.classList.contains('codehilite') ? pre.parentElement : pre;
-    const container = document.createElement('div');
-    container.className = 'article-code';
-    highlighted.before(container);
-    container.append(highlighted);
-    const toolbar = document.createElement('div');
-    toolbar.className = 'article-code-header';
-    const copy = document.createElement('button');
-    copy.type = 'button';
-    copy.className = 'code-copy';
-    copy.textContent = 'Copy';
-    copy.setAttribute('aria-label', 'Copy code');
-    let resetTimer;
-    copy.addEventListener('click', async () => {
-      clearTimeout(resetTimer);
-      try {
-        await navigator.clipboard.writeText(original);
-        copy.textContent = 'Copied';
-      } catch {
-        copy.textContent = 'Copy failed';
-      }
-      copy.setAttribute('aria-label', copy.textContent);
-      resetTimer = setTimeout(() => {
-        copy.textContent = 'Copy';
-        copy.setAttribute('aria-label', 'Copy code');
-      }, 2000);
-    });
-    toolbar.append(copy);
-    container.prepend(toolbar);
-  });
     return () => {
       controller.abort();
       observers.forEach(observer => observer.disconnect());
@@ -426,6 +426,7 @@
     };
   };
   let cleanupPage = initPage();
+  let pendingPage = false;
   const syncNavigation = () => {
     const home = location.pathname === '/' || location.pathname === '/index.html';
     header.querySelectorAll('.nav-links a').forEach(link => {
@@ -458,6 +459,7 @@
     swup.hooks.on('visit:abort', () => navigationProgress.classList.remove('is-loading'));
     swup.hooks.on('content:replace', (visit) => {
       cleanupPage();
+      pendingPage = true;
       const incoming = visit.to.document;
       if (incoming) {
         document.body.className = incoming.body.className;
@@ -470,6 +472,8 @@
       }
     }, { before: true });
     swup.hooks.on('page:view', () => {
+      if (!pendingPage) return;
+      pendingPage = false;
       navigationProgress.classList.remove('is-loading');
       cleanupPage = initPage();
       syncNavigation();
