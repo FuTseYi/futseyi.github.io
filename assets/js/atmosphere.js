@@ -116,7 +116,7 @@
       float heightFade=smoothstep(.02,.75,uv.y);
       float variation=smoothstep(.26,.74,depth+.12*cloud);
       float atmosphere=heightFade*(.26+.74*variation);
-      float softEdge=smoothstep(.03,.48,uv.x)*smoothstep(.98,.50,uv.x);
+      float softEdge=smoothstep(.03,.48,uv.x)*(1.-smoothstep(.52,.97,uv.x));
       vec3 col=mix(vec3(9.,15.,25.),vec3(27.,58.,95.),atmosphere)/255.;
       col+=vec3(.18,.29,.42)*vapor*heightFade*.14;
       col+=vec3(.27,.39,.53)*pow(vapor,2.)*heightFade*softEdge*.11;
