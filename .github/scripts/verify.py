@@ -125,6 +125,7 @@ def main():
     assert (ROOT / "blog/posts.json").is_file(), "Missing Writing feed"
     assert (ROOT / "pagefind/pagefind.js").is_file(), "Missing search index"
     assert (ROOT / "assets/icons/favicon.svg").is_file(), "Missing favicon"
+    assert f"Sitemap: {ORIGIN}/sitemap.xml" in (ROOT / "robots.txt").read_text(encoding="utf-8"), "Incorrect robots sitemap URL"
 
     pages = {}
     for file in ROOT.rglob("*.html"):
