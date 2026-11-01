@@ -158,7 +158,7 @@ def run(root, script, *args):
     return result.stdout
 
 
-def assemble(root):
+def assemble(root, refresh_activity=False):
     """Reuse the deployment builders inside an isolated source copy, returning a one-line summary."""
     site = root / "_site"
     log = run(root, "build.py")
@@ -169,7 +169,7 @@ def assemble(root):
         shutil.copytree(root / name, site / name)
     (site / ".nojekyll").touch()
     log += run(root, "sync_readme.py", "--update-site")
-    log += run(root, "sync_activity.py")
+    log += run(root, "sync_activity.py", *(("--refresh",) if refresh_activity else ()))
     for page in site.rglob("*.html"):
         html = page.read_text(encoding="utf-8")
         origin = re.search(r\'<link rel="canonical" href="([^"]+)"\', (root / "index.html").read_text(encoding="utf-8"))[1].rstrip("/")
@@ -184,7 +184,7 @@ def assemble(root):
     return summarize(log + run(root, "verify.py"))
 
 
-def build():
+def build(refresh_activity=False):
     # Same filesystem as _site, so publishing uses directory renames, not copies.
     with tempfile.TemporaryDirectory(prefix=".preview-", dir=ROOT) as directory:
         candidate = Path(directory)
@@ -197,7 +197,7 @@ def build():
         if snapshot.is_file():
             (candidate / "_site").mkdir()
             shutil.copy2(snapshot, candidate / "_site/contributions.json")
-        summary = assemble(candidate)
+        summary = assemble(candidate, refresh_activity) if refresh_activity else assemble(candidate)
         with SERVING_LOCK:
             previous = candidate / "previous"
             if SITE.exists():
@@ -226,11 +226,11 @@ def source_state():
     return state
 
 
-def rebuild(initial=False):
+def rebuild(initial=False, refresh_activity=False):
     """Report initial counts or a short update; return False on a failed build."""
     try:
         with Progress(mark("正在生成预览 / Building preview…", "Building preview...")):
-            parts, notes = build()
+            parts, notes = build(refresh_activity) if refresh_activity else build()
     except (subprocess.CalledProcessError, OSError, ValueError) as error:
         print(paint(f"{mark('✗', 'x')} 生成失败 / Build failed: {error}", RED), flush=True)
         print(paint("  保留上次预览，修正文件并保存后重试。 / Previous preview kept; fix the source and save to retry.", DIM), flush=True)
@@ -317,6 +317,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--port", type=int, default=8765)
     parser.add_argument("--build-only", action="store_true", help="Build and verify without starting a server")
+    parser.add_argument("--refresh-activity", action="store_true", help="Refresh public GitHub activity during the build")
     parser.add_argument(CHECK_FLAG, action="store_true", help=argparse.SUPPRESS)
     args = parser.parse_args()
     if args.check_dependencies:
@@ -336,10 +337,10 @@ def main():
         discard_stale_builds()
         previous = source_state()
         if args.build_only:
-            if not rebuild(initial=True):
+            if not rebuild(initial=True, refresh_activity=args.refresh_activity):
                 sys.exit(1)
             return
-        rebuild(initial=True)
+        rebuild(initial=True, refresh_activity=args.refresh_activity)
         print(paint(f"{mark('→', '->')} http://127.0.0.1:{args.port}/", CYAN), flush=True)
         print(paint("  保存文件后自动生成，浏览器需手动刷新。 / Saving rebuilds the site; refresh the browser manually.", DIM), flush=True)
         print(paint("  按 Ctrl+C 停止。 / Press Ctrl+C to stop.", DIM), flush=True)
