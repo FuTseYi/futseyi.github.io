@@ -728,8 +728,8 @@ section.section { padding: 32px 0; }
 .web-evolution-history{list-style:none;display:grid;gap:15px;margin:0;padding:0}
 .web-evolution-history li{display:grid;grid-template-columns:104px minmax(0,1fr);gap:12px;font-size:13px;line-height:1.7;color:var(--ink-soft)}
 .web-evolution-date{font-size:11px;color:var(--ink-faint);font-variant-numeric:tabular-nums}
-.web-evolution-stack{margin-top:24px;padding-top:18px;border-top:1px solid var(--line)}
-.web-evolution-stack h2{font-size:14px;font-weight:600;margin:0 0 8px}
+.web-evolution-stack{margin-top:24px}
+.web-evolution-stack h2{font-size:12px;font-weight:500;color:var(--ink-faint);margin:0 0 8px}
 .web-evolution-stack p{font-size:13px;line-height:1.75;color:var(--ink-soft)}
 @media(max-width:680px){.web-evolution{margin-top:18px}.web-evolution-history li{grid-template-columns:82px minmax(0,1fr);gap:10px}}
 @media(prefers-reduced-motion:reduce){.web-evolution-panel,.web-evolution-toggle::after{transition:none}}
