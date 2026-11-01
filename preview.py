@@ -172,8 +172,7 @@ def assemble(root):
     log += run(root, "sync_activity.py")
     for page in site.rglob("*.html"):
         html = page.read_text(encoding="utf-8")
-        from asset_urls import site_url
-        origin = site_url(root)
+        origin = re.search(r\'<link rel="canonical" href="([^"]+)"\', (root / "index.html").read_text(encoding="utf-8"))[1].rstrip("/")
         html = re.sub(r'(<a\b[^>]*\bhref=[\'"])' + re.escape(origin) + r'(?=/)', r'\1', html)
         page.write_text(html, encoding="utf-8")
     # Pagefind's banner and progress lines are noise on success; surface them on failure.
