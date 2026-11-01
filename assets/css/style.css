@@ -109,10 +109,11 @@ html {
     scroll-padding-top: calc(var(--nav-h) + var(--nav-offset) + 16px);
   }
 html.is-ready { scroll-behavior: smooth; }
-/* A single exit surface masks the outgoing document without reflowing it. */
-.navigation-exit{position:fixed;inset:0;z-index:1000;pointer-events:none;background:var(--bg);opacity:0;transition:opacity .16s ease-out}
-.navigation-exit.is-active{opacity:1}
-@media(prefers-reduced-motion:reduce){.navigation-exit{transition:none}}
+/* The main content fades on its first paint, without waiting for pageshow. */
+@media(prefers-reduced-motion:no-preference){
+  .js main{animation:page-enter .2s ease-out both}
+  @keyframes page-enter{from{opacity:0}to{opacity:1}}
+}
 
 
 html { overflow-x: clip; }
