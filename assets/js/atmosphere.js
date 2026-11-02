@@ -147,8 +147,10 @@
       vec2 delta=(pos-focus)/vec2(max(aspect*.8,.7),.8);
       float radial=length(delta);
       float irregular=(broad-.5)*.23+(turbulence-.5)*.10;
+      // Suppress the initial focal hotspot; let the light field gather before opening.
+      float opening=smoothstep(.06,.28,entrance);
       float sweep=entrance*1.75-.22;
-      float reveal=mix(smoothstep(radial+irregular-.34,radial+irregular+.28,sweep),1.,smoothstep(.78,1.,entrance));
+      float reveal=opening*mix(smoothstep(radial+irregular-.34,radial+irregular+.28,sweep),1.,smoothstep(.78,1.,entrance));
       density*=reveal;
       ridge*=reveal;
       core*=reveal;
