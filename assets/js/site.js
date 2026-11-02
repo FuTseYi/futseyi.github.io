@@ -27,7 +27,6 @@
     syncTheme();
   });
   syncTheme();
-  if (themeControl) themeControl.hidden = false;
   const currentYear = String(new Date().getFullYear());
   document.querySelectorAll('[data-current-year]').forEach((element) => {
     element.dateTime = currentYear;
