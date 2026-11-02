@@ -128,8 +128,8 @@
       vec2 a=normalize(vec2(-.83,-.55));
       vec2 b=normalize(vec2(.85,.53));
       vec2 c=normalize(vec2(.55,-.83));
-      float high=plume(swept,vec2(aspect*1.04,.94),a,.20,.98);
-      float low=plume(swept,vec2(-aspect*.08,.03),b,.23,1.05);
+      float high=plume(swept,vec2(aspect*1.04,.94),a,.23,1.05);
+      float low=plume(swept,vec2(-aspect*.08,.03),b,.27,1.13);
       float side=plume(swept,vec2(aspect*.18,1.13),c,.12,.73);
       float opposing=max(high,low*.88);
       float sources=max(opposing,side*.52);
@@ -137,27 +137,21 @@
       float collision=min(high,low);
       float turbulence=noise(vec3(p*2.05+warp*.64+fine*.18,phase*.59+7.))*.5+.5;
       float broad=noise(vec3(p*.85+warp*.2,phase*.31+2.))*.5+.5;
-      float density=clamp(sources*(.48+.53*broad+.39*turbulence)+collision*.22,0.,1.);
-      float ridge=smoothstep(.46,.79,turbulence)*sources;
+      float density=clamp(sources*(.36+.68*broad+.46*turbulence)+collision*.24,0.,1.);
+      float ridge=smoothstep(.52,.82,turbulence)*sources;
       float core=smoothstep(.48,.9,density);
       float shadow=collision*(1.-turbulence)*.24;
-      // A wide directional front enters from offscreen, never forming a focal hotspot.
-      vec2 axis=normalize(vec2(cos(seed.x*2.1+.7),sin(seed.x*2.1+.7)));
-      float travel=dot(uv-.5,axis);
-      float edge=(broad-.5)*.18+(turbulence-.5)*.07;
-      float front=mix(-1.0,1.0,entrance);
-      float reveal=1.-smoothstep(front-.32,front+.16,travel+edge);
-      reveal*=smoothstep(0.,.12,entrance);
-      reveal=mix(reveal,1.,smoothstep(.82,1.,entrance));
+      // One shared envelope raises every plume together; no travelling reveal front.
+      float reveal=smoothstep(0.,.84,entrance);
       density*=reveal;
       ridge*=reveal;
       core*=reveal;
       shadow*=reveal;
       // Shared density and lighting, with separate dark/light color ramps.
       vec3 darkBase=vec3(.012,.026,.058);
-      vec3 darkBody=vec3(.085,.22,.42);
-      vec3 darkLight=vec3(.47,.69,.87);
-      vec3 night=mix(darkBase,darkBody,smoothstep(.08,.68,density));
+      vec3 darkBody=vec3(.065,.18,.37);
+      vec3 darkLight=vec3(.54,.74,.91);
+      vec3 night=mix(darkBase,darkBody,smoothstep(.12,.71,density));
       night=mix(night,darkLight,clamp(core*.62+ridge*.24,0.,.75));
       night*=1.-shadow;
       vec3 dayBase=vec3(.995,.998,1.);
