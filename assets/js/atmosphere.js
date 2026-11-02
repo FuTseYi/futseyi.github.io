@@ -131,18 +131,19 @@
       float high=plume(swept,vec2(aspect*1.04,.94),a,.23,1.05);
       float low=plume(swept,vec2(-aspect*.08,.03),b,.27,1.13);
       float side=plume(swept,vec2(aspect*.18,1.13),c,.12,.73);
-      float opposing=max(high,low*.88);
-      float sources=max(opposing,side*.52);
+      float opposing=max(high,low*.9);
+      float sources=max(opposing,side*.55);
+      float bridge=smoothstep(.12,.65,high+low)*.17;
       // Compression and shear at the meeting point create depth, not flat additive glow.
       float collision=min(high,low);
       float turbulence=noise(vec3(p*2.05+warp*.64+fine*.18,phase*.59+7.))*.5+.5;
       float broad=noise(vec3(p*.85+warp*.2,phase*.31+2.))*.5+.5;
-      float density=clamp(sources*(.36+.68*broad+.46*turbulence)+collision*.24,0.,1.);
-      float ridge=smoothstep(.52,.82,turbulence)*sources;
+      float density=clamp(sources*(.42+.57*broad+.39*turbulence)+collision*.22+bridge*broad,0.,1.);
+      float ridge=smoothstep(.49,.85,turbulence)*sources;
       float core=smoothstep(.48,.9,density);
       float shadow=collision*(1.-turbulence)*.24;
       // One shared envelope raises every plume together; no travelling reveal front.
-      float reveal=smoothstep(0.,.84,entrance);
+      float reveal=entrance;
       density*=reveal;
       ridge*=reveal;
       core*=reveal;
@@ -151,7 +152,7 @@
       vec3 darkBase=vec3(.012,.026,.058);
       vec3 darkBody=vec3(.065,.18,.37);
       vec3 darkLight=vec3(.54,.74,.91);
-      vec3 night=mix(darkBase,darkBody,smoothstep(.12,.71,density));
+      vec3 night=mix(darkBase,darkBody,smoothstep(.07,.73,density));
       night=mix(night,darkLight,clamp(core*.62+ridge*.24,0.,.75));
       night*=1.-shadow;
       vec3 dayBase=vec3(.995,.998,1.);
@@ -188,14 +189,15 @@
   gl.uniform2f(uniforms.seed, offset[0], offset[1]);
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const system = matchMedia('(prefers-color-scheme: dark)');
-  let visible = true, lost = false, frame = 0, last = 0, elapsed = 0;
-  const started = performance.now();
+  let visible = true, lost = false, frame = 0, last = 0, elapsed = 0, entranceStart = 0;
   const draw = () => {
+    if (!entranceStart) entranceStart = performance.now();
     const theme = document.documentElement.dataset.theme;
     gl.uniform1f(uniforms.dark, theme === 'dark' || (theme !== 'light' && system.matches) ? 1 : 0);
     gl.uniform1f(uniforms.time, elapsed);
-    const progress = Math.min((performance.now() - started) / 1850, 1);
-    gl.uniform1f(uniforms.entrance, reduced.matches ? 1 : progress * progress * (3 - 2 * progress));
+    const progress = Math.min((performance.now() - entranceStart) / 1600, 1);
+    const reveal = progress * progress * (3 - 2 * progress);
+    gl.uniform1f(uniforms.entrance, reduced.matches ? 1 : reveal);
     gl.viewport(0, 0, canvas.width, canvas.height);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     layer.classList.add('is-ready');
@@ -203,8 +205,8 @@
   const tick = now => {
     frame = 0;
     if (lost || !visible || document.hidden) { last = 0; return; }
-    if (!last || now - last >= 1000 / 30) {
-      if (last && !reduced.matches) elapsed += Math.min(now - last, 100) / 1000 * 1.25;
+    if (!last || now - last >= 1000 / 60) {
+      if (last && !reduced.matches) elapsed += Math.min(now - last, 100) / 1000;
       last = now;
       draw();
     }
