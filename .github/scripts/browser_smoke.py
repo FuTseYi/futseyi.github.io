@@ -118,6 +118,20 @@ def check_site_navigation(page, width):
     page.wait_for_url("**/blog/")
     page.locator(".blog-entry").first.wait_for()
     assert page.evaluate("document.querySelector('#site-header') === window.__persistentHeader")
+    for _ in range(2):
+        page.locator("#site-header .brand").click()
+        page.wait_for_url("http://127.0.0.1:8766/")
+        page.locator("main h1").wait_for()
+        page.evaluate("window.scrollTo({top: 700, behavior: 'instant'})")
+        page.wait_for_function("window.scrollY > 100")
+        page.evaluate("window.__scrollHistory = []")
+        if width <= 860:
+            page.locator(".nav-toggle").click()
+        page.locator("#primary-navigation a[href='/blog/']").click()
+        page.wait_for_url("**/blog/")
+        page.locator(".blog-entry").first.wait_for()
+        page.wait_for_function("window.scrollY < 2")
+        assert page.evaluate("""() => !(window.__scrollHistory || []).some(y => y > 15 && y < 600)"""), "Repeated navigation animated the scroll position"
 
 
 def check_search(page):
