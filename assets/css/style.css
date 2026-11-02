@@ -544,12 +544,9 @@ section.section { padding: 38px 0; }
 
 /* Community and contribution lists. */
 #active-in .project-item{grid-template-columns:40px minmax(0,1fr)}
-#contributions .project-item{grid-template-columns:minmax(0,1fr) auto;column-gap:32px}
-#contributions .contribution-date{grid-column:2;grid-row:1}
-#contributions .project-item > div{grid-column:1;grid-row:1}
-#recent-blog .project-item{grid-template-columns:minmax(0,1fr) auto;column-gap:32px}
-#recent-blog .contribution-date{grid-column:2;grid-row:1}
-#recent-blog .project-item > div{grid-column:1;grid-row:1}
+:is(#recent-blog,#contributions) .project-item{grid-template-columns:minmax(0,1fr) auto;column-gap:32px}
+:is(#recent-blog,#contributions) .contribution-date{grid-column:2;grid-row:1}
+:is(#recent-blog,#contributions) .project-item > div{grid-column:1;grid-row:1}
 #recent-blog .project-item h3 a{background-image:none}
 .contribution-date{font-size:11px;color:var(--ink-faint);font-variant-numeric:tabular-nums;padding-top:4px;white-space:nowrap}
 #contributions .project-tags{margin-top:5px;gap:8px}
@@ -564,8 +561,8 @@ section.section { padding: 38px 0; }
  #contributions .project-item { gap: 12px; }
  #contributions .contribution-date { justify-self: start; }
  #recent-blog .project-item { gap: 8px; }
- #recent-blog .contribution-date,#contributions .contribution-date { grid-column: 1; grid-row: 2; }
- #contributions .project-item > div { grid-column: 1; grid-row: 1; }
+ :is(#recent-blog,#contributions) .contribution-date { grid-column: 1; grid-row: 2; }
+ :is(#recent-blog,#contributions) .project-item > div { grid-column: 1; grid-row: 1; }
  .contribution-date { padding-top: 0; }
  .project-item > div { min-width: 0; overflow-wrap: anywhere; }
 }
