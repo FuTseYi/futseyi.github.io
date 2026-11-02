@@ -451,6 +451,7 @@
     swup.hooks.on('visit:start', async (visit) => {
       root.classList.add('is-navigating');
       visit.animation.animate = false;
+      visit.scroll.animate = false;
       header.classList.remove('nav-reset');
       if (!header.classList.contains('menu-open')) return;
       const bar = header.querySelector('.header-inner');
@@ -473,7 +474,10 @@
       header.classList.toggle('is-scrolled', window.scrollY > 6);
     };
     swup.hooks.on('visit:abort', finishVisit);
-    swup.hooks.on('content:scroll', finishVisit);
+    swup.hooks.on('content:scroll', () => {
+      // Keep cross-page scrolling instant until the browser has applied Swup's target.
+      requestAnimationFrame(() => requestAnimationFrame(finishVisit));
+    }, { after: true });
     swup.hooks.on('content:replace', (visit) => {
       cleanupPage();
       pendingPage = true;

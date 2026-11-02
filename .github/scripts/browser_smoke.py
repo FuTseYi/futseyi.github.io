@@ -69,6 +69,10 @@ def check_site_navigation(page, width):
         window.__persistentHeader = document.querySelector('#site-header');
         window.__persistentCanvas = document.querySelector('.atmosphere canvas');
     }""")
+    page.evaluate("""() => {
+        window.__scrollHistory = [];
+        window.addEventListener('scroll', () => window.__scrollHistory.push(window.scrollY), {passive: true});
+    }""")
     page.evaluate("window.scrollTo({top: 700, behavior: 'instant'})")
     assert page.evaluate("window.scrollY > 100")
     if width <= 860:
@@ -88,6 +92,10 @@ def check_site_navigation(page, width):
     page.wait_for_url("**/blog/")
     page.locator(".blog-entry").first.wait_for()
     page.wait_for_function("window.scrollY < 2")
+    assert page.evaluate("""() => {
+        const samples = window.__scrollHistory || [];
+        return !samples.some(y => y > 15 && y < 600);
+    }"""), "Cross-page navigation visibly animated the scroll position"
     page.wait_for_function("""() => {
         const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
         return !document.documentElement.classList.contains('is-navigating') &&
