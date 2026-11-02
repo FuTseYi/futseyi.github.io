@@ -148,7 +148,7 @@
       float radial=length(delta);
       float irregular=(broad-.5)*.23+(turbulence-.5)*.10;
       float sweep=entrance*1.75-.22;
-      float reveal=smoothstep(radial+irregular-.34,radial+irregular+.28,sweep);
+      float reveal=mix(smoothstep(radial+irregular-.34,radial+irregular+.28,sweep),1.,smoothstep(.78,1.,entrance));
       density*=reveal;
       ridge*=reveal;
       core*=reveal;
