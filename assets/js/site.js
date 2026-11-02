@@ -84,7 +84,11 @@
   nav?.addEventListener('click', (event) => {
     const link = event.target.closest('a[href]');
     if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || (link.target && link.target !== '_self')) return;
-    if (link.origin === location.origin && link.pathname === location.pathname && link.search === location.search) setOpen(false);
+    if (link.origin !== location.origin || link.pathname !== location.pathname || link.search !== location.search) return;
+    setOpen(false);
+    if (link.hash || window.scrollY < 1) return;
+    event.preventDefault();
+    window.scrollTo({ top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
   });
   window.addEventListener('pagehide', () => {
     header.classList.add('nav-reset');
