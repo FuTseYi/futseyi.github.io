@@ -128,11 +128,9 @@
       vec2 a=normalize(vec2(-.83,-.55));
       vec2 b=normalize(vec2(.85,.53));
       vec2 c=normalize(vec2(.55,-.83));
-      // Extend the existing plumes from their original emitters at first load.
-      float growth=mix(.04,1.,smoothstep(0.,1.,entrance));
-      float high=plume(swept,vec2(aspect*1.04,.94),a,.20,.98*growth);
-      float low=plume(swept,vec2(-aspect*.08,.03),b,.23,1.05*growth);
-      float side=plume(swept,vec2(aspect*.18,1.13),c,.12,.73*growth);
+      float high=plume(swept,vec2(aspect*1.04,.94),a,.20,.98);
+      float low=plume(swept,vec2(-aspect*.08,.03),b,.23,1.05);
+      float side=plume(swept,vec2(aspect*.18,1.13),c,.12,.73);
       float opposing=max(high,low*.88);
       float sources=max(opposing,side*.52);
       // Compression and shear at the meeting point create depth, not flat additive glow.
@@ -143,6 +141,18 @@
       float ridge=smoothstep(.46,.79,turbulence)*sources;
       float core=smoothstep(.48,.9,density);
       float shadow=collision*(1.-turbulence)*.24;
+      // A broad, seed-shifted light sweep reveals the existing cloud field without
+      // resizing its emitters or abruptly altering the finished atmosphere.
+      vec2 focus=vec2(aspect*(.46+.15*sin(seed.x*2.7)),.42+.13*sin(seed.y*3.1));
+      vec2 delta=(pos-focus)/vec2(max(aspect*.8,.7),.8);
+      float radial=length(delta);
+      float irregular=(broad-.5)*.23+(turbulence-.5)*.10;
+      float sweep=entrance*1.75-.22;
+      float reveal=smoothstep(radial+irregular-.34,radial+irregular+.28,sweep);
+      density*=reveal;
+      ridge*=reveal;
+      core*=reveal;
+      shadow*=reveal;
       // Shared density and lighting, with separate dark/light color ramps.
       vec3 darkBase=vec3(.012,.026,.058);
       vec3 darkBody=vec3(.085,.22,.42);
@@ -190,7 +200,8 @@
     const theme = document.documentElement.dataset.theme;
     gl.uniform1f(uniforms.dark, theme === 'dark' || (theme !== 'light' && system.matches) ? 1 : 0);
     gl.uniform1f(uniforms.time, elapsed);
-    gl.uniform1f(uniforms.entrance, reduced.matches ? 1 : Math.min((performance.now() - started) / 1900, 1));
+    const progress = Math.min((performance.now() - started) / 1850, 1);
+    gl.uniform1f(uniforms.entrance, reduced.matches ? 1 : progress * progress * (3 - 2 * progress));
     gl.viewport(0, 0, canvas.width, canvas.height);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     layer.classList.add('is-ready');
