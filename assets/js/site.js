@@ -45,7 +45,8 @@
     if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || link.hasAttribute('download') || (link.target && link.target !== '_self')) return;
     if (link.origin === location.origin && (link.pathname !== location.pathname || link.search !== location.search)) {
       navigationProgress.classList.add('is-loading');
-      if (header.classList.contains('menu-open')) {
+      // Swup owns menu closure for persistent visits; native navigation keeps its fallback.
+      if (!window.Swup && header.classList.contains('menu-open')) {
         header.classList.add('nav-reset');
         setOpen(false);
       }
@@ -105,6 +106,7 @@
   const initPage = () => {
     const controller = new AbortController();
     const observers = [];
+    const timers = new Set();
     const listen = (target, type, callback, options = {}) =>
       target.addEventListener(type, callback, { ...options, signal: controller.signal });
     const article = document.querySelector('.article');
@@ -402,17 +404,23 @@
       let resetTimer;
       copy.addEventListener('click', async () => {
         clearTimeout(resetTimer);
+        timers.delete(resetTimer);
         try {
           await navigator.clipboard.writeText(original);
+          if (controller.signal.aborted) return;
           copy.textContent = 'Copied';
         } catch {
+          if (controller.signal.aborted) return;
           copy.textContent = 'Copy failed';
         }
         copy.setAttribute('aria-label', copy.textContent);
         resetTimer = setTimeout(() => {
+          timers.delete(resetTimer);
+          if (controller.signal.aborted) return;
           copy.textContent = 'Copy';
           copy.setAttribute('aria-label', 'Copy code');
         }, 2000);
+        timers.add(resetTimer);
       });
       toolbar.append(copy);
       container.prepend(toolbar);
@@ -420,6 +428,7 @@
     return () => {
       controller.abort();
       observers.forEach(observer => observer.disconnect());
+      timers.forEach(clearTimeout);
       const dialog = document.getElementById('search-dialog');
       if (dialog?.open) dialog.close();
       readingProgress?.remove();

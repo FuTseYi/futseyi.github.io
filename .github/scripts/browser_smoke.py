@@ -93,10 +93,23 @@ def check_site_navigation(page, width):
         return !document.documentElement.classList.contains('is-navigating') &&
             getComputedStyle(document.documentElement).scrollBehavior === (reduced ? 'auto' : 'smooth');
     }""")
+    assert page.evaluate("""() => Boolean(window.Swup) &&
+        document.querySelector('#site-header') === window.__persistentHeader &&
+        document.querySelector('.atmosphere canvas') === window.__persistentCanvas
+    """)
+    if width <= 860:
+        assert page.locator(".nav-toggle").get_attribute("aria-expanded") == "false"
+    page.go_back()
+    page.wait_for_url("http://127.0.0.1:8766/")
+    page.locator("main h1").wait_for()
     assert page.evaluate("""() => !window.Swup || (
         document.querySelector('#site-header') === window.__persistentHeader &&
         document.querySelector('.atmosphere canvas') === window.__persistentCanvas
     )""")
+    page.go_forward()
+    page.wait_for_url("**/blog/")
+    page.locator(".blog-entry").first.wait_for()
+    assert page.evaluate("document.querySelector('#site-header') === window.__persistentHeader")
 
 
 def check_search(page):
@@ -140,6 +153,9 @@ def main():
                     for slug in ("astro-waline-comments", "pytorch-quickstart-neural-networks", "hkust-elpa-serverless-github-native-cms"):
                         check(page, slug, width)
                     context.close()
+            context = browser.new_context(viewport={"width": 390, "height": 850}, reduced_motion="no-preference")
+            check_site_navigation(context.new_page(), 390)
+            context.close()
             context = browser.new_context(viewport={"width": 1024, "height": 850}, reduced_motion="reduce")
             check_search(context.new_page())
             context.close()

@@ -34,7 +34,7 @@ The homepage canonical URL in `index.html` is the production origin for generate
 
 ## Persistent navigation
 
-The site remains a set of complete, independently accessible HTML documents. When JavaScript and Swup are available, same-origin links replace only `#main`; the shared navigation, footer, and WebGL atmosphere remain mounted. If the pinned Swup CDN script cannot load, ordinary browser navigation still works. Keep the script version pinned and review upgrades explicitly.
+The site remains a set of complete, independently accessible HTML documents. When JavaScript and Swup are available, same-origin links replace only `#main`; the shared navigation, footer, and WebGL atmosphere remain mounted. The Swup 4.10.0 URL is pinned; review the pinned release and dependency policy explicitly before upgrading. If the CDN script cannot load, ordinary browser navigation still works. The CDN remains a runtime availability dependency; vendoring is an optional future improvement, not a reason to add a build tool. Keep the script version pinned and review upgrades explicitly.
 
 Page-dependent behavior in `assets/js/site.js` must be initialized when new content becomes visible and cleaned up before replacement. New global listeners, ResizeObservers, and dialogs must not outlive the page they belong to. The mobile navigation closes before a content visit, and the normal scroll-driven header sizing remains independent of content replacement.
 
