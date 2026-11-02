@@ -128,7 +128,7 @@ body {
     text-size-adjust: 100%;
   }
 
-/* Atmosphere and fallback gradient. */
+/* WebGL atmosphere; the page background remains the fallback. */
 .atmosphere {
     position:absolute;inset:0 0 auto;height:1120px;z-index:-1;pointer-events:none;
     -webkit-mask-image:linear-gradient(#000000fc 0%,#000000e8 9%,transparent 100%);
