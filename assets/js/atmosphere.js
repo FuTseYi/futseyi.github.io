@@ -141,16 +141,14 @@
       float ridge=smoothstep(.46,.79,turbulence)*sources;
       float core=smoothstep(.48,.9,density);
       float shadow=collision*(1.-turbulence)*.24;
-      // A broad, seed-shifted light sweep reveals the existing cloud field without
-      // resizing its emitters or abruptly altering the finished atmosphere.
-      vec2 focus=vec2(aspect*(.46+.15*sin(seed.x*2.7)),.42+.13*sin(seed.y*3.1));
-      vec2 delta=(pos-focus)/vec2(max(aspect*.8,.7),.8);
-      float radial=length(delta);
-      float irregular=(broad-.5)*.23+(turbulence-.5)*.10;
-      // Suppress the initial focal hotspot; let the light field gather before opening.
-      float opening=smoothstep(.06,.28,entrance);
-      float sweep=entrance*1.75-.22;
-      float reveal=opening*mix(smoothstep(radial+irregular-.34,radial+irregular+.28,sweep),1.,smoothstep(.78,1.,entrance));
+      // A wide directional front enters from offscreen, never forming a focal hotspot.
+      vec2 axis=normalize(vec2(cos(seed.x*2.1+.7),sin(seed.x*2.1+.7)));
+      float travel=dot(uv-.5,axis);
+      float edge=(broad-.5)*.18+(turbulence-.5)*.07;
+      float front=mix(-1.0,1.0,entrance);
+      float reveal=1.-smoothstep(front-.32,front+.16,travel+edge);
+      reveal*=smoothstep(0.,.12,entrance);
+      reveal=mix(reveal,1.,smoothstep(.82,1.,entrance));
       density*=reveal;
       ridge*=reveal;
       core*=reveal;

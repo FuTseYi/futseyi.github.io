@@ -57,7 +57,7 @@
     requestAnimationFrame(() => {
       header.classList.toggle('is-scrolled', window.scrollY > 6);
       header.classList.remove('nav-reset');
-      document.documentElement.classList.add('is-ready');
+      requestAnimationFrame(() => document.documentElement.classList.add('is-ready'));
     });
   });
   const toggle = header.querySelector('.nav-toggle');
