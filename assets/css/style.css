@@ -134,7 +134,8 @@ body::before,.atmosphere {
     -webkit-mask-image:linear-gradient(#000000fc 0%,#000000e8 9%,transparent 100%);
     mask-image:linear-gradient(#000000fc 0%,#000000e8 9%,transparent 100%);
   }
-body::before{content:"";background:linear-gradient(to bottom,var(--bg-soft),transparent);opacity:var(--atmosphere-opacity);transition:opacity .45s ease-out}
+/* Diagnostic (PR #41): temporarily disable the fallback gradient to isolate refresh artifacts. */
+body::before{display:none}
 .atmosphere{overflow:hidden;opacity:0;transition:opacity .45s ease-out}
 .atmosphere.is-ready{opacity:var(--atmosphere-opacity)}
 body:has(.atmosphere.is-ready)::before{opacity:0}
