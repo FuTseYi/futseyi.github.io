@@ -139,27 +139,30 @@
       float turbulence=noise(vec3(p*2.05+warp*.64+fine*.18,phase*.59+7.))*.5+.5;
       float broad=noise(vec3(p*.85+warp*.2,phase*.31+2.))*.5+.5;
       float density=clamp(sources*(.42+.57*broad+.39*turbulence)+collision*.22+bridge*broad,0.,1.);
-      float ridge=smoothstep(.49,.85,turbulence)*sources;
-      float core=smoothstep(.48,.9,density);
-      float shadow=collision*(1.-turbulence)*.24;
-      // One shared envelope raises every plume together; no travelling reveal front.
+      // Broad density shapes the cloud body; finer ridges catch a restrained cool-white light.
+      float volume=smoothstep(.08,.78,density);
+      float ridge=smoothstep(.52,.86,turbulence)*smoothstep(.28,.75,density);
+      float crest=smoothstep(.69,.94,density)*smoothstep(.57,.84,turbulence);
+      float shadow=collision*(1.-turbulence)*.2;
+      // All lighting responds to the same entrance envelope.
       float reveal=entrance;
-      density*=reveal;
+      volume*=reveal;
       ridge*=reveal;
-      core*=reveal;
+      crest*=reveal;
       shadow*=reveal;
-      // Shared density and lighting, with separate dark/light color ramps.
       vec3 darkBase=vec3(.012,.026,.058);
       vec3 darkBody=vec3(.065,.18,.37);
-      vec3 darkLight=vec3(.54,.74,.91);
-      vec3 night=mix(darkBase,darkBody,smoothstep(.07,.73,density));
-      night=mix(night,darkLight,clamp(core*.62+ridge*.24,0.,.75));
+      vec3 iceBlue=vec3(.29,.49,.69);
+      vec3 cloudWhite=vec3(.79,.87,.94);
+      vec3 night=mix(darkBase,darkBody,volume*.92);
+      night=mix(night,iceBlue,clamp(volume*.22+ridge*.35,0.,.57));
+      night=mix(night,cloudWhite,crest*.52);
       night*=1.-shadow;
       vec3 dayBase=vec3(.995,.998,1.);
       vec3 dayBody=vec3(.69,.82,.96);
       vec3 dayLight=vec3(.32,.56,.79);
-      vec3 daylight=mix(dayBase,dayBody,smoothstep(.09,.79,density)*.75);
-      daylight=mix(daylight,dayLight,clamp(core*.19+ridge*.07,0.,.22));
+      vec3 daylight=mix(dayBase,dayBody,volume*.75);
+      daylight=mix(daylight,dayLight,clamp(crest*.16+ridge*.07,0.,.22));
       daylight=mix(daylight,dayBase,collision*.18);
       // Preserve negative space and the site's existing soft vertical fade.
       float fade=1.-smoothstep(.64,1.,1.-uv.y);
