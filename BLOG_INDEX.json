@@ -1,0 +1,2863 @@
+{
+  "schema_version": 2,
+  "generator": ".github/scripts/blog_index.py",
+  "articles": [
+    {
+      "slug": "github-readme-transparent-image-background",
+      "title": "GitHub README 透明图片出现灰底的解决方法",
+      "date": "2026-11-02",
+      "tags": [
+        "GitHub",
+        "README",
+        "SVG",
+        "Troubleshooting"
+      ],
+      "path": "posts/github-readme-transparent-image-background/index.md",
+      "internal_links": [],
+      "headings": [
+        {
+          "level": 1,
+          "title": "1 问题现象"
+        },
+        {
+          "level": 1,
+          "title": "2 定位到 README 的图片属性"
+        },
+        {
+          "level": 1,
+          "title": "3 最小修复"
+        },
+        {
+          "level": 1,
+          "title": "4 验证与总结"
+        }
+      ],
+      "excerpt": "在 GitHub README 中展示透明 Logo 时，有时会遇到一个不太直观的问题：图片文件本身没有丢失透明通道，在普通网页和编辑器预览中也显示正常，到了 GitHub 页面却出现了灰色背景。"
+    },
+    {
+      "slug": "hkust-elpa-serverless-github-native-cms",
+      "title": "把 GitHub 变成内容后台：HKUST-ELPA 的 Serverless 实践",
+      "date": "2026-10-19",
+      "tags": [
+        "Serverless",
+        "Cloudflare Workers",
+        "GitHub Actions",
+        "Local-First"
+      ],
+      "path": "posts/hkust-elpa-serverless-github-native-cms/index.md",
+      "internal_links": [],
+      "headings": [
+        {
+          "level": 1,
+          "title": "1 前言"
+        },
+        {
+          "level": 1,
+          "title": "2 技术选型：把复杂度留给真正需要的环节"
+        },
+        {
+          "level": 1,
+          "title": "3 系统架构：两条数据链路"
+        },
+        {
+          "level": 2,
+          "title": "3.1 个人练习留在浏览器"
+        },
+        {
+          "level": 2,
+          "title": "3.2 社区内容通过 GitHub 审核发布"
+        },
+        {
+          "level": 1,
+          "title": "4 核心设计：GitHub-Native CMS"
+        },
+        {
+          "level": 2,
+          "title": "4.1 Issue 同时承担投稿队列与来源记录"
+        },
+        {
+          "level": 2,
+          "title": "4.2 审核通过后自动生成 PR，而不是自动发布"
+        },
+        {
+          "level": 2,
+          "title": "4.3 用文件白名单控制自动化边界"
+        },
+        {
+          "level": 1,
+          "title": "5 数据设计：稳定 ID、考试经历与内容补充分离"
+        },
+        {
+          "level": 2,
+          "title": "5.1 Stable IDs：题目排序不等于题目身份"
+        },
+        {
+          "level": 2,
+          "title": "5.2 Encounter 与 Supplement：反馈次数要有明确含义"
+        },
+        {
+          "level": 2,
+          "title": "5.3 Provenance：来源和考试场次不能靠猜"
+        },
+        {
+          "level": 1,
+          "title": "6 Local-First：无需账号的学习记录"
+        },
+        {
+          "level": 1,
+          "title": "7 Edge Security：给静态网站增加可信写入入口"
+        },
+        {
+          "level": 1,
+          "title": "8 测试与发布：让小步迭代可重复验证"
+        },
+        {
+          "level": 2,
+          "title": "8.1 Node.js 逻辑测试"
+        },
+        {
+          "level": 2,
+          "title": "8.2 Playwright 浏览器回归"
+        },
+        {
+          "level": 2,
+          "title": "8.3 发布与持续维护"
+        },
+        {
+          "level": 1,
+          "title": "9 总结：让系统复杂度与真实需求匹配"
+        },
+        {
+          "level": 1,
+          "title": "10 项目与参考资料"
+        }
+      ],
+      "excerpt": "最近，我把自己整理的 ELPA 口语备考资料做成了一个网站：HKUST-ELPA。"
+    },
+    {
+      "slug": "cloudflare-email-routing-outlook-forwarding",
+      "title": "Cloudflare Email Routing：自有域名邮件转发实践",
+      "date": "2026-10-14",
+      "tags": [
+        "Cloudflare",
+        "Email Routing",
+        "Email"
+      ],
+      "path": "posts/cloudflare-email-routing-outlook-forwarding/index.md",
+      "internal_links": [],
+      "excerpt": "一直想给自己的域名配一套邮箱地址：对外使用简洁的自定义地址，收到的邮件仍然由熟悉的 Outlook 统一管理。",
+      "headings": [
+        {
+          "level": 1,
+          "title": "1 前言"
+        },
+        {
+          "level": 1,
+          "title": "2 先理解：这是邮件转发，不是独立邮箱"
+        },
+        {
+          "level": 1,
+          "title": "3 准备条件"
+        },
+        {
+          "level": 1,
+          "title": "4 Cloudflare Email Routing 配置过程"
+        },
+        {
+          "level": 2,
+          "title": "4.1 启用邮件路由"
+        },
+        {
+          "level": 2,
+          "title": "4.2 检查 DNS：MX、SPF、DKIM"
+        },
+        {
+          "level": 2,
+          "title": "4.3 添加并验证 Outlook 目标邮箱"
+        },
+        {
+          "level": 2,
+          "title": "4.4 创建四个自定义邮箱地址"
+        },
+        {
+          "level": 2,
+          "title": "4.5 保持 Catch-all 关闭"
+        },
+        {
+          "level": 1,
+          "title": "5 实际验证：确保邮件真的能收到"
+        },
+        {
+          "level": 1,
+          "title": "6 几个值得记住的细节"
+        },
+        {
+          "level": 2,
+          "title": "6.1 目标邮箱没验证，规则可能无法创建"
+        },
+        {
+          "level": 2,
+          "title": "6.2 路由开启不等于地址已创建"
+        },
+        {
+          "level": 2,
+          "title": "6.3 邮件认证与转发不是百分之百无损"
+        },
+        {
+          "level": 2,
+          "title": "6.4 这套方案只解决“收”，不解决“发”"
+        },
+        {
+          "level": 2,
+          "title": "6.5 不在公开教程里放真实邮箱和控制台截图"
+        },
+        {
+          "level": 1,
+          "title": "7 总结"
+        },
+        {
+          "level": 1,
+          "title": "8 参考资料"
+        }
+      ]
+    },
+    {
+      "slug": "git-baidu-netdisk-sync-conflict",
+      "title": "Git 仓库与百度网盘同步冲突排查",
+      "date": "2026-10-12",
+      "tags": [
+        "Git",
+        "百度网盘",
+        "Troubleshooting"
+      ],
+      "path": "posts/git-baidu-netdisk-sync-conflict/index.md",
+      "internal_links": [],
+      "excerpt": "把 Git 仓库放进网盘同步目录，看起来可以同时获得跨设备访问和云端保存，但这并不等于为仓库建立了可靠备份。网盘同步工具只会处理文件变化，并不了解 Git 对 .git 目录中对象和引用的更新时序；两者同时读写时，就可能产生难以定位的异常。",
+      "headings": [
+        {
+          "level": 1,
+          "title": "1 问题背景"
+        },
+        {
+          "level": 1,
+          "title": "2 遇到的错误"
+        },
+        {
+          "level": 1,
+          "title": "3 原因与处理"
+        },
+        {
+          "level": 1,
+          "title": "4 更稳妥的目录管理方式"
+        },
+        {
+          "level": 1,
+          "title": "5 验证与日常检查"
+        },
+        {
+          "level": 1,
+          "title": "6 总结"
+        }
+      ]
+    },
+    {
+      "slug": "baidu-netdisk-onedrive-sync-backup",
+      "title": "百度网盘与 OneDrive 的文件同步与备份实践",
+      "date": "2026-10-12",
+      "tags": [
+        "百度网盘",
+        "OneDrive",
+        "Cloud Storage",
+        "Backup"
+      ],
+      "path": "posts/baidu-netdisk-onedrive-sync-backup/index.md",
+      "internal_links": [],
+      "excerpt": "随着个人项目、学习资料和归档文件越来越多，我希望找到一种能够兼顾多设备访问、自动同步和本地空间管理的方案。",
+      "headings": [
+        {
+          "level": 1,
+          "title": "1 我为什么重新整理云盘方案"
+        },
+        {
+          "level": 1,
+          "title": "2 OneDrive 与百度网盘的使用体验"
+        },
+        {
+          "level": 1,
+          "title": "3 同步空间与 Git 仓库的边界"
+        },
+        {
+          "level": 1,
+          "title": "4 释放本地空间时需要注意什么"
+        },
+        {
+          "level": 1,
+          "title": "5 同步不等于备份"
+        },
+        {
+          "level": 1,
+          "title": "6 最终分工"
+        },
+        {
+          "level": 1,
+          "title": "7 总结"
+        }
+      ]
+    },
+    {
+      "slug": "raindrop-cross-browser-bookmarks",
+      "title": "使用 Raindrop.io 统一管理跨浏览器书签",
+      "date": "2026-09-26",
+      "tags": [
+        "Raindrop",
+        "Productivity"
+      ],
+      "path": "posts/raindrop-cross-browser-bookmarks/index.md",
+      "internal_links": [],
+      "headings": [
+        {
+          "level": 1,
+          "title": "1 为什么需要独立的书签管理工具"
+        },
+        {
+          "level": 1,
+          "title": "2 为什么选择 Raindrop.io"
+        },
+        {
+          "level": 1,
+          "title": "3 一套容易长期维护的组织方式"
+        },
+        {
+          "level": 1,
+          "title": "4 从浏览器迁移到统一收藏库"
+        },
+        {
+          "level": 1,
+          "title": "5 不把收藏库绑定在单一平台"
+        },
+        {
+          "level": 1,
+          "title": "6 总结"
+        }
+      ],
+      "excerpt": "日常使用浏览器时，我的书签分散在 Google Chrome、Safari 等不同环境中。每个浏览器都有自己的收藏夹体系，分类、整理和同步也各自独立。"
+    },
+    {
+      "slug": "codex-browser-computer-use-network-issue",
+      "title": "Codex Browser 与 Computer Use 网络异常排查",
+      "date": "2026-09-26",
+      "tags": [
+        "Codex",
+        "Proxy",
+        "Troubleshooting"
+      ],
+      "path": "posts/codex-browser-computer-use-network-issue/index.md",
+      "internal_links": [],
+      "excerpt": "2026 年 9 月，我在使用 Codex 桌面端的 Browser / Computer Use 功能时，遇到过一个比较特殊的网络问题：普通网页访问和常规代理连接基本正常，但相关自动化能力无法正常发起网络请求。",
+      "headings": [
+        {
+          "level": 1,
+          "title": "1 问题现象"
+        },
+        {
+          "level": 1,
+          "title": "2 排查思路"
+        },
+        {
+          "level": 1,
+          "title": "3 实际解决方式"
+        },
+        {
+          "level": 1,
+          "title": "4 如果仍然失败"
+        },
+        {
+          "level": 1,
+          "title": "5 总结"
+        }
+      ]
+    },
+    {
+      "slug": "onedrive-proxy-login-uwp",
+      "title": "Windows 代理环境下 OneDrive 登录异常排查",
+      "date": "2026-09-24",
+      "tags": [
+        "OneDrive",
+        "Windows",
+        "Proxy",
+        "Troubleshooting"
+      ],
+      "path": "posts/onedrive-proxy-login-uwp/index.md",
+      "internal_links": [],
+      "headings": [
+        {
+          "level": 1,
+          "title": "1 问题背景"
+        },
+        {
+          "level": 1,
+          "title": "2 问题定位"
+        },
+        {
+          "level": 1,
+          "title": "3 实际解决步骤"
+        },
+        {
+          "level": 1,
+          "title": "4 为什么不是只设置 OneDrive"
+        },
+        {
+          "level": 1,
+          "title": "5 注意事项"
+        },
+        {
+          "level": 1,
+          "title": "6 总结"
+        }
+      ],
+      "excerpt": "在 Windows 使用代理工具时，浏览器可以正常访问 Microsoft 网站，但 OneDrive 或部分 Microsoft 应用仍然可能出现登录异常。"
+    },
+    {
+      "slug": "clash-verge-campus-network-proxy",
+      "title": "Clash Verge 校园网代理连接异常排查",
+      "date": "2026-09-24",
+      "tags": [
+        "Clash Verge",
+        "Network",
+        "Proxy"
+      ],
+      "path": "posts/clash-verge-campus-network-proxy/index.md",
+      "internal_links": [],
+      "excerpt": "同一台电脑、同一套 Clash Verge 配置，在手机热点下可以正常连接，切换到校园网后却出现大量节点连接失败。遇到这种反差时，很容易先怀疑订阅或节点失效，但网络环境、请求路由和代理模式同样值得检查。",
+      "headings": [
+        {
+          "level": 1,
+          "title": "1 问题现象"
+        },
+        {
+          "level": 1,
+          "title": "2 为什么手机热点正常、校园网异常"
+        },
+        {
+          "level": 1,
+          "title": "3 我的实际处理过程"
+        },
+        {
+          "level": 1,
+          "title": "4 更有针对性的排查顺序"
+        },
+        {
+          "level": 1,
+          "title": "5 总结"
+        }
+      ]
+    },
+    {
+      "slug": "turkey-foreign-apple-id-chatgpt-plus-cross-region-family-sharing",
+      "title": "土耳其 Apple ID 注册与跨区家庭共享实践",
+      "date": "2026-05-16",
+      "tags": [
+        "Apple ID",
+        "ChatGPT",
+        "iCloud",
+        "Cross-Region"
+      ],
+      "path": "posts/turkey-foreign-apple-id-chatgpt-plus-cross-region-family-sharing/index.md",
+      "internal_links": [],
+      "headings": [
+        {
+          "level": 1,
+          "title": "为什么选择土耳其区？"
+        },
+        {
+          "level": 1,
+          "title": "前期准备"
+        },
+        {
+          "level": 2,
+          "title": "1. 一个全新的邮箱"
+        },
+        {
+          "level": 2,
+          "title": "2. 一个手机号"
+        },
+        {
+          "level": 2,
+          "title": "3. 一份土耳其地址信息"
+        },
+        {
+          "level": 2,
+          "title": "4. 一台 Apple 设备"
+        },
+        {
+          "level": 1,
+          "title": "一、注册土耳其 Apple ID"
+        },
+        {
+          "level": 2,
+          "title": "1. 打开 Apple 官网"
+        },
+        {
+          "level": 2,
+          "title": "2. 创建 Apple 账户"
+        },
+        {
+          "level": 2,
+          "title": "3. 验证信息"
+        },
+        {
+          "level": 1,
+          "title": "二、真正切换 App Store 到土耳其区（关键步骤）"
+        },
+        {
+          "level": 2,
+          "title": "使用 App Store 地区跳转链接（强烈推荐）"
+        },
+        {
+          "level": 2,
+          "title": "1. 退出当前 App Store 账号"
+        },
+        {
+          "level": 2,
+          "title": "2. 使用 Safari 打开土区跳转链接"
+        },
+        {
+          "level": 2,
+          "title": "3. 直接登录刚注册的土区账号"
+        },
+        {
+          "level": 1,
+          "title": "三、购买土耳其 Apple 礼品卡"
+        },
+        {
+          "level": 2,
+          "title": "方案一：正规虚拟卡平台（推荐）"
+        },
+        {
+          "level": 2,
+          "title": "方案二：国内二手平台"
+        },
+        {
+          "level": 1,
+          "title": "四、购买礼品卡并充值"
+        },
+        {
+          "level": 2,
+          "title": "1. 使用支持支付宝的 SEAGM 购买礼品卡"
+        },
+        {
+          "level": 2,
+          "title": "2. 获取礼品卡代码"
+        },
+        {
+          "level": 2,
+          "title": "3. App Store 兑换礼品卡"
+        },
+        {
+          "level": 1,
+          "title": "五、关于付款信息：不需要提前选择 None"
+        },
+        {
+          "level": 1,
+          "title": "六、订阅 ChatGPT Plus"
+        },
+        {
+          "level": 1,
+          "title": "七、将土区账号加入中国区 Apple 家庭（附加功能）"
+        },
+        {
+          "level": 2,
+          "title": "和 GPT Plus 共享无关"
+        },
+        {
+          "level": 2,
+          "title": "方案：将土区账号加入中国区 Apple 家庭"
+        },
+        {
+          "level": 2,
+          "title": "方法一：隔空投送邀请"
+        },
+        {
+          "level": 2,
+          "title": "方法二：iMessage 邀请（更稳定）"
+        },
+        {
+          "level": 1,
+          "title": "最后总结"
+        },
+        {
+          "level": 1,
+          "title": "常见问题 FAQ"
+        },
+        {
+          "level": 2,
+          "title": "Q1：必须使用代理吗？"
+        },
+        {
+          "level": 2,
+          "title": "Q2：为什么 Mac 无法支付？"
+        },
+        {
+          "level": 2,
+          "title": "Q3：GPT 账号必须是土区吗？"
+        },
+        {
+          "level": 2,
+          "title": "Q4：注册完土区 Apple ID 后，必须先添加付款方式并选择 None 吗？"
+        },
+        {
+          "level": 2,
+          "title": "Q5：家庭共享是共享 GPT Plus 吗？"
+        },
+        {
+          "level": 2,
+          "title": "Q6：土区 Apple ID 会封号吗？"
+        }
+      ],
+      "excerpt": "最近重新折腾了一遍土耳其区 Apple ID，并成功完成："
+    },
+    {
+      "slug": "on-the-road-accumulating-choices",
+      "title": "我们都还在路上：在不确定中攒出自己的选择权",
+      "date": "2026-05-13",
+      "tags": [
+        "Personal Reflection"
+      ],
+      "path": "posts/on-the-road-accumulating-choices/index.md",
+      "internal_links": [],
+      "headings": [
+        {
+          "level": 1,
+          "title": "作为今天最后一个分享人，我其实不想用一个 offer 来结束这场分享"
+        },
+        {
+          "level": 2,
+          "title": "所以我想和大家共勉的是"
+        },
+        {
+          "level": 2,
+          "title": "不用急着成为一个“很厉害的人”。"
+        }
+      ],
+      "excerpt": "不要等到机会出现时，才开始准备自己。"
+    },
+    {
+      "slug": "claude-desktop-third-party-api-ccswitch",
+      "title": "Claude Desktop 第三方模型接入：CC Switch 配置实践",
+      "date": "2026-04-30",
+      "tags": [
+        "Claude Desktop",
+        "CC Switch",
+        "DeepSeek",
+        "LLM"
+      ],
+      "path": "posts/claude-desktop-third-party-api-ccswitch/index.md",
+      "internal_links": [],
+      "excerpt": "最近想让 Claude Desktop 也能像 Claude Code 一样，通过 ccswitch 接入第三方模型 API，方便在桌面端里切换不同 Provider 测试。",
+      "headings": [
+        {
+          "level": 1,
+          "title": "Claude Desktop 接入 ccswitch：第三方模型 API 配置与踩坑记录"
+        },
+        {
+          "level": 2,
+          "title": "一、先搞清楚：Claude Desktop 和 Claude Code 不是同一条链路"
+        },
+        {
+          "level": 2,
+          "title": "二、开启 ccswitch 本地路由"
+        },
+        {
+          "level": 2,
+          "title": "三、配置 Claude Desktop 的 Gateway"
+        },
+        {
+          "level": 2,
+          "title": "四、最关键的一步：手动补 inferenceModels"
+        },
+        {
+          "level": 2,
+          "title": "五、通过 .reg 添加 inferenceModels"
+        },
+        {
+          "level": 2,
+          "title": "六、haiku / sonnet / opus 只是别名"
+        },
+        {
+          "level": 2,
+          "title": "七、关于模型名后缀，比如 [1m]"
+        },
+        {
+          "level": 2,
+          "title": "八、thinking: false 不是必选项"
+        },
+        {
+          "level": 2,
+          "title": "九、常见报错怎么理解？"
+        },
+        {
+          "level": 3,
+          "title": "1. Gateway returned HTTP 400"
+        },
+        {
+          "level": 3,
+          "title": "2. Gateway returned HTTP 404"
+        },
+        {
+          "level": 2,
+          "title": "十、如何确认 Claude Desktop 真的走了 ccswitch？"
+        },
+        {
+          "level": 2,
+          "title": "十一、最终流程总结"
+        },
+        {
+          "level": 3,
+          "title": "1. 先在 ccswitch 里配置好 Provider"
+        },
+        {
+          "level": 3,
+          "title": "2. 开启 ccswitch 本地路由"
+        },
+        {
+          "level": 3,
+          "title": "3. Claude Desktop 配置 Gateway"
+        },
+        {
+          "level": 3,
+          "title": "4. 导出 .reg"
+        },
+        {
+          "level": 3,
+          "title": "5. 修改 .reg，补上 inferenceModels"
+        },
+        {
+          "level": 3,
+          "title": "6. 导入 .reg 并重启 Claude Desktop"
+        },
+        {
+          "level": 3,
+          "title": "7. 新开会话测试"
+        },
+        {
+          "level": 2,
+          "title": "十二、最终使用习惯"
+        },
+        {
+          "level": 2,
+          "title": "结论"
+        }
+      ]
+    },
+    {
+      "slug": "fushi-zucuo-2026",
+      "title": "傅氏祖厝重建落成记：一生难忘，仅此一次",
+      "date": "2026-01-20",
+      "tags": [
+        "Family",
+        "Heritage",
+        "Event"
+      ],
+      "path": "posts/fushi-zucuo-2026/index.md",
+      "internal_links": [],
+      "excerpt": "男： 尊敬的各位领导、各位嘉宾。",
+      "headings": [
+        {
+          "level": 1,
+          "title": "傅氏傅厝井朵桥祖厝重建落成庆典主持词"
+        },
+        {
+          "level": 2,
+          "title": "第一部分：开场白"
+        },
+        {
+          "level": 3,
+          "title": "自我介绍"
+        },
+        {
+          "level": 2,
+          "title": "第二部分：代表发言"
+        },
+        {
+          "level": 2,
+          "title": "第三部分：表演环节"
+        },
+        {
+          "level": 2,
+          "title": "第四部分：敬酒环节"
+        },
+        {
+          "level": 3,
+          "title": "第一杯酒：敬贵客临门"
+        },
+        {
+          "level": 3,
+          "title": "第二杯酒：敬家族同心"
+        },
+        {
+          "level": 3,
+          "title": "第三杯酒：敬美好未来"
+        },
+        {
+          "level": 2,
+          "title": "第五部分：结尾"
+        }
+      ]
+    },
+    {
+      "slug": "waline-email-notifications",
+      "title": "Waline 邮件通知配置：iCloud 与 Gmail",
+      "date": "2025-10-12",
+      "tags": [
+        "Waline",
+        "Email",
+        "iCloud",
+        "Gmail"
+      ],
+      "path": "posts/waline-email-notifications/index.md",
+      "internal_links": [],
+      "headings": [
+        {
+          "level": 1,
+          "title": "使用 Waline 实现 iCloud 和 Gmail 邮件通知的完整配置教程"
+        },
+        {
+          "level": 2,
+          "title": "环境准备"
+        },
+        {
+          "level": 2,
+          "title": "一、iCloud 邮箱邮件通知配置"
+        },
+        {
+          "level": 3,
+          "title": "1. iCloud SMTP 配置参数"
+        },
+        {
+          "level": 3,
+          "title": "2. 应用专用密码获取方式"
+        },
+        {
+          "level": 3,
+          "title": "3. 重要说明"
+        },
+        {
+          "level": 2,
+          "title": "二、Gmail 邮箱邮件通知配置"
+        },
+        {
+          "level": 3,
+          "title": "1. Gmail SMTP 配置参数"
+        },
+        {
+          "level": 3,
+          "title": "2. 应用专用密码获取方式"
+        },
+        {
+          "level": 3,
+          "title": "3. Gmail 配置要点"
+        },
+        {
+          "level": 2,
+          "title": "三、Waline 环境变量配置示例"
+        },
+        {
+          "level": 2,
+          "title": "四、部署与验证"
+        },
+        {
+          "level": 2,
+          "title": "五、常见问题与解决方案"
+        }
+      ],
+      "excerpt": "Waline 是一款轻量级且高度可定制的评论系统，自带邮件通知功能可以有效提升用户互动体验。本文将分享如何配置 Apple 的 iCloud 邮箱和 Google 的 Gmail 邮箱，实现可靠且专业的邮件通知。"
+    },
+    {
+      "slug": "astro-waline-comments",
+      "title": "Astro 博客的 Waline 评论系统集成与定制",
+      "date": "2025-10-11",
+      "tags": [
+        "Astro",
+        "Waline",
+        "TypeScript"
+      ],
+      "path": "posts/astro-waline-comments/index.md",
+      "internal_links": [],
+      "excerpt": "在现代 Web 开发中，静态站点生成器（SSG）凭借其卓越的性能和安全性越来越受欢迎。然而，静态博客在实现用户互动功能时往往面临挑战。作为一名追求极致体验的开发者，我在使用 Astro 构建个人博客时，深入研究了如何优雅地集成评论系统，并通过多次重构，最终打造了一套配置集中、类型安全、高度可定制的 Waline 集成方案。",
+      "headings": [
+        {
+          "level": 1,
+          "title": "前言"
+        },
+        {
+          "level": 1,
+          "title": "技术选型：为什么选择 Waline？"
+        },
+        {
+          "level": 2,
+          "title": "评论系统对比分析"
+        },
+        {
+          "level": 2,
+          "title": "选择 Waline 的核心原因"
+        },
+        {
+          "level": 1,
+          "title": "项目架构设计"
+        },
+        {
+          "level": 2,
+          "title": "整体技术栈"
+        },
+        {
+          "level": 2,
+          "title": "文件组织结构（重构后）"
+        },
+        {
+          "level": 2,
+          "title": "架构设计理念"
+        },
+        {
+          "level": 3,
+          "title": "🎯 核心设计原则"
+        },
+        {
+          "level": 1,
+          "title": "架构演进：从分散到集中"
+        },
+        {
+          "level": 2,
+          "title": "第一阶段：初始实现（配置分散）"
+        },
+        {
+          "level": 3,
+          "title": "问题分析"
+        },
+        {
+          "level": 3,
+          "title": "存在的问题"
+        },
+        {
+          "level": 2,
+          "title": "第二阶段：配置集中管理（重构后）"
+        },
+        {
+          "level": 3,
+          "title": "1. 类型定义：建立类型安全基础"
+        },
+        {
+          "level": 3,
+          "title": "2. 配置集中：统一管理所有配置"
+        },
+        {
+          "level": 3,
+          "title": "3. 组件简化：专注于逻辑和渲染"
+        },
+        {
+          "level": 2,
+          "title": "重构效果对比"
+        },
+        {
+          "level": 1,
+          "title": "核心功能实现"
+        },
+        {
+          "level": 2,
+          "title": "第一步：Props 覆盖机制"
+        },
+        {
+          "level": 3,
+          "title": "设计理念"
+        },
+        {
+          "level": 3,
+          "title": "实现原理"
+        },
+        {
+          "level": 3,
+          "title": "实际应用场景"
+        },
+        {
+          "level": 4,
+          "title": "场景 1：关于页面禁用反应功能"
+        },
+        {
+          "level": 4,
+          "title": "场景 2：特定文章禁用评论"
+        },
+        {
+          "level": 4,
+          "title": "场景 3：测试页面使用不同服务器"
+        },
+        {
+          "level": 2,
+          "title": "第二步：客户端初始化逻辑"
+        },
+        {
+          "level": 3,
+          "title": "错误处理机制"
+        },
+        {
+          "level": 2,
+          "title": "第三步：Placeholder 持久化"
+        },
+        {
+          "level": 3,
+          "title": "问题描述"
+        },
+        {
+          "level": 3,
+          "title": "创新解决方案：MutationObserver"
+        },
+        {
+          "level": 3,
+          "title": "方案优势"
+        },
+        {
+          "level": 3,
+          "title": "技术深度"
+        },
+        {
+          "level": 2,
+          "title": "第四步：生命周期管理"
+        },
+        {
+          "level": 3,
+          "title": "支持 Astro ViewTransitions"
+        },
+        {
+          "level": 1,
+          "title": "深度样式定制"
+        },
+        {
+          "level": 2,
+          "title": "CSS 变量系统：主题色统一管理"
+        },
+        {
+          "level": 2,
+          "title": "暗色模式适配"
+        },
+        {
+          "level": 2,
+          "title": "模块化样式架构"
+        },
+        {
+          "level": 2,
+          "title": "自定义反应按钮"
+        },
+        {
+          "level": 3,
+          "title": "设计理念"
+        },
+        {
+          "level": 3,
+          "title": "交互效果"
+        },
+        {
+          "level": 1,
+          "title": "实战中的问题与创新解决方案"
+        },
+        {
+          "level": 2,
+          "title": "问题 1：表情包和 GIF 弹出层撑开与收回问题"
+        },
+        {
+          "level": 3,
+          "title": "问题描述"
+        },
+        {
+          "level": 3,
+          "title": "解决方案演进过程"
+        },
+        {
+          "level": 4,
+          "title": "尝试 1：移动端临时修复（已废弃）"
+        },
+        {
+          "level": 4,
+          "title": "尝试 2：深度排查机制"
+        },
+        {
+          "level": 4,
+          "title": "最终方案：基于类名的优雅解决"
+        },
+        {
+          "level": 3,
+          "title": "技术亮点"
+        },
+        {
+          "level": 2,
+          "title": "问题 2：移动端统计标签拥挤"
+        },
+        {
+          "level": 3,
+          "title": "响应式解决方案"
+        },
+        {
+          "level": 3,
+          "title": "Tailwind 响应式策略"
+        },
+        {
+          "level": 3,
+          "title": "用户体验对比"
+        },
+        {
+          "level": 1,
+          "title": "页面集成与使用"
+        },
+        {
+          "level": 2,
+          "title": "在文章页面展示统计信息"
+        },
+        {
+          "level": 2,
+          "title": "在关于页面使用"
+        },
+        {
+          "level": 2,
+          "title": "全局样式引入"
+        },
+        {
+          "level": 1,
+          "title": "配置指南：快速定制"
+        },
+        {
+          "level": 2,
+          "title": "基础配置修改"
+        },
+        {
+          "level": 2,
+          "title": "主题色自定义"
+        },
+        {
+          "level": 2,
+          "title": "页面级配置覆盖"
+        },
+        {
+          "level": 1,
+          "title": "性能优化策略"
+        },
+        {
+          "level": 2,
+          "title": "1. CSS 动画性能优化"
+        },
+        {
+          "level": 2,
+          "title": "2. 懒加载优化"
+        },
+        {
+          "level": 2,
+          "title": "3. CDN 资源优化"
+        },
+        {
+          "level": 1,
+          "title": "最佳实践与经验总结"
+        },
+        {
+          "level": 2,
+          "title": "代码组织原则"
+        },
+        {
+          "level": 2,
+          "title": "架构设计理念"
+        },
+        {
+          "level": 2,
+          "title": "样式设计理念"
+        },
+        {
+          "level": 2,
+          "title": "用户体验设计"
+        },
+        {
+          "level": 1,
+          "title": "未来优化方向"
+        },
+        {
+          "level": 2,
+          "title": "短期计划"
+        },
+        {
+          "level": 2,
+          "title": "长期规划"
+        },
+        {
+          "level": 1,
+          "title": "技术栈版本信息"
+        },
+        {
+          "level": 1,
+          "title": "文档资源"
+        },
+        {
+          "level": 1,
+          "title": "结语"
+        },
+        {
+          "level": 2,
+          "title": "核心收获"
+        },
+        {
+          "level": 2,
+          "title": "架构演进的启示"
+        },
+        {
+          "level": 1,
+          "title": "参考资源"
+        }
+      ]
+    },
+    {
+      "slug": "vscode-settings-extensions",
+      "title": "VS Code 配置与扩展推荐",
+      "date": "2025-09-17",
+      "tags": [
+        "VS Code",
+        "Development Tools"
+      ],
+      "path": "posts/vscode-settings-extensions/index.md",
+      "internal_links": [],
+      "headings": [
+        {
+          "level": 1,
+          "title": "VSCode 优化使用体验篇（设置 | 插件）"
+        },
+        {
+          "level": 1,
+          "title": "推荐设置"
+        },
+        {
+          "level": 1,
+          "title": "插件"
+        },
+        {
+          "level": 2,
+          "title": "外观类"
+        },
+        {
+          "level": 3,
+          "title": "主题"
+        },
+        {
+          "level": 3,
+          "title": "图标主题"
+        },
+        {
+          "level": 2,
+          "title": "背景"
+        },
+        {
+          "level": 2,
+          "title": "基础功能类"
+        },
+        {
+          "level": 2,
+          "title": "拓展功能类"
+        },
+        {
+          "level": 2,
+          "title": "算法练习类"
+        },
+        {
+          "level": 1,
+          "title": "参考链接"
+        }
+      ],
+      "excerpt": "众所周知，vscode 是一个非常好用的 文本编辑器，通过各式各样的插件几乎是万能的，也可以作为好用的 IDE，但 vscode 有很多默认不开启的、个人认为非常好用的一些设置，因此，在这里与大家分享，同时也推荐几个好用的插件。"
+    },
+    {
+      "slug": "yolo-v7-rk3588-deployment",
+      "title": "YOLOv7 在 RK3588 上的部署与多线程优化",
+      "date": "2025-07-27",
+      "tags": [
+        "YOLOv7",
+        "RK3588",
+        "RKNN",
+        "Edge AI"
+      ],
+      "path": "posts/yolo-v7-rk3588-deployment/index.md",
+      "internal_links": [],
+      "headings": [
+        {
+          "level": 2,
+          "title": "多线程 YOLO7"
+        },
+        {
+          "level": 1,
+          "title": "局域网内调试"
+        },
+        {
+          "level": 1,
+          "title": "主机端操作"
+        },
+        {
+          "level": 2,
+          "title": "模型训练"
+        },
+        {
+          "level": 2,
+          "title": "best.pt 转换为 onnx 模型"
+        },
+        {
+          "level": 2,
+          "title": "onnx 转 rknn 模型 (安装 rknn-toolkit 工具)"
+        },
+        {
+          "level": 1,
+          "title": "板端操作"
+        },
+        {
+          "level": 2,
+          "title": "修改模型后需要的步骤"
+        },
+        {
+          "level": 1,
+          "title": "手动启动"
+        }
+      ],
+      "excerpt": "在此方案上修改 GitHub - leafqycc/rknn-cpp-Multithreading"
+    },
+    {
+      "slug": "yolo-v11-rk3588-deployment",
+      "title": "YOLO11 在 RK3588 上的部署与多线程优化",
+      "date": "2025-07-26",
+      "tags": [
+        "YOLO11",
+        "RK3588",
+        "RKNN",
+        "Edge AI"
+      ],
+      "path": "posts/yolo-v11-rk3588-deployment/index.md",
+      "internal_links": [],
+      "headings": [
+        {
+          "level": 1,
+          "title": "环境部署"
+        },
+        {
+          "level": 1,
+          "title": "RK3588/RK3588S"
+        },
+        {
+          "level": 2,
+          "title": "板端 Anaconda 环境创建"
+        },
+        {
+          "level": 1,
+          "title": "模型选择"
+        },
+        {
+          "level": 2,
+          "title": "1.板端下载官方预转换的 ONNX 模型"
+        },
+        {
+          "level": 2,
+          "title": "2.使用服务器训练好的模型"
+        },
+        {
+          "level": 1,
+          "title": "模型部署"
+        },
+        {
+          "level": 2,
+          "title": "板端升级 Cmake 版本"
+        },
+        {
+          "level": 2,
+          "title": "板端安装 rknn-toolkit（2.3.0 版本）"
+        },
+        {
+          "level": 2,
+          "title": "板端克隆官方 Model 仓库"
+        },
+        {
+          "level": 2,
+          "title": "板端 ONNX 转 RKNN 模型"
+        },
+        {
+          "level": 2,
+          "title": "板端运行示例代码"
+        },
+        {
+          "level": 1,
+          "title": "其他"
+        },
+        {
+          "level": 2,
+          "title": "查看 NPU 驱动版本"
+        },
+        {
+          "level": 2,
+          "title": "查看实时 NPU 占用"
+        }
+      ],
+      "excerpt": "参考项目https://github.com/leafqycc/rknn-multi-threaded"
+    },
+    {
+      "slug": "zotero-tara-backup-restore",
+      "title": "Zotero 配置备份与恢复：Tara 插件",
+      "date": "2025-07-21",
+      "tags": [
+        "Zotero",
+        "Backup",
+        "Tara Plugin"
+      ],
+      "path": "posts/zotero-tara-backup-restore/index.md",
+      "internal_links": [],
+      "headings": [
+        {
+          "level": 1,
+          "title": "蒲公英 Tara"
+        },
+        {
+          "level": 1,
+          "title": "1 创建备份"
+        },
+        {
+          "level": 1,
+          "title": "2 恢复备份"
+        },
+        {
+          "level": 1,
+          "title": "3 导出备份文件"
+        },
+        {
+          "level": 1,
+          "title": "4 在新电脑上进行数据恢复"
+        },
+        {
+          "level": 1,
+          "title": "5 在不同电脑上同步备份"
+        }
+      ],
+      "excerpt": "原文 蒲公英 \\| Zotero 中文社区"
+    },
+    {
+      "slug": "obsidian-syncthing-sync",
+      "title": "Obsidian 跨设备同步：Syncthing 实践",
+      "date": "2025-07-20",
+      "tags": [
+        "Obsidian",
+        "Syncthing",
+        "Synchronization"
+      ],
+      "path": "posts/obsidian-syncthing-sync/index.md",
+      "internal_links": [],
+      "headings": [
+        {
+          "level": 1,
+          "title": "1 前言"
+        },
+        {
+          "level": 1,
+          "title": "2 Syncthing 的介绍"
+        },
+        {
+          "level": 1,
+          "title": "3 Syncthing 的安装"
+        },
+        {
+          "level": 2,
+          "title": "3.1 Windows 端"
+        },
+        {
+          "level": 3,
+          "title": "3.1.1 集成 UI 客户端 (有本地 UI 界面)"
+        },
+        {
+          "level": 3,
+          "title": "3.1.2 基于 WebUI 的 Base 客户端"
+        },
+        {
+          "level": 2,
+          "title": "3.2 iPhone 和 iPad 端"
+        },
+        {
+          "level": 3,
+          "title": "3.2.1 Synctrain(免费开源,建议使用这个)"
+        },
+        {
+          "level": 3,
+          "title": "3.2.2 Mobius Sync"
+        },
+        {
+          "level": 1,
+          "title": "4 Syncthing 配置（演示局域网下的同步）"
+        },
+        {
+          "level": 1,
+          "title": "5 Syncthing 并非仅能同步局域网内的电脑，广域网内电脑照样好同步 (后续更新)"
+        },
+        {
+          "level": 1,
+          "title": "6 参考链接"
+        }
+      ],
+      "excerpt": "或许这就是最好的 Obsidian 全平台同步方案，甚至在国内可能优于官方的同步，因为它的同步速度取决于你内网带宽！并且它不局限于同步 Obsidian，也可以同步其他基于文件的的资料或者照片以及视频。"
+    },
+    {
+      "slug": "ubuntu-new-machine-setup",
+      "title": "Ubuntu 新机初始化与开发环境配置",
+      "date": "2025-07-17",
+      "tags": [
+        "Ubuntu",
+        "Linux",
+        "Development"
+      ],
+      "path": "posts/ubuntu-new-machine-setup/index.md",
+      "internal_links": [],
+      "headings": [
+        {
+          "level": 1,
+          "title": "我新机到手一般都会做如下配置"
+        },
+        {
+          "level": 1,
+          "title": "1：更改主机名"
+        },
+        {
+          "level": 1,
+          "title": "2：换国内系统源（开源脚本）"
+        },
+        {
+          "level": 1,
+          "title": "3：更新系统常用包"
+        },
+        {
+          "level": 1,
+          "title": "4：启用 BBR"
+        },
+        {
+          "level": 1,
+          "title": "5：启用虚拟内存"
+        },
+        {
+          "level": 1,
+          "title": "6：使用国内镜像安装 docker（开源脚本）"
+        },
+        {
+          "level": 1,
+          "title": "7：加强 SSH 防护"
+        },
+        {
+          "level": 1,
+          "title": "8：安装 web 服务（caddy）"
+        },
+        {
+          "level": 1,
+          "title": "9：更改系统语言为中文"
+        },
+        {
+          "level": 1,
+          "title": "10：配置系统时区为上海"
+        },
+        {
+          "level": 1,
+          "title": "11：然后就可以使用 docker 愉快的部署各种服务了（脚本已自动配置国内镜像源），然后配合 caddy 反代各种服务"
+        },
+        {
+          "level": 1,
+          "title": "其他参考"
+        },
+        {
+          "level": 1,
+          "title": "实验室备份"
+        }
+      ],
+      "excerpt": "按顺序执行"
+    },
+    {
+      "slug": "pytorch-quickstart-training-workflow",
+      "title": "PyTorch 入门 04：模型训练流程",
+      "date": "2025-07-16",
+      "tags": [
+        "PyTorch",
+        "Deep Learning",
+        "Tutorial"
+      ],
+      "path": "posts/pytorch-quickstart-training-workflow/index.md",
+      "internal_links": [],
+      "headings": [
+        {
+          "level": 1,
+          "title": "第 04 讲 炼丹流程📝"
+        },
+        {
+          "level": 1,
+          "title": "1.1 模型操作"
+        },
+        {
+          "level": 2,
+          "title": "1.1.1 使用&修改"
+        },
+        {
+          "level": 2,
+          "title": "1.1.2 保存&加载"
+        },
+        {
+          "level": 1,
+          "title": "1.2 模型训练"
+        },
+        {
+          "level": 1,
+          "title": "1.3 GPU"
+        },
+        {
+          "level": 1,
+          "title": "1.4 验证"
+        }
+      ],
+      "excerpt": "torchvision.models 有分类、语义分割、目标检测等，本次讲分类模型 VGG 最常用的为 VGG16 和 VGG19，VGG16 的数据集 ImageNet 需安装「scipy」"
+    },
+    {
+      "slug": "pytorch-quickstart-neural-networks",
+      "title": "PyTorch 入门 03：神经网络",
+      "date": "2025-07-15",
+      "tags": [
+        "PyTorch",
+        "Deep Learning",
+        "Tutorial"
+      ],
+      "path": "posts/pytorch-quickstart-neural-networks/index.md",
+      "internal_links": [],
+      "headings": [
+        {
+          "level": 1,
+          "title": "第 03 讲 神经网络📝"
+        },
+        {
+          "level": 1,
+          "title": "1.1 基本骨架"
+        },
+        {
+          "level": 2,
+          "title": "1.1.1 Module"
+        },
+        {
+          "level": 2,
+          "title": "1.1.2 Layers"
+        },
+        {
+          "level": 2,
+          "title": "1.1.2.1 Ⅰ 卷积层"
+        },
+        {
+          "level": 2,
+          "title": "1.1.2.2 Ⅱ 池化层"
+        },
+        {
+          "level": 2,
+          "title": "1.1.2.3 Ⅲ 激活层"
+        },
+        {
+          "level": 2,
+          "title": "1.1.2.4 Ⅳ 其他层"
+        },
+        {
+          "level": 2,
+          "title": "1.1.3 Sequential"
+        },
+        {
+          "level": 1,
+          "title": "1.2 损失&优化"
+        },
+        {
+          "level": 2,
+          "title": "1.2.1 损失函数"
+        },
+        {
+          "level": 2,
+          "title": "1.2.2 反向传播"
+        },
+        {
+          "level": 2,
+          "title": "1.2.3 优化器"
+        }
+      ],
+      "excerpt": "torch.nn 是非常常用的包，其中 torch.container 中的 「Module」 是所有神经网络的基类 自己定义的模型需要实现「Module」的 init 和 forward 函数"
+    },
+    {
+      "slug": "pytorch-quickstart-data",
+      "title": "PyTorch 入门 02：数据处理",
+      "date": "2025-07-14",
+      "tags": [
+        "PyTorch",
+        "Deep Learning",
+        "Tutorial"
+      ],
+      "path": "posts/pytorch-quickstart-data/index.md",
+      "internal_links": [],
+      "headings": [
+        {
+          "level": 1,
+          "title": "第 02 讲 数据📝"
+        },
+        {
+          "level": 1,
+          "title": "1.1 加载数据"
+        },
+        {
+          "level": 2,
+          "title": "1.1.1 Dataset"
+        },
+        {
+          "level": 2,
+          "title": "1.1.2 TensorBoard"
+        },
+        {
+          "level": 1,
+          "title": "1.2 转换数据"
+        },
+        {
+          "level": 2,
+          "title": "1.2.1 Transforms(一个工具箱)"
+        },
+        {
+          "level": 2,
+          "title": "1.2.2 DataLoader"
+        }
+      ],
+      "excerpt": "PyTorch 有关加载数据的，主要涉及 Dataset 和 DataLoader 前者主要告诉后者如何 获取数据 ，后者主要用于 加载数据和为网络提供数据"
+    },
+    {
+      "slug": "pytorch-quickstart-configuration",
+      "title": "PyTorch 入门 01：环境配置",
+      "date": "2025-07-13",
+      "tags": [
+        "PyTorch",
+        "Deep Learning",
+        "Tutorial"
+      ],
+      "path": "posts/pytorch-quickstart-configuration/index.md",
+      "internal_links": [],
+      "headings": [
+        {
+          "level": 1,
+          "title": "第 01 讲 配置📝"
+        },
+        {
+          "level": 1,
+          "title": "1.1 基本环境"
+        },
+        {
+          "level": 2,
+          "title": "1.1.1 Anaconda"
+        },
+        {
+          "level": 2,
+          "title": "1.1.2 PyTorch"
+        },
+        {
+          "level": 1,
+          "title": "1.2 基本工具"
+        },
+        {
+          "level": 2,
+          "title": "1.2.1 PyCharm"
+        },
+        {
+          "level": 2,
+          "title": "1.2.2 Jupyter"
+        },
+        {
+          "level": 2,
+          "title": "1.2.3 两个函数"
+        },
+        {
+          "level": 2,
+          "title": "1.2.4 工具对比"
+        }
+      ],
+      "excerpt": "教程视频见 B 站 up 主 小土堆"
+    },
+    {
+      "slug": "lan-vpn-proxy-for-devices",
+      "title": "通过局域网主机共享代理：以 Jetson 为例",
+      "date": "2025-07-10",
+      "tags": [
+        "Network",
+        "Proxy",
+        "Jetson"
+      ],
+      "path": "posts/lan-vpn-proxy-for-devices/index.md",
+      "internal_links": [],
+      "headings": [
+        {
+          "level": 1,
+          "title": "1 主机端代理设置"
+        },
+        {
+          "level": 2,
+          "title": "1.1 检查代理端口是否监听（Windows 主机）"
+        },
+        {
+          "level": 2,
+          "title": "1.2 修改代理配置以允许局域网访问"
+        },
+        {
+          "level": 2,
+          "title": "1.3 安全设置"
+        },
+        {
+          "level": 1,
+          "title": "2 Jetson 端设备配置"
+        },
+        {
+          "level": 2,
+          "title": "2.1 系统级代理设置"
+        },
+        {
+          "level": 2,
+          "title": "2.2 终端临时代理（仅当前会话有效）"
+        },
+        {
+          "level": 1,
+          "title": "3 测试代理效果"
+        }
+      ],
+      "excerpt": "Jetson 等设备不会自动继承主机的代理规则"
+    },
+    {
+      "slug": "jetson-orin-nano-flashing",
+      "title": "Jetson Orin Nano 系统烧录指南",
+      "date": "2025-07-09",
+      "tags": [
+        "Jetson Orin Nano",
+        "NVIDIA",
+        "Linux"
+      ],
+      "path": "posts/jetson-orin-nano-flashing/index.md",
+      "internal_links": [],
+      "headings": [
+        {
+          "level": 1,
+          "title": "1 前言"
+        },
+        {
+          "level": 1,
+          "title": "2 环境搭建过程"
+        },
+        {
+          "level": 2,
+          "title": "2.1 在安装有 Ubuntu 系统的电脑主机上安装应用库"
+        },
+        {
+          "level": 2,
+          "title": "2.2 从 NVIDIA 官网下载所需版本的驱动程序包，和示例根文件系统包"
+        },
+        {
+          "level": 2,
+          "title": "2.3 查阅指导文档"
+        },
+        {
+          "level": 1,
+          "title": "3 开始动手烧录系统"
+        }
+      ],
+      "excerpt": "Jetson 系列产品烧录系统的方法一般有两种，"
+    },
+    {
+      "slug": "rknn-yolov7",
+      "title": "YOLOv7 目标检测模型训练与 RKNN 适配",
+      "date": "2025-07-08",
+      "tags": [
+        "YOLOv7",
+        "RKNN",
+        "Edge AI"
+      ],
+      "path": "posts/rknn-yolov7/index.md",
+      "internal_links": [],
+      "headings": [
+        {
+          "level": 1,
+          "title": "1.数据标注"
+        },
+        {
+          "level": 1,
+          "title": "2.模型训练"
+        },
+        {
+          "level": 1,
+          "title": "3.模型转换与部署"
+        }
+      ],
+      "excerpt": "yolov7-rknn/data 文件夹中的数据集配置文件，在 yolov7-rknn 文件夹 中执行 python train.py --data ./data/XXX.yaml --workers 8 --batch 64 --device 0 --epoch 300 进行训练"
+    },
+    {
+      "slug": "jetson-orin-nano-guide",
+      "title": "Jetson Orin Nano 开发指南",
+      "date": "2025-07-08",
+      "tags": [
+        "Jetson Orin Nano",
+        "Edge AI",
+        "Development"
+      ],
+      "path": "posts/jetson-orin-nano-guide/index.md",
+      "internal_links": [],
+      "headings": [
+        {
+          "level": 1,
+          "title": "1 换源"
+        },
+        {
+          "level": 2,
+          "title": "1.1 验证架构和源兼容性"
+        },
+        {
+          "level": 2,
+          "title": "1.2 两种换源方式"
+        },
+        {
+          "level": 3,
+          "title": "1.2.1 方式 1.鱼香 ROS 一键换源"
+        },
+        {
+          "level": 3,
+          "title": "1.2.2 方式 2.输入以下代码换源"
+        },
+        {
+          "level": 1,
+          "title": "2 Jupyter Lab 的安装与使用"
+        },
+        {
+          "level": 1,
+          "title": "3 部署深度学习"
+        },
+        {
+          "level": 2,
+          "title": "3.1 构建 Jetson-inference 环境"
+        },
+        {
+          "level": 2,
+          "title": "3.2 安装 Pytorch 人工智能框架 (迁移学习重新训练网络)(可选)"
+        },
+        {
+          "level": 1,
+          "title": "4 Hello AI Word 图像分类推理"
+        }
+      ],
+      "excerpt": "不要清除第三方源: 这样会把 nvidia 源配置文件给删除"
+    },
+    {
+      "slug": "software-configurations",
+      "title": "我的常用软件与配置",
+      "date": "2025-07-02",
+      "tags": [
+        "Windows",
+        "Software",
+        "Setup"
+      ],
+      "path": "posts/software-configurations/index.md",
+      "internal_links": [],
+      "headings": [
+        {
+          "level": 1,
+          "title": "1 我自己使用"
+        },
+        {
+          "level": 2,
+          "title": "1.1 Mac"
+        },
+        {
+          "level": 2,
+          "title": "1.2 Windows"
+        },
+        {
+          "level": 1,
+          "title": "2 工具类 (系统增强，GIF，截图，剪切板，下载)"
+        },
+        {
+          "level": 1,
+          "title": "3 插件工具"
+        },
+        {
+          "level": 1,
+          "title": "4 命令行工具"
+        },
+        {
+          "level": 1,
+          "title": "5 远程控制"
+        },
+        {
+          "level": 1,
+          "title": "6 OCR/翻译"
+        },
+        {
+          "level": 1,
+          "title": "7 局域网文件传输"
+        },
+        {
+          "level": 1,
+          "title": "8 图片查看器"
+        },
+        {
+          "level": 1,
+          "title": "9 图表和白板"
+        },
+        {
+          "level": 1,
+          "title": "10 PDF"
+        },
+        {
+          "level": 1,
+          "title": "11 解压缩"
+        },
+        {
+          "level": 1,
+          "title": "12 视频播放器"
+        },
+        {
+          "level": 1,
+          "title": "13 卸载工具"
+        },
+        {
+          "level": 1,
+          "title": "14 录屏"
+        },
+        {
+          "level": 1,
+          "title": "15 桌面快速启动管理"
+        },
+        {
+          "level": 1,
+          "title": "16 相关参考拓展"
+        }
+      ],
+      "excerpt": "该文章会持续更新 大家有什么好用的软件或工具也欢迎安利一下，大家一起交流进步。"
+    },
+    {
+      "slug": "vulcan-salute",
+      "title": "瓦肯举手礼",
+      "date": "2025-06-18",
+      "tags": [
+        "Vulcan Salute",
+        "Pop Culture"
+      ],
+      "path": "posts/vulcan-salute/index.md",
+      "internal_links": [],
+      "headings": [
+        {
+          "level": 1,
+          "title": "瓦肯举手礼详解"
+        },
+        {
+          "level": 2,
+          "title": "1 起源与背景"
+        },
+        {
+          "level": 2,
+          "title": "2 手势做法"
+        },
+        {
+          "level": 2,
+          "title": "3 文化意义与流行"
+        },
+        {
+          "level": 2,
+          "title": "4 趣闻轶事"
+        },
+        {
+          "level": 2,
+          "title": "5 在流行文化中的影响"
+        },
+        {
+          "level": 2,
+          "title": "6 总结"
+        }
+      ],
+      "excerpt": "瓦肯举手礼（Vulcan Salute），又称“火神答复敬礼”，最初出现在美国著名科幻作品《星际迷航》（Star Trek）中，是瓦肯人用于问候的标志性手势 12。该手势由斯波克（Spock）的扮演者伦纳德·尼莫伊（Leonard Nimoy）在拍摄过程中提出，灵感来自他童年时参加犹太教祈福仪式时见到的“kohane blessing”手势——该手势象征希伯来字母“ש”，寓意“上帝”123。"
+    },
+    {
+      "slug": "mcp-introduction",
+      "title": "初识 MCP：概念与应用",
+      "date": "2025-06-16",
+      "tags": [
+        "MCP",
+        "AI Agents",
+        "Tooling"
+      ],
+      "path": "posts/mcp-introduction/index.md",
+      "internal_links": [],
+      "headings": [
+        {
+          "level": 1,
+          "title": "1 什么是 MCP 技术？"
+        },
+        {
+          "level": 1,
+          "title": "2 MCP 的核心作用"
+        },
+        {
+          "level": 1,
+          "title": "3 MCP 的技术架构（0 基础易懂版）"
+        },
+        {
+          "level": 1,
+          "title": "4 MCP 的工作流程"
+        },
+        {
+          "level": 1,
+          "title": "5 MCP 能做什么？"
+        },
+        {
+          "level": 1,
+          "title": "6 为什么 MCP 重要？"
+        },
+        {
+          "level": 1,
+          "title": "7 MCP 架构简化理解"
+        },
+        {
+          "level": 1,
+          "title": "8 工作原理：一步步举例"
+        },
+        {
+          "level": 1,
+          "title": "9 场景举例：AI 助手查天气"
+        },
+        {
+          "level": 1,
+          "title": "10 核心流程总结"
+        },
+        {
+          "level": 1,
+          "title": "11 关键术语简明解释"
+        },
+        {
+          "level": 1,
+          "title": "12 总结类比"
+        }
+      ],
+      "excerpt": "MCP，全称 Model Context Protocol（模型上下文协议），是一种开放标准协议，最早由 Anthropic 公司于 2024 年 11 月推出，旨在让大型语言模型（LLM）能够以标准化的方式无缝连接外部工具和数据源。"
+    },
+    {
+      "slug": "qwen25-vl-vllm-deployment",
+      "title": "Qwen2.5-VL 的 vLLM 部署与图像分析",
+      "date": "2025-06-15",
+      "tags": [
+        "Qwen2.5-VL",
+        "vLLM",
+        "Vision-Language Models"
+      ],
+      "path": "posts/qwen25-vl-vllm-deployment/index.md",
+      "internal_links": [],
+      "headings": [
+        {
+          "level": 1,
+          "title": "环境搭建工作"
+        },
+        {
+          "level": 2,
+          "title": "1 使用 Conda 创建环境"
+        },
+        {
+          "level": 2,
+          "title": "2 模型下载"
+        },
+        {
+          "level": 1,
+          "title": "模型正式测试与调用"
+        },
+        {
+          "level": 2,
+          "title": "1 使用 OpenAI Python SDK 调用"
+        }
+      ],
+      "excerpt": "1.首先安装所需依赖"
+    },
+    {
+      "slug": "chatbox-ollama",
+      "title": "Ollama 远程部署与 Chatbox 连接",
+      "date": "2025-06-11",
+      "tags": [
+        "Chatbox",
+        "Ollama",
+        "LLM"
+      ],
+      "path": "posts/chatbox-ollama/index.md",
+      "internal_links": [],
+      "excerpt": "在这里因为网络原因,我推荐大家直接到 github 官网下载压缩包,移入服务器中解压使用",
+      "headings": [
+        {
+          "level": 1,
+          "title": "1 在服务器上安装 Ollama 框架&并使用 systemd 管理 Ollama"
+        },
+        {
+          "level": 1,
+          "title": "2 使用 Chatbox 连接到远程 Ollama 服务"
+        }
+      ]
+    },
+    {
+      "slug": "biome-code-review",
+      "title": "使用 Biome 进行代码检查",
+      "date": "2025-06-07",
+      "tags": [
+        "Biome",
+        "Code Quality",
+        "Tooling"
+      ],
+      "path": "posts/biome-code-review/index.md",
+      "internal_links": [],
+      "excerpt": "Biome 检测到多个 .astro 和 .svelte 文件的格式问题，主要是 代码缩进和换行不一致。Biome 会尝试自动修复这些问题，但你需要手动确认或调整配置。",
+      "headings": [
+        {
+          "level": 1,
+          "title": "1 解决方案"
+        },
+        {
+          "level": 2,
+          "title": "1.1 自动修复格式问题"
+        },
+        {
+          "level": 2,
+          "title": "1.2 手动检查差异"
+        },
+        {
+          "level": 2,
+          "title": "1.3 调整 Biome 配置（可选）"
+        },
+        {
+          "level": 2,
+          "title": "1.4 忽略特定文件或规则"
+        },
+        {
+          "level": 2,
+          "title": "1.5 使用 npx 临时运行"
+        }
+      ]
+    },
+    {
+      "slug": "cloudflare-piclist-image-hosting",
+      "title": "使用 Cloudflare 与 PicList 搭建图床",
+      "date": "2025-05-12",
+      "tags": [
+        "Cloudflare",
+        "PicList",
+        "Image Hosting"
+      ],
+      "path": "posts/cloudflare-piclist-image-hosting/index.md",
+      "internal_links": [],
+      "excerpt": "R2 实际上是一个对象存储。Cloudflare 提供 10G 的免费存储和每月 1000 万次的免费访问",
+      "headings": [
+        {
+          "level": 1,
+          "title": "1 提前准备"
+        },
+        {
+          "level": 1,
+          "title": "2 创建 Cloudflare R2 存储桶"
+        },
+        {
+          "level": 1,
+          "title": "3 S3 API 配置"
+        },
+        {
+          "level": 1,
+          "title": "4 Piclist 图床配置"
+        },
+        {
+          "level": 1,
+          "title": "5 Piclist 的管理功能 (可以直接管理你的云端图床)"
+        },
+        {
+          "level": 1,
+          "title": "6 关于配置的同步备份 (使用 Github 仓库备份)"
+        },
+        {
+          "level": 1,
+          "title": "7 相关参考链接"
+        }
+      ]
+    },
+    {
+      "slug": "code-as-poetry-article-as-song",
+      "title": "代码如诗，文章如歌",
+      "date": "2002-11-24",
+      "tags": [
+        "Personal Writing"
+      ],
+      "path": "posts/code-as-poetry-article-as-song/index.md",
+      "internal_links": [],
+      "excerpt": "思来想去，敲下无数行字，却又一行行删除。",
+      "headings": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Deep Learning",
+      "count": 4,
+      "articles": [
+        "pytorch-quickstart-training-workflow",
+        "pytorch-quickstart-neural-networks",
+        "pytorch-quickstart-data",
+        "pytorch-quickstart-configuration"
+      ]
+    },
+    {
+      "name": "Edge AI",
+      "count": 4,
+      "articles": [
+        "yolo-v7-rk3588-deployment",
+        "yolo-v11-rk3588-deployment",
+        "rknn-yolov7",
+        "jetson-orin-nano-guide"
+      ]
+    },
+    {
+      "name": "Proxy",
+      "count": 4,
+      "articles": [
+        "codex-browser-computer-use-network-issue",
+        "onedrive-proxy-login-uwp",
+        "clash-verge-campus-network-proxy",
+        "lan-vpn-proxy-for-devices"
+      ]
+    },
+    {
+      "name": "PyTorch",
+      "count": 4,
+      "articles": [
+        "pytorch-quickstart-training-workflow",
+        "pytorch-quickstart-neural-networks",
+        "pytorch-quickstart-data",
+        "pytorch-quickstart-configuration"
+      ]
+    },
+    {
+      "name": "Troubleshooting",
+      "count": 4,
+      "articles": [
+        "github-readme-transparent-image-background",
+        "git-baidu-netdisk-sync-conflict",
+        "codex-browser-computer-use-network-issue",
+        "onedrive-proxy-login-uwp"
+      ]
+    },
+    {
+      "name": "Tutorial",
+      "count": 4,
+      "articles": [
+        "pytorch-quickstart-training-workflow",
+        "pytorch-quickstart-neural-networks",
+        "pytorch-quickstart-data",
+        "pytorch-quickstart-configuration"
+      ]
+    },
+    {
+      "name": "RKNN",
+      "count": 3,
+      "articles": [
+        "yolo-v7-rk3588-deployment",
+        "yolo-v11-rk3588-deployment",
+        "rknn-yolov7"
+      ]
+    },
+    {
+      "name": "Backup",
+      "count": 2,
+      "articles": [
+        "baidu-netdisk-onedrive-sync-backup",
+        "zotero-tara-backup-restore"
+      ]
+    },
+    {
+      "name": "Cloudflare",
+      "count": 2,
+      "articles": [
+        "cloudflare-email-routing-outlook-forwarding",
+        "cloudflare-piclist-image-hosting"
+      ]
+    },
+    {
+      "name": "Development",
+      "count": 2,
+      "articles": [
+        "ubuntu-new-machine-setup",
+        "jetson-orin-nano-guide"
+      ]
+    },
+    {
+      "name": "Email",
+      "count": 2,
+      "articles": [
+        "cloudflare-email-routing-outlook-forwarding",
+        "waline-email-notifications"
+      ]
+    },
+    {
+      "name": "iCloud",
+      "count": 2,
+      "articles": [
+        "turkey-foreign-apple-id-chatgpt-plus-cross-region-family-sharing",
+        "waline-email-notifications"
+      ]
+    },
+    {
+      "name": "Jetson Orin Nano",
+      "count": 2,
+      "articles": [
+        "jetson-orin-nano-flashing",
+        "jetson-orin-nano-guide"
+      ]
+    },
+    {
+      "name": "Linux",
+      "count": 2,
+      "articles": [
+        "ubuntu-new-machine-setup",
+        "jetson-orin-nano-flashing"
+      ]
+    },
+    {
+      "name": "LLM",
+      "count": 2,
+      "articles": [
+        "claude-desktop-third-party-api-ccswitch",
+        "chatbox-ollama"
+      ]
+    },
+    {
+      "name": "Network",
+      "count": 2,
+      "articles": [
+        "clash-verge-campus-network-proxy",
+        "lan-vpn-proxy-for-devices"
+      ]
+    },
+    {
+      "name": "OneDrive",
+      "count": 2,
+      "articles": [
+        "baidu-netdisk-onedrive-sync-backup",
+        "onedrive-proxy-login-uwp"
+      ]
+    },
+    {
+      "name": "RK3588",
+      "count": 2,
+      "articles": [
+        "yolo-v7-rk3588-deployment",
+        "yolo-v11-rk3588-deployment"
+      ]
+    },
+    {
+      "name": "Tooling",
+      "count": 2,
+      "articles": [
+        "mcp-introduction",
+        "biome-code-review"
+      ]
+    },
+    {
+      "name": "Waline",
+      "count": 2,
+      "articles": [
+        "waline-email-notifications",
+        "astro-waline-comments"
+      ]
+    },
+    {
+      "name": "Windows",
+      "count": 2,
+      "articles": [
+        "onedrive-proxy-login-uwp",
+        "software-configurations"
+      ]
+    },
+    {
+      "name": "YOLOv7",
+      "count": 2,
+      "articles": [
+        "yolo-v7-rk3588-deployment",
+        "rknn-yolov7"
+      ]
+    },
+    {
+      "name": "百度网盘",
+      "count": 2,
+      "articles": [
+        "git-baidu-netdisk-sync-conflict",
+        "baidu-netdisk-onedrive-sync-backup"
+      ]
+    },
+    {
+      "name": "AI Agents",
+      "count": 1,
+      "articles": [
+        "mcp-introduction"
+      ]
+    },
+    {
+      "name": "Apple ID",
+      "count": 1,
+      "articles": [
+        "turkey-foreign-apple-id-chatgpt-plus-cross-region-family-sharing"
+      ]
+    },
+    {
+      "name": "Astro",
+      "count": 1,
+      "articles": [
+        "astro-waline-comments"
+      ]
+    },
+    {
+      "name": "Biome",
+      "count": 1,
+      "articles": [
+        "biome-code-review"
+      ]
+    },
+    {
+      "name": "CC Switch",
+      "count": 1,
+      "articles": [
+        "claude-desktop-third-party-api-ccswitch"
+      ]
+    },
+    {
+      "name": "Chatbox",
+      "count": 1,
+      "articles": [
+        "chatbox-ollama"
+      ]
+    },
+    {
+      "name": "ChatGPT",
+      "count": 1,
+      "articles": [
+        "turkey-foreign-apple-id-chatgpt-plus-cross-region-family-sharing"
+      ]
+    },
+    {
+      "name": "Clash Verge",
+      "count": 1,
+      "articles": [
+        "clash-verge-campus-network-proxy"
+      ]
+    },
+    {
+      "name": "Claude Desktop",
+      "count": 1,
+      "articles": [
+        "claude-desktop-third-party-api-ccswitch"
+      ]
+    },
+    {
+      "name": "Cloud Storage",
+      "count": 1,
+      "articles": [
+        "baidu-netdisk-onedrive-sync-backup"
+      ]
+    },
+    {
+      "name": "Cloudflare Workers",
+      "count": 1,
+      "articles": [
+        "hkust-elpa-serverless-github-native-cms"
+      ]
+    },
+    {
+      "name": "Code Quality",
+      "count": 1,
+      "articles": [
+        "biome-code-review"
+      ]
+    },
+    {
+      "name": "Codex",
+      "count": 1,
+      "articles": [
+        "codex-browser-computer-use-network-issue"
+      ]
+    },
+    {
+      "name": "Cross-Region",
+      "count": 1,
+      "articles": [
+        "turkey-foreign-apple-id-chatgpt-plus-cross-region-family-sharing"
+      ]
+    },
+    {
+      "name": "DeepSeek",
+      "count": 1,
+      "articles": [
+        "claude-desktop-third-party-api-ccswitch"
+      ]
+    },
+    {
+      "name": "Development Tools",
+      "count": 1,
+      "articles": [
+        "vscode-settings-extensions"
+      ]
+    },
+    {
+      "name": "Email Routing",
+      "count": 1,
+      "articles": [
+        "cloudflare-email-routing-outlook-forwarding"
+      ]
+    },
+    {
+      "name": "Event",
+      "count": 1,
+      "articles": [
+        "fushi-zucuo-2026"
+      ]
+    },
+    {
+      "name": "Family",
+      "count": 1,
+      "articles": [
+        "fushi-zucuo-2026"
+      ]
+    },
+    {
+      "name": "Git",
+      "count": 1,
+      "articles": [
+        "git-baidu-netdisk-sync-conflict"
+      ]
+    },
+    {
+      "name": "GitHub",
+      "count": 1,
+      "articles": [
+        "github-readme-transparent-image-background"
+      ]
+    },
+    {
+      "name": "GitHub Actions",
+      "count": 1,
+      "articles": [
+        "hkust-elpa-serverless-github-native-cms"
+      ]
+    },
+    {
+      "name": "Gmail",
+      "count": 1,
+      "articles": [
+        "waline-email-notifications"
+      ]
+    },
+    {
+      "name": "Heritage",
+      "count": 1,
+      "articles": [
+        "fushi-zucuo-2026"
+      ]
+    },
+    {
+      "name": "Image Hosting",
+      "count": 1,
+      "articles": [
+        "cloudflare-piclist-image-hosting"
+      ]
+    },
+    {
+      "name": "Jetson",
+      "count": 1,
+      "articles": [
+        "lan-vpn-proxy-for-devices"
+      ]
+    },
+    {
+      "name": "Local-First",
+      "count": 1,
+      "articles": [
+        "hkust-elpa-serverless-github-native-cms"
+      ]
+    },
+    {
+      "name": "MCP",
+      "count": 1,
+      "articles": [
+        "mcp-introduction"
+      ]
+    },
+    {
+      "name": "NVIDIA",
+      "count": 1,
+      "articles": [
+        "jetson-orin-nano-flashing"
+      ]
+    },
+    {
+      "name": "Obsidian",
+      "count": 1,
+      "articles": [
+        "obsidian-syncthing-sync"
+      ]
+    },
+    {
+      "name": "Ollama",
+      "count": 1,
+      "articles": [
+        "chatbox-ollama"
+      ]
+    },
+    {
+      "name": "Personal Reflection",
+      "count": 1,
+      "articles": [
+        "on-the-road-accumulating-choices"
+      ]
+    },
+    {
+      "name": "Personal Writing",
+      "count": 1,
+      "articles": [
+        "code-as-poetry-article-as-song"
+      ]
+    },
+    {
+      "name": "PicList",
+      "count": 1,
+      "articles": [
+        "cloudflare-piclist-image-hosting"
+      ]
+    },
+    {
+      "name": "Pop Culture",
+      "count": 1,
+      "articles": [
+        "vulcan-salute"
+      ]
+    },
+    {
+      "name": "Productivity",
+      "count": 1,
+      "articles": [
+        "raindrop-cross-browser-bookmarks"
+      ]
+    },
+    {
+      "name": "Qwen2.5-VL",
+      "count": 1,
+      "articles": [
+        "qwen25-vl-vllm-deployment"
+      ]
+    },
+    {
+      "name": "Raindrop",
+      "count": 1,
+      "articles": [
+        "raindrop-cross-browser-bookmarks"
+      ]
+    },
+    {
+      "name": "README",
+      "count": 1,
+      "articles": [
+        "github-readme-transparent-image-background"
+      ]
+    },
+    {
+      "name": "Serverless",
+      "count": 1,
+      "articles": [
+        "hkust-elpa-serverless-github-native-cms"
+      ]
+    },
+    {
+      "name": "Setup",
+      "count": 1,
+      "articles": [
+        "software-configurations"
+      ]
+    },
+    {
+      "name": "Software",
+      "count": 1,
+      "articles": [
+        "software-configurations"
+      ]
+    },
+    {
+      "name": "SVG",
+      "count": 1,
+      "articles": [
+        "github-readme-transparent-image-background"
+      ]
+    },
+    {
+      "name": "Synchronization",
+      "count": 1,
+      "articles": [
+        "obsidian-syncthing-sync"
+      ]
+    },
+    {
+      "name": "Syncthing",
+      "count": 1,
+      "articles": [
+        "obsidian-syncthing-sync"
+      ]
+    },
+    {
+      "name": "Tara Plugin",
+      "count": 1,
+      "articles": [
+        "zotero-tara-backup-restore"
+      ]
+    },
+    {
+      "name": "TypeScript",
+      "count": 1,
+      "articles": [
+        "astro-waline-comments"
+      ]
+    },
+    {
+      "name": "Ubuntu",
+      "count": 1,
+      "articles": [
+        "ubuntu-new-machine-setup"
+      ]
+    },
+    {
+      "name": "Vision-Language Models",
+      "count": 1,
+      "articles": [
+        "qwen25-vl-vllm-deployment"
+      ]
+    },
+    {
+      "name": "vLLM",
+      "count": 1,
+      "articles": [
+        "qwen25-vl-vllm-deployment"
+      ]
+    },
+    {
+      "name": "VS Code",
+      "count": 1,
+      "articles": [
+        "vscode-settings-extensions"
+      ]
+    },
+    {
+      "name": "Vulcan Salute",
+      "count": 1,
+      "articles": [
+        "vulcan-salute"
+      ]
+    },
+    {
+      "name": "YOLO11",
+      "count": 1,
+      "articles": [
+        "yolo-v11-rk3588-deployment"
+      ]
+    },
+    {
+      "name": "Zotero",
+      "count": 1,
+      "articles": [
+        "zotero-tara-backup-restore"
+      ]
+    }
+  ]
+}

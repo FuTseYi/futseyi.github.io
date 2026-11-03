@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from asset_urls import site_url
+from blog_index import write_index
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -34,7 +35,7 @@ class SitePortabilityTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory) / "renamed-private-website"
             root.mkdir()
-            for name in ("index.html", "robots.txt"):
+            for name in ("index.html", "robots.txt", "BLOG_INDEX.json"):
                 shutil.copy2(ROOT / name, root / name)
             for name in ("posts", "assets", ".github/scripts"):
                 shutil.copytree(ROOT / name, root / name)
@@ -47,6 +48,7 @@ class SitePortabilityTests(unittest.TestCase):
             snapshot.write_text(json.dumps({
                 "updated_at": datetime.now(timezone.utc).isoformat(), "entries": []
             }), encoding="utf-8")
+            write_index(root)
             preview.assemble(root)
             site = root / "_site"
             self.assertIn('https://portable.example.org/', (site / "index.html").read_text(encoding="utf-8"))

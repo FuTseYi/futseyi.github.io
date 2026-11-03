@@ -57,6 +57,19 @@ Keep article media beside its source in `posts/my-note/assets/` and link to file
 
 Under the current workflows, changes reaching `main` publish the site and trigger README synchronization.
 
+## Blog Content Index
+
+`BLOG_INDEX.json` is a generated editorial index containing article metadata, a plain-text excerpt, structured heading hierarchy (`level` and `title`), reusable tag usage, and explicit links between existing articles. Markdown files under `posts/` remain the only source of truth. The index is intended for editorial discovery and AI-assisted research; it is not shipped to the public site.
+
+After adding, removing, or editing an article's content, metadata, headings, or links, regenerate and verify the index:
+
+```sh
+python .github/scripts/blog_index.py --write
+python .github/scripts/blog_index.py --check
+```
+
+The pull-request and site verification workflows check that the committed index matches the article sources. Do not edit `BLOG_INDEX.json` manually.
+
 ## Browser Verification
 
 Run the build check above for site or publishing changes. The repository's PR workflow additionally runs Python unit tests and Chromium browser smoke tests.

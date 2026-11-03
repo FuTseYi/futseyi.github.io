@@ -7,6 +7,7 @@ from pathlib import Path
 from urllib.parse import unquote, urljoin, urlsplit
 from xml.etree import ElementTree
 from asset_urls import version_assets, site_url
+from blog_index import check_index
 
 ROOT = Path(__file__).resolve().parents[2] / "_site"
 ORIGIN = site_url(ROOT.parent)
@@ -136,6 +137,11 @@ def main():
         pages[file.resolve()] = parsed
 
     errors = []
+    try:
+        check_index(ROOT.parent)
+    except (OSError, ValueError) as error:
+        errors.append(str(error))
+
     for post_page in (ROOT / "blog").glob("*/index.html"):
         if post_page.parent.name == "tags":
             continue
