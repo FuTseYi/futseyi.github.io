@@ -2,6 +2,7 @@
 """Verify generated static pages and local references before deployment."""
 from __future__ import annotations
 import json
+import re
 from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import unquote, urljoin, urlsplit
@@ -17,11 +18,18 @@ class Page(HTMLParser):
         super().__init__(convert_charrefs=True)
         self.ids: set[str] = set()
         self.links: list[str] = []
+        self.meta: dict[str, str] = {}
 
     def handle_starttag(self, tag, attrs):
         attrs = dict(attrs)
         if attrs.get("id"):
             self.ids.add(attrs["id"])
+        if tag == "meta":
+            key = attrs.get("property") or attrs.get("name")
+            if key:
+                self.meta[key] = attrs.get("content", "")
+                if key in ("og:image", "twitter:image") and self.meta[key]:
+                    self.links.append(self.meta[key])
         if tag in ("a", "link") and attrs.get("href"):
             self.links.append(attrs["href"])
         if tag in ("img", "source", "script") and attrs.get("src"):
@@ -136,6 +144,30 @@ def main():
         pages[file.resolve()] = parsed
 
     errors = []
+    home_html = (ROOT / "index.html").read_text(encoding="utf-8")
+    toc = re.search(r'<nav class="page-toc"[^>]*>(.*?)</nav>', home_html, re.S)
+    expected_toc = ["about", "recent-blog", "education", "active-in", "contributions"]
+    actual_toc = re.findall(r'href="#([^"]+)"', toc[1]) if toc else []
+    if actual_toc != expected_toc:
+        errors.append(f"Homepage On This Page order is {actual_toc}, expected {expected_toc}")
+
+    required_social_meta = (
+        "og:site_name", "og:title", "og:description", "og:type", "og:url", "og:locale",
+        "og:image", "og:image:type", "og:image:width", "og:image:height", "og:image:alt",
+        "twitter:card", "twitter:site", "twitter:title", "twitter:description",
+        "twitter:image", "twitter:image:alt",
+    )
+    for file, parsed in pages.items():
+        for key in required_social_meta:
+            if not parsed.meta.get(key):
+                errors.append(f"{file.relative_to(ROOT)}: missing social metadata {key}")
+        if parsed.meta.get("og:image") != parsed.meta.get("twitter:image"):
+            errors.append(f"{file.relative_to(ROOT)}: Open Graph and X images do not match")
+        if parsed.meta.get("twitter:card") != "summary":
+            errors.append(f"{file.relative_to(ROOT)}: expected a summary card for the portrait image")
+        if parsed.meta.get("og:type") not in ("website", "article"):
+            errors.append(f"{file.relative_to(ROOT)}: invalid Open Graph type")
+
     for post_page in (ROOT / "blog").glob("*/index.html"):
         if post_page.parent.name == "tags":
             continue

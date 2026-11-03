@@ -23,6 +23,8 @@ ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "posts"
 OUTPUT = ROOT / "blog"
 SITE = site_url(ROOT)
+SOCIAL_IMAGE = f"{SITE}/assets/images/profile/me.jpg"
+SOCIAL_IMAGE_ALT = "Portrait of FuTseYi (Shine)"
 
 def get_post(path: Path) -> tuple[dict[str, str], str]:
     raw = path.read_text(encoding="utf-8")
@@ -43,9 +45,17 @@ def get_post(path: Path) -> tuple[dict[str, str], str]:
     date.fromisoformat(meta["date"])
     return meta, raw[match.end():]
 
-def layout(title: str, description: str, url: str, content: str, body_class: str = "blog-page", lang: str = "en") -> str:
+def layout(title: str, description: str, url: str, content: str, body_class: str = "blog-page",
+           lang: str = "en", social_type: str = "website", tags: list[str] | None = None) -> str:
     title, description, url = (escape(value, quote=True) for value in (title, description, url))
     lang = escape(lang, quote=True)
+    locale = "zh_CN" if lang == "zh-CN" else "en_US"
+    social_type = escape(social_type, quote=True)
+    social_image = escape(SOCIAL_IMAGE, quote=True)
+    social_image_alt = escape(SOCIAL_IMAGE_ALT, quote=True)
+    article_tags = "".join(
+        f'<meta property="article:tag" content="{escape(tag, quote=True)}">\n' for tag in tags or []
+    )
     home = version_assets((ROOT / "index.html").read_text(encoding="utf-8"), ROOT)
     header = re.search(r'<header class="site-header".*?</header>', home, re.S)[0]
     header = re.sub(r'(aria-label="[^"]*), back to top"', r'\1 homepage"', header)
@@ -63,6 +73,23 @@ def layout(title: str, description: str, url: str, content: str, body_class: str
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="description" content="{description}">
+<meta property="og:site_name" content="FuTseYi (Shine)">
+<meta property="og:title" content="{title}">
+<meta property="og:description" content="{description}">
+<meta property="og:type" content="{social_type}">
+<meta property="og:url" content="{url}">
+<meta property="og:locale" content="{locale}">
+<meta property="og:image" content="{social_image}">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1378">
+<meta property="og:image:height" content="2065">
+<meta property="og:image:alt" content="{social_image_alt}">
+{article_tags}<meta name="twitter:card" content="summary">
+<meta name="twitter:site" content="@FuTseYi">
+<meta name="twitter:title" content="{title}">
+<meta name="twitter:description" content="{description}">
+<meta name="twitter:image" content="{social_image}">
+<meta name="twitter:image:alt" content="{social_image_alt}">
 <title>{title} · FuTseYi</title><link rel="canonical" href="{url}">
 <link rel="icon" href="/assets/icons/favicon.ico" sizes="any">
 <link rel="icon" href="/assets/icons/favicon.svg" type="image/svg+xml">
@@ -79,6 +106,17 @@ def layout(title: str, description: str, url: str, content: str, body_class: str
 {footer}
 </body></html>
 """
+
+
+def article_description(article: str, fallback: str) -> str:
+    match = re.search(r"<p\b[^>]*>(.*?)</p>", article, re.S)
+    if not match:
+        return fallback
+    summary = unescape(re.sub(r"<[^>]+>", " ", match[1]))
+    summary = " ".join(summary.split())
+    if len(summary) > 180:
+        summary = summary[:177].rstrip() + "…"
+    return summary or fallback
 
 
 def pretty_date(value: str) -> str:
@@ -192,7 +230,14 @@ def main() -> None:
         assets = SOURCE / slug / "assets"
         if assets.is_dir():
             shutil.copytree(assets, destination / "assets")
-        (destination / "index.html").write_text(layout(item["title"], item["title"], SITE + url, content, body_class="blog-page article-page", lang=meta.get("lang", "zh-CN" if re.search(r"[\u3400-\u9fff]", meta["title"] + source) else "en")), encoding="utf-8")
+        page_lang = meta.get("lang", "zh-CN" if re.search(r"[\u3400-\u9fff]", meta["title"] + source) else "en")
+        description = meta.get("description") or article_description(article, item["title"])
+        (destination / "index.html").write_text(
+            layout(item["title"], description, SITE + url, content,
+                   body_class="blog-page article-page", lang=page_lang,
+                   social_type="article", tags=item["tags"]),
+            encoding="utf-8"
+        )
         posts.append(item)
 
     entries = []
