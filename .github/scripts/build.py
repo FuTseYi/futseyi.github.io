@@ -18,44 +18,25 @@ from pathlib import Path
 from xml.sax.saxutils import escape as xml_escape
 import markdown
 from asset_urls import version_assets, site_url
+from post_metadata import get_post as parse_post, post_slug
+from site_metadata import load_site_metadata, render_social_metadata
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "posts"
 OUTPUT = ROOT / "blog"
 SITE = site_url(ROOT)
-SOCIAL_IMAGE = f"{SITE}/assets/images/profile/me.jpg"
-SOCIAL_IMAGE_ALT = "Portrait of FuTseYi (Shine)"
+SITE_METADATA = load_site_metadata(ROOT)
 
 def get_post(path: Path) -> tuple[dict[str, str], str]:
-    raw = path.read_text(encoding="utf-8")
-    match = re.match(r"\A---\r?\n(.*?)\r?\n---\r?\n", raw, re.S)
-    if not match:
-        raise ValueError(f"{path}: Missing --- frontmatter")
-    meta: dict[str, str] = {}
-    for line in match.group(1).splitlines():
-        if not line.strip() or line.lstrip().startswith("#"):
-            continue
-        if ":" not in line:
-            raise ValueError(f"{path}: Invalid metadata line {line!r}")
-        key, value = line.split(":", 1)
-        meta[key.strip()] = value.strip().strip('"').strip("'")
-    for key in ("title", "date"):
-        if not meta.get(key):
-            raise ValueError(f"{path}: Missing {key}")
-    date.fromisoformat(meta["date"])
-    return meta, raw[match.end():]
+    """Compatibility export for existing repository scripts."""
+    return parse_post(path)
+
 
 def layout(title: str, description: str, url: str, content: str, body_class: str = "blog-page",
            lang: str = "en", social_type: str = "website", tags: list[str] | None = None) -> str:
+    social_meta = render_social_metadata(SITE_METADATA, title, description, url, lang, social_type, tags)
     title, description, url = (escape(value, quote=True) for value in (title, description, url))
     lang = escape(lang, quote=True)
-    locale = "zh_CN" if lang == "zh-CN" else "en_US"
-    social_type = escape(social_type, quote=True)
-    social_image = escape(SOCIAL_IMAGE, quote=True)
-    social_image_alt = escape(SOCIAL_IMAGE_ALT, quote=True)
-    article_tags = "".join(
-        f'<meta property="article:tag" content="{escape(tag, quote=True)}">\n' for tag in tags or []
-    )
     home = version_assets((ROOT / "index.html").read_text(encoding="utf-8"), ROOT)
     header = re.search(r'<header class="site-header".*?</header>', home, re.S)[0]
     header = re.sub(r'(aria-label="[^"]*), back to top"', r'\1 homepage"', header)
@@ -73,23 +54,7 @@ def layout(title: str, description: str, url: str, content: str, body_class: str
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="description" content="{description}">
-<meta property="og:site_name" content="FuTseYi (Shine)">
-<meta property="og:title" content="{title}">
-<meta property="og:description" content="{description}">
-<meta property="og:type" content="{social_type}">
-<meta property="og:url" content="{url}">
-<meta property="og:locale" content="{locale}">
-<meta property="og:image" content="{social_image}">
-<meta property="og:image:type" content="image/jpeg">
-<meta property="og:image:width" content="1378">
-<meta property="og:image:height" content="2065">
-<meta property="og:image:alt" content="{social_image_alt}">
-{article_tags}<meta name="twitter:card" content="summary">
-<meta name="twitter:site" content="@FuTseYi">
-<meta name="twitter:title" content="{title}">
-<meta name="twitter:description" content="{description}">
-<meta name="twitter:image" content="{social_image}">
-<meta name="twitter:image:alt" content="{social_image_alt}">
+{social_meta}
 <title>{title} · FuTseYi</title><link rel="canonical" href="{url}">
 <link rel="icon" href="/assets/icons/favicon.ico" sizes="any">
 <link rel="icon" href="/assets/icons/favicon.svg" type="image/svg+xml">
@@ -193,9 +158,7 @@ def main() -> None:
     # Validate article metadata before replacing generated pages.
     source_posts: list[tuple[str, dict[str, str], str]] = []
     for path in sorted(SOURCE.glob("*/index.md")):
-        slug = path.parent.name
-        if not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", slug):
-            raise ValueError(f"Post directory must be a lowercase URL slug: {slug}")
+        slug = post_slug(path)
         meta, source = get_post(path)
         source_posts.append((slug, meta, source))
 

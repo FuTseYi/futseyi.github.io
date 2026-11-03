@@ -10,7 +10,7 @@ from html import unescape
 from pathlib import Path
 from urllib.request import Request, urlopen
 from asset_urls import version_assets, site_url as production_url
-from build import get_post
+from post_metadata import get_post, post_slug
 
 ROOT=Path(__file__).resolve().parents[2]
 
@@ -53,8 +53,8 @@ def read_post_entries(limit=6):
     for file in (ROOT/"posts").glob("*/index.md"):
         fields, _ = get_post(file)
         dt=date.fromisoformat(fields["date"])
-        if not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*",file.parent.name):raise ValueError(f"Invalid article slug: {file.parent.name}")
-        found.append((dt,file.parent.name,fields["title"]))
+        slug=post_slug(file)
+        found.append((dt,slug,fields["title"]))
     found.sort(reverse=True)
     return found[:limit]
 
