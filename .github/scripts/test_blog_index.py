@@ -3,7 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from blog_index import build_index, check_index, render_index, write_index
+from blog_index import ROOT, build_index, check_index, render_index, write_index
 
 
 class BlogIndexTests(unittest.TestCase):
@@ -50,6 +50,9 @@ class BlogIndexTests(unittest.TestCase):
         (self.root / "BLOG_INDEX.json").write_text("{", encoding="utf-8")
         with self.assertRaisesRegex(ValueError, "invalid JSON"):
             check_index(self.root)
+
+    def test_repository_index_is_current(self):
+        check_index(ROOT)
 
     def test_invalid_slug_is_rejected(self):
         self.add_post("Bad Slug", "Sample", "2026-11-03", "Notes")

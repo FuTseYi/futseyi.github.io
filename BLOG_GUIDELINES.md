@@ -47,7 +47,7 @@ For a complete article task:
 3. Research and verify claims at a depth appropriate to the subject.
 4. Write or revise the article, choosing its title, date, and tags.
 5. Review the complete result for usefulness, voice, accuracy, privacy, licensing, and long-term readability.
-6. Regenerate and check the index, run relevant repository tests, and prepare one focused PR.
+6. Regenerate and check the index, then run the relevant repository tests.
 
 Do not change the author's substantive experience or opinion, publish sensitive information, or delete historically significant content without confirmation. Protect credentials, account identifiers, private contact details, and identifying information in screenshots, logs, and examples. Respect repository and third-party licenses.
 
@@ -55,4 +55,4 @@ Do not change the author's substantive experience or opinion, publish sensitive 
 
 An article should stand on its own outside the author's current website layout, temporary interface, or private workflow. Remove details that will confuse readers without removing the concrete context needed to understand or reproduce the experience.
 
-Keep article PRs focused. Briefly describe the purpose, material editorial changes, important sources or verification, metadata decisions, and checks performed. Do not include hidden reasoning or lengthy process narration. Never claim checks passed unless they actually ran, and do not merge or publish without the author's authorization.
+Keep article changes focused. Use a PR for substantial editorial batches or changes that benefit from review and a durable record; use a normal commit for routine maintenance, following the repository's engineering conventions. When a PR is appropriate, briefly describe the purpose, material editorial changes, important sources or verification, metadata decisions, and checks performed. Do not include hidden reasoning or lengthy process narration. Never claim checks passed unless they actually ran, and do not merge or publish without the author's authorization.
