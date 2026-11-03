@@ -192,7 +192,7 @@ def build(refresh_activity=False):
     # Same filesystem as _site, so publishing uses directory renames, not copies.
     with tempfile.TemporaryDirectory(prefix=".preview-", dir=ROOT) as directory:
         candidate = Path(directory)
-        for name in ("index.html", "robots.txt", "BLOG_INDEX.json"):
+        for name in ("index.html", "robots.txt"):
             shutil.copy2(ROOT / name, candidate / name)
         for name in ("assets", "posts", ".github/scripts"):
             shutil.copytree(ROOT / name, candidate / name,
@@ -216,7 +216,7 @@ def build(refresh_activity=False):
 
 
 def source_state():
-    files = [ROOT / "index.html", ROOT / "robots.txt", ROOT / "requirements.txt", ROOT / "BLOG_INDEX.json"]
+    files = [ROOT / "index.html", ROOT / "robots.txt", ROOT / "requirements.txt"]
     for folder, pattern in (("posts", "*"), ("assets", "*"), (".github/scripts", "*.py")):
         files.extend((ROOT / folder).rglob(pattern))
     state = {}

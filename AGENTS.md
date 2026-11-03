@@ -54,6 +54,6 @@ See [PREVIEW.md](PREVIEW.md) for commands, publishing, and browser checks. Do no
 - For tasks that create, edit, review, reorganize, or classify articles under `posts/`, read [BLOG_GUIDELINES.md](BLOG_GUIDELINES.md) and [BLOG_INDEX.json](BLOG_INDEX.json) before making editorial decisions.
 - `BLOG_GUIDELINES.md` is the authoritative source for editorial policy, research, writing, metadata, and content review. Keep editorial rules there; do not duplicate them in this file.
 - `BLOG_INDEX.json` is generated from Markdown sources. Never edit it manually; regenerate with `python .github/scripts/blog_index.py --write` and verify with `python .github/scripts/blog_index.py --check`.
-- Use the index to discover existing topics and tags, then read relevant source articles before relying on their details. The current archive is context, not a limit on future subjects, formats, or depth.
+- Use the index for quick topic and tag discovery, then read relevant Markdown sources before relying on their details. The archive is context, not a limit on future subjects, formats, or depth.
 - Website engineering tasks that do not touch blog content do not need to load the editorial guide. Mixed tasks must follow both this file and the editorial guide.
 - Repository engineering and verification rules remain governed by this file; editorial decisions remain governed by `BLOG_GUIDELINES.md`. Follow explicit user instructions where applicable, without overriding factual accuracy, privacy, licensing, or publication safeguards.

@@ -22,7 +22,6 @@ class PreviewTests(unittest.TestCase):
             (root / name).mkdir(parents=True)
         (root / "index.html").write_text("source")
         (root / "robots.txt").write_text("robots")
-        (root / "BLOG_INDEX.json").write_text("{}")
         (root / "_site/index.html").write_text("last good build")
 
     def test_build_only_does_not_bind_preview_port(self):
@@ -180,7 +179,6 @@ class PreviewTests(unittest.TestCase):
             for folder in ("posts", "assets", ".github/scripts", "_site", "blog", ".venv", ".git"):
                 (root / folder).mkdir(parents=True, exist_ok=True)
             (root / "index.html").write_text("home")
-            (root / "BLOG_INDEX.json").write_text("{}")
             original = preview.source_state()
             for filename in ("_site/index.html", "blog/index.html", "sitemap.xml", ".git/config", ".venv/test.py"):
                 (root / filename).write_text("generated")
@@ -195,9 +193,6 @@ class PreviewTests(unittest.TestCase):
                 self.assertNotEqual(preview.source_state(), added)
                 file.unlink()
                 self.assertEqual(preview.source_state(), original)
-            index = root / "BLOG_INDEX.json"
-            index.write_text("updated")
-            self.assertNotEqual(preview.source_state(), original)
 
     def test_consecutive_saves_are_combined_and_changes_during_build_are_seen(self):
         states = [{"file": 1}, {"file": 2}, {"file": 2}, {"file": 3}, {"file": 3}]
