@@ -17,15 +17,15 @@ from html import escape, unescape
 from pathlib import Path
 from xml.sax.saxutils import escape as xml_escape
 import markdown
-from asset_urls import version_assets, site_url
+from asset_urls import version_assets
 from post_metadata import get_post as parse_post, post_slug
 from site_metadata import load_site_metadata, render_social_metadata
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "posts"
 OUTPUT = ROOT / "blog"
-SITE = site_url(ROOT)
 SITE_METADATA = load_site_metadata(ROOT)
+SITE = SITE_METADATA["origin"]
 
 def get_post(path: Path) -> tuple[dict[str, str], str]:
     """Compatibility export for existing repository scripts."""
