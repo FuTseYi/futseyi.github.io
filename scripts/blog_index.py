@@ -4,23 +4,19 @@ from __future__ import annotations
 
 import argparse
 import json
-import re
 import sys
 from pathlib import Path
 
-from build import get_post
+from post_metadata import get_post, post_slug
 
 ROOT = Path(__file__).resolve().parents[1]
-SLUG_PATTERN = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
 
 
 def build_index(root: Path = ROOT) -> list[dict[str, object]]:
     """Read article metadata from the Markdown sources."""
     articles = []
     for path in (root / "posts").glob("*/index.md"):
-        slug = path.parent.name
-        if not SLUG_PATTERN.fullmatch(slug):
-            raise ValueError(f"{path}: invalid article slug")
+        slug = post_slug(path)
 
         metadata, _ = get_post(path)
         tags = list(dict.fromkeys(
