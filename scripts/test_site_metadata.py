@@ -4,7 +4,7 @@ import unittest
 from pathlib import Path
 from site_metadata import load_site_metadata, render_homepage, render_social_metadata, site_url
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[1]
 
 
 class SiteMetadataTests(unittest.TestCase):

@@ -10,7 +10,7 @@ from pathlib import Path
 
 from build import get_post
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[1]
 SLUG_PATTERN = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
 
 
@@ -47,7 +47,7 @@ def write_index(root: Path = ROOT) -> None:
 def check_index(root: Path = ROOT) -> None:
     path = root / "BLOG_INDEX.json"
     if not path.is_file():
-        raise ValueError("Missing BLOG_INDEX.json; run python .github/scripts/blog_index.py --write")
+        raise ValueError("Missing BLOG_INDEX.json; run python scripts/blog_index.py --write")
     try:
         current = json.loads(path.read_text(encoding="utf-8"))
     except json.JSONDecodeError as error:

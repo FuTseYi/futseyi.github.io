@@ -21,7 +21,7 @@ from asset_urls import version_assets, site_url
 from post_metadata import get_post as parse_post, post_slug
 from site_metadata import load_site_metadata, render_social_metadata
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "posts"
 OUTPUT = ROOT / "blog"
 SITE = site_url(ROOT)

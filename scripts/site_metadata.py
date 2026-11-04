@@ -194,7 +194,7 @@ def main() -> int:
     args = parser.parse_args()
     if not args.update_homepage:
         parser.error("choose --update-homepage")
-    update_homepage(Path(__file__).resolve().parents[2])
+    update_homepage(Path(__file__).resolve().parents[1])
     return 0
 
 
