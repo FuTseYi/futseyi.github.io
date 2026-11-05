@@ -7,6 +7,7 @@ on:
       - posts/**
       - scripts/blog_index.py
       - scripts/post_metadata.py
+      - scripts/site_metadata.py
       - scripts/sync_readme.py
   workflow_dispatch:
 permissions:
