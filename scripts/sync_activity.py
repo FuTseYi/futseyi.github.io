@@ -30,25 +30,25 @@ query($login: String!, $from: DateTime!, $to: DateTime!) {
       totalRepositoriesWithContributedPullRequestReviews
       commitContributionsByRepository(maxRepositories: 100) {
         repository { nameWithOwner isPrivate isArchived isDisabled }
-        contributions(first: 1, orderBy: {field: OCCURRED_AT, direction: DESC}) {
+        contributions(first: 1, orderBy: {direction: DESC}) {
           nodes { occurredAt }
         }
       }
       pullRequestContributionsByRepository(maxRepositories: 100) {
         repository { nameWithOwner isPrivate isArchived isDisabled }
-        contributions(first: 1, orderBy: {field: OCCURRED_AT, direction: DESC}) {
+        contributions(first: 1, orderBy: {direction: DESC}) {
           nodes { occurredAt }
         }
       }
       issueContributionsByRepository(maxRepositories: 100) {
         repository { nameWithOwner isPrivate isArchived isDisabled }
-        contributions(first: 1, orderBy: {field: OCCURRED_AT, direction: DESC}) {
+        contributions(first: 1, orderBy: {direction: DESC}) {
           nodes { occurredAt }
         }
       }
       pullRequestReviewContributionsByRepository(maxRepositories: 100) {
         repository { nameWithOwner isPrivate isArchived isDisabled }
-        contributions(first: 1, orderBy: {field: OCCURRED_AT, direction: DESC}) {
+        contributions(first: 1, orderBy: {direction: DESC}) {
           nodes { occurredAt }
         }
       }
@@ -124,12 +124,12 @@ def merge(*groups, now=None):
 
 
 def annual_windows(start, end):
-    """Cover account lifetime with disjoint, <= one-year GraphQL windows."""
-    for year in range(start.year, end.year + 1):
-        left = max(start, datetime(year, 1, 1, tzinfo=timezone.utc))
-        right = min(end, datetime(year + 1, 1, 1, tzinfo=timezone.utc) - timedelta(seconds=1))
-        if left <= right:
-            yield left, right
+    """Cover account lifetime in disjoint <= 365-day GraphQL windows, including leap years."""
+    left = start
+    while left <= end:
+        right = min(end, left + timedelta(days=365) - timedelta(seconds=1))
+        yield left, right
+        left = right + timedelta(seconds=1)
 
 
 def graphql_window(start, end):
