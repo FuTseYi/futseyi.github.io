@@ -133,6 +133,13 @@ class ContributionTests(unittest.TestCase):
         self.assertIn("&lt;unsafe&gt;", activity.render({"updated_at": NOW.isoformat(),
                                                        "entries": rows}))
 
+    def test_archived_public_repository_is_still_part_of_history(self):
+        repo = {"full_name": "upstream/archived", "private": False, "archived": True,
+                "disabled": False, "visibility": "public"}
+        with patch.object(activity, "fetch", return_value=repo):
+            rows = activity.repository_metadata([record("upstream/archived")])
+        self.assertEqual([row["name"] for row in rows], ["upstream/archived"])
+
     def test_local_snapshot_preserves_history(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "contributions.json"
