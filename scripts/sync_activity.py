@@ -59,6 +59,102 @@ query($login: String!, $from: DateTime!, $to: DateTime!) {
   }
 }
 """
+# User-owned history connections cover old PRs and comments without REST Search limits.
+PUBLIC_REPO = "nameWithOwner visibility description primaryLanguage { name }"
+USER_HISTORY = {
+    "pullRequests": f"""query($login: String!, $after: String) {{
+      user(login:$login) {{
+        pullRequests(first:50, after:$after) {{
+          pageInfo {{ hasNextPage endCursor }}
+          nodes {{
+            createdAt repository {{ {PUBLIC_REPO} }}
+            commits(last:100) {{
+              pageInfo {{ hasPreviousPage }}
+              nodes {{ commit {{ authoredDate author {{ user {{ login }} }} }} }}
+            }}
+          }}
+        }}
+      }}
+    }}""",
+    "issueComments": f"""query($login: String!, $after: String) {{
+      user(login:$login) {{
+        issueComments(first:100, after:$after) {{
+          pageInfo {{ hasNextPage endCursor }}
+          nodes {{ createdAt repository {{ {PUBLIC_REPO} }} }}
+        }}
+      }}
+    }}""",
+    "repositoryDiscussions": f"""query($login: String!, $after: String) {{
+      user(login:$login) {{
+        repositoryDiscussions(first:100, after:$after) {{
+          pageInfo {{ hasNextPage endCursor }}
+          nodes {{ createdAt repository {{ {PUBLIC_REPO} }} }}
+        }}
+      }}
+    }}""",
+    "repositoryDiscussionComments": f"""query($login: String!, $after: String) {{
+      user(login:$login) {{
+        repositoryDiscussionComments(first:100, after:$after) {{
+          pageInfo {{ hasNextPage endCursor }}
+          nodes {{ createdAt discussion {{ repository {{ {PUBLIC_REPO} }} }} }}
+        }}
+      }}
+    }}""",
+}
+
+
+def graph_history():
+    """Directly query authored PRs/comments/discussions; do not infer activity from updatedAt."""
+    records, partial = [], False
+    for kind, query in USER_HISTORY.items():
+        cursor = None
+        try:
+            for _ in range(100):
+                response = fetch(API + "/graphql", {"query": query,
+                                 "variables": {"login": USER, "after": cursor}})
+                if response.get("errors"):
+                    raise ValueError("GitHub GraphQL: " + response["errors"][0].get("message", "query failed"))
+                connection = response["data"]["user"][kind]
+                for node in connection["nodes"]:
+                    if not node:
+                        continue
+                    repo = (node.get("discussion") or {}).get("repository") if kind == "repositoryDiscussionComments" else node.get("repository")
+                    if not repo or repo["visibility"] != "PUBLIC":
+                        continue
+                    details = {"description": repo.get("description"),
+                               "language": (repo.get("primaryLanguage") or {}).get("name")}
+                    label = {"pullRequests": "Pull request", "issueComments": "Comment",
+                             "repositoryDiscussions": "Discussion",
+                             "repositoryDiscussionComments": "Discussion comment"}[kind]
+                    entry = candidate(repo["nameWithOwner"], node["createdAt"], label, details)
+                    if entry:
+                        entry["_public"] = True
+                        records.append(entry)
+                    if kind == "pullRequests":
+                        if node["commits"]["pageInfo"]["hasPreviousPage"]:
+                            partial = True
+                        for item in node["commits"]["nodes"]:
+                            commit = item["commit"]
+                            if ((commit.get("author") or {}).get("user") or {}).get("login", "").lower() != USER.lower():
+                                continue
+                            own = candidate(repo["nameWithOwner"], commit["authoredDate"], "Commit", details)
+                            if own:
+                                own["_public"] = True
+                                records.append(own)
+                info = connection["pageInfo"]
+                if not info["hasNextPage"]:
+                    break
+                if not info["endCursor"] or info["endCursor"] == cursor:
+                    raise ValueError("Invalid GitHub GraphQL history cursor")
+                cursor = info["endCursor"]
+            else:
+                raise ValueError("GitHub history exceeds 10,000 items")
+        except SNAPSHOT_ERRORS as error:
+            partial = True
+            print(f"::warning::GitHub {kind} history incomplete ({type(error).__name__}: {error}).")
+    return records, partial
+
+
 KINDS = (
     ("commitContributionsByRepository", "totalRepositoriesWithContributedCommits", "Commit"),
     ("pullRequestContributionsByRepository", "totalRepositoriesWithContributedPullRequests", "Pull request"),
@@ -292,25 +388,30 @@ def discover(now):
                                       item["commit"]["author"]["date"], "Commit")
                     if entry:
                         commits.append(entry)
-    for start, end in windows:
-        try:
-            for pr in search("prs", start, end):
-                if (pr.get("user") or {}).get("login", "").lower() != USER.lower():
-                    continue
-                name = pr["repository_url"].removeprefix(API + "/repos/")
-                entry = candidate(name, pr["created_at"], "Pull request")
-                if entry:
-                    commits.append(entry)
-                    commits.extend(inspect_pr_commits(pr))
-        except SNAPSHOT_ERRORS as error:
-            partial = True
-            print(f"::warning::PR history incomplete ({type(error).__name__}: {error}).")
-        try:
-            for item in search("comments", start, end):
-                commits.extend(comment_contributions(item))
-        except SNAPSHOT_ERRORS as error:
-            partial = True
-            print(f"::warning::Comment history incomplete ({type(error).__name__}: {error}).")
+    if os.environ.get("GITHUB_TOKEN"):
+        extra, incomplete = graph_history()
+        commits.extend(extra)
+        partial |= incomplete
+    else:
+        for start, end in windows:
+            try:
+                for pr in search("prs", start, end):
+                    if (pr.get("user") or {}).get("login", "").lower() != USER.lower():
+                        continue
+                    name = pr["repository_url"].removeprefix(API + "/repos/")
+                    entry = candidate(name, pr["created_at"], "Pull request")
+                    if entry:
+                        commits.append(entry)
+                        commits.extend(inspect_pr_commits(pr))
+            except SNAPSHOT_ERRORS as error:
+                partial = True
+                print(f"::warning::PR history incomplete ({type(error).__name__}: {error}).")
+            try:
+                for item in search("comments", start, end):
+                    commits.extend(comment_contributions(item))
+            except SNAPSHOT_ERRORS as error:
+                partial = True
+                print(f"::warning::Comment history incomplete ({type(error).__name__}: {error}).")
     # REST searches may find a newer event in a repository GraphQL already verified.
     # Carry the current public visibility and metadata to that newer event.
     known = {row["name"].lower(): row for row in commits if row.get("_public")}
