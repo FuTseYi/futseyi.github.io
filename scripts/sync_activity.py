@@ -81,7 +81,7 @@ def candidate(name, date, activity, repo=None):
             "language": (repo or {}).get("language") or ""}
 
 
-def merge(*groups, now=None):
+def merge(*groups, now=None, limit=MAX_REPOSITORIES):
     """A bounded, deterministic union; stale contributions are not retained forever."""
     now = now or datetime.now(timezone.utc)
     by_name = {}
@@ -96,8 +96,9 @@ def merge(*groups, now=None):
             key = name.lower()
             if key not in by_name or timestamp(by_name[key]["date"]) < date:
                 by_name[key] = dict(entry)
-    return sorted(by_name.values(), key=lambda e: (timestamp(e["date"]), e["name"].lower()),
-                  reverse=True)[:MAX_REPOSITORIES]
+    ordered = sorted(by_name.values(), key=lambda e: (timestamp(e["date"]), e["name"].lower()),
+                     reverse=True)
+    return ordered[:limit] if limit is not None else ordered
 
 
 def graphql_commits(now):
@@ -190,6 +191,8 @@ def repository_metadata(entries):
         item = candidate(name, entry["date"], entry["activity"], repo)
         if item:
             verified.append(item)
+            if len(verified) >= MAX_REPOSITORIES:
+                break
     return verified
 
 
@@ -214,7 +217,7 @@ def collect(previous=None, now=None):
     # Without credentials, the REST commit search still works (with narrower rate limits).
     commits = graphql_commits(now) if os.environ.get("GITHUB_TOKEN") else search_commits(now)
     prs = search_prs(now)
-    candidates = merge(commits, prs, (previous or {}).get("entries", []), now=now)
+    candidates = merge(commits, prs, (previous or {}).get("entries", []), now=now, limit=None)
     verified = repository_metadata(candidates)
     return {"updated_at": now.isoformat(), "entries": merge(verified, now=now)}
 
