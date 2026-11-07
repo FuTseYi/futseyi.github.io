@@ -30,7 +30,7 @@ query($login: String!, $from: DateTime!, $to: DateTime!) {
       totalRepositoriesWithContributedPullRequestReviews
       commitContributionsByRepository(maxRepositories: 100) {
         repository { nameWithOwner isPrivate isArchived isDisabled }
-        contributions(first: 1, orderBy: {direction: DESC}) {
+        contributions(first: 1, orderBy: {field: OCCURRED_AT, direction: DESC}) {
           nodes { occurredAt }
         }
       }
