@@ -14,7 +14,7 @@ import sync_activity as activity
 NOW = datetime(2026, 11, 7, 12, tzinfo=timezone.utc)
 
 
-def record(name="org/example", date="2026-11-06T12:00:00Z", label="Code push"):
+def record(name="org/example", date="2026-11-06T12:00:00Z", label="Commit"):
     return {"name": name, "date": date, "activity": label,
             "description": "Safe <text>", "language": "Python"}
 
@@ -102,17 +102,37 @@ class ContributionTests(unittest.TestCase):
         self.assertEqual([x["name"] for x in rows], ["org/public"])
         self.assertIn("&lt;unsafe&gt;", activity.render({"updated_at": NOW.isoformat(), "entries": rows}))
 
-    def test_public_organization_metadata_retries_without_token_on_403(self):
-        from urllib.error import HTTPError
-        url = activity.API + "/repos/org/public"
-        forbidden = HTTPError(url, 403, "Forbidden", {}, None)
+    def test_public_organization_metadata_uses_anonymous_lookup(self):
         public = {"full_name": "org/public", "private": False, "archived": False,
                   "disabled": False, "description": "Public repo", "language": "Python"}
-        with patch.object(activity, "fetch", side_effect=[forbidden, public]) as fetch:
-            entries = activity.repository_metadata([record("org/public")])
-        self.assertEqual(len(entries), 1)
-        self.assertEqual(entries[0]["name"], "org/public")
-        self.assertEqual(fetch.call_args_list[1].kwargs, {"authenticated": False})
+        with patch.object(activity, "fetch", return_value=public) as fetch:
+            rows = activity.repository_metadata([record("org/public")])
+        self.assertEqual([row["name"] for row in rows], ["org/public"])
+        fetch.assert_called_once_with(activity.API + "/repos/org/public", authenticated=False)
+
+    def test_own_repository_metadata_keeps_authenticated_lookup(self):
+        repo = {"full_name": "FuTseYi/project", "private": False, "archived": False,
+                "disabled": False}
+        with patch.object(activity, "fetch", return_value=repo) as fetch:
+            rows = activity.repository_metadata([record("FuTseYi/project")])
+        self.assertEqual(len(rows), 1)
+        fetch.assert_called_once_with(activity.API + "/repos/FuTseYi/project", authenticated=True)
+
+    def test_snapshot_is_local_only(self):
+        with tempfile.TemporaryDirectory() as directory:
+            cache = Path(directory) / "contributions.json"
+            data = {"updated_at": NOW.isoformat(), "entries": [record()]}
+            with patch.object(activity, "SNAPSHOT", cache), \
+                 patch.object(activity, "fetch", side_effect=AssertionError("network not allowed")):
+                self.assertIsNone(activity.load_snapshot())
+                cache.write_text(json.dumps(data), encoding="utf-8")
+                self.assertEqual(activity.load_snapshot(), data)
+
+    def test_legacy_activity_label_renders_as_commit(self):
+        html = activity.render({"updated_at": NOW.isoformat(),
+                                "entries": [record(label="Code push")]})
+        self.assertIn("Commit · Python", html)
+        self.assertNotIn("Code push", html)
 
     def test_successful_refresh_does_not_republish_unverified_history(self):
         old = {"entries": [record("org/previous", "2026-09-01T00:00:00Z")]}
