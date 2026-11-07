@@ -29,25 +29,25 @@ query($login: String!, $from: DateTime!, $to: DateTime!) {
       totalRepositoriesWithContributedIssues
       totalRepositoriesWithContributedPullRequestReviews
       commitContributionsByRepository(maxRepositories: 100) {
-        repository { nameWithOwner isPrivate isArchived isDisabled }
+        repository { nameWithOwner isPrivate }
         contributions(first: 1, orderBy: {field: OCCURRED_AT, direction: DESC}) {
           nodes { occurredAt }
         }
       }
       pullRequestContributionsByRepository(maxRepositories: 100) {
-        repository { nameWithOwner isPrivate isArchived isDisabled }
+        repository { nameWithOwner isPrivate }
         contributions(first: 1, orderBy: {direction: DESC}) {
           nodes { occurredAt }
         }
       }
       issueContributionsByRepository(maxRepositories: 100) {
-        repository { nameWithOwner isPrivate isArchived isDisabled }
+        repository { nameWithOwner isPrivate }
         contributions(first: 1, orderBy: {direction: DESC}) {
           nodes { occurredAt }
         }
       }
       pullRequestReviewContributionsByRepository(maxRepositories: 100) {
-        repository { nameWithOwner isPrivate isArchived isDisabled }
+        repository { nameWithOwner isPrivate }
         contributions(first: 1, orderBy: {direction: DESC}) {
           nodes { occurredAt }
         }
