@@ -11,11 +11,8 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
-from site_metadata import site_url
-
 ROOT = Path(__file__).resolve().parents[1]
 USER = "FuTseYi"
-SITE = site_url(ROOT)
 API = "https://api.github.com"
 SNAPSHOT = ROOT / "_site/contributions.json"
 MAX_REPOSITORIES = 12
@@ -126,7 +123,7 @@ def graphql_commits(now):
             continue
         nodes = group["contributions"]["nodes"]
         if nodes:
-            entry = candidate(repo["nameWithOwner"], nodes[0]["occurredAt"], "Code push",
+            entry = candidate(repo["nameWithOwner"], nodes[0]["occurredAt"], "Commit",
                               {"description": repo.get("description"),
                                "language": (repo.get("primaryLanguage") or {}).get("name")})
             if entry:
@@ -166,7 +163,7 @@ def search_commits(now):
         if (item.get("author") or {}).get("login", "").lower() != USER.lower():
             continue
         repo = item["repository"]
-        entry = candidate(repo["full_name"], item["commit"]["committer"]["date"], "Code push")
+        entry = candidate(repo["full_name"], item["commit"]["committer"]["date"], "Commit")
         if entry:
             entries.append(entry)
     return entries
@@ -185,25 +182,18 @@ def search_prs(now):
 
 
 def repository_metadata(entries):
-    """Recheck public visibility and repo identity before publishing or retaining caches."""
+    """Verify repository visibility and metadata before publishing."""
     verified = []
     for entry in entries:
+        # Tokens scoped to personal repositories may not read other public organizations.
+        owner = entry["name"].split("/", 1)[0]
         url = API + "/repos/" + entry["name"]
         try:
-            repo = fetch(url)
+            repo = fetch(url, authenticated=owner.lower() == USER.lower())
         except HTTPError as error:
             if error.code == 404:
                 continue
-            if error.code != 403:
-                raise
-            # Fine-grained tokens may not access public repositories in other organizations.
-            # This public metadata endpoint supports anonymous access.
-            try:
-                repo = fetch(url, authenticated=False)
-            except HTTPError as retry_error:
-                if retry_error.code == 404:
-                    continue
-                raise
+            raise
         if (repo.get("private") or repo.get("visibility", "public") != "public"
                 or repo.get("archived") or repo.get("disabled")):
             continue
@@ -217,19 +207,16 @@ def repository_metadata(entries):
 
 
 def load_snapshot():
-    """Local staging cache first, otherwise current published JSON across Vercel builds."""
-    for source in (lambda: SNAPSHOT.read_text(encoding="utf-8"),
-                   lambda: json.dumps(fetch(SITE + "/contributions.json"))):
-        try:
-            data = json.loads(source())
-            updated = timestamp(data["updated_at"])
-            if updated > datetime.now(timezone.utc) or not isinstance(data["entries"], list):
-                continue
-            render(data)
-            return data
-        except SNAPSHOT_ERRORS:
-            continue
-    return None
+    """Reuse only the build's local snapshot; hosting providers remain independent."""
+    try:
+        data = json.loads(SNAPSHOT.read_text(encoding="utf-8"))
+        updated = timestamp(data["updated_at"])
+        if updated > datetime.now(timezone.utc) or not isinstance(data["entries"], list):
+            return None
+        render(data)
+        return data
+    except SNAPSHOT_ERRORS:
+        return None
 
 
 def collect(previous=None, now=None):
@@ -258,13 +245,13 @@ def render(snapshot):
             raise ValueError("Invalid repository name")
         dt = timestamp(entry["date"])
         description = f'<p>{escape(entry["description"])}</p>' if entry.get("description") else ""
-        tags = " · ".join(escape(v) for v in (entry["activity"], entry.get("language", "")) if v)
+        tags = " · ".join(escape(v) for v in (("Commit" if entry["activity"] == "Code push" else entry["activity"]), entry.get("language", "")) if v)
         rows.append(f'<article class="project-item"><time class="contribution-date" datetime="{dt.date().isoformat()}">{dt:%Y.%m.%d}</time><div>'
                     f'<h3><a href="https://github.com/{name}" target="_blank" rel="noopener noreferrer">'
                     f'{escape(name)} <span class="link-arrow" aria-hidden="true"></span></a></h3>'
                     f'{description}<div class="project-tags"><span>{tags}</span></div></div></article>')
     if not rows:
-        rows.append('<p class="section-lead">No recent public code pushes or pull requests in the available activity window.</p>')
+        rows.append('<p class="section-lead">No recent public commits or pull requests in the available activity window.</p>')
     updated = timestamp(snapshot["updated_at"])
     rows.append(f'<p class="activity-note">Activity snapshot · {updated:%Y.%m.%d} UTC</p>')
     return "\n".join(rows)
@@ -284,7 +271,7 @@ def main():
         try:
             snapshot = collect(previous)
         except SNAPSHOT_ERRORS as error:
-            print(f"::warning::Public contributions unavailable ({type(error).__name__}); using last valid snapshot.")
+            print(f"::warning::Public contributions unavailable ({type(error).__name__}); using local snapshot if present.")
     if snapshot is None:
         SNAPSHOT.unlink(missing_ok=True)
         return

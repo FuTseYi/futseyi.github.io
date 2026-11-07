@@ -61,5 +61,5 @@ jobs:
           git checkout -B main origin/main
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit --allow-empty -m "chore: refresh website activity"
+          git commit --allow-empty -m "chore: refresh recent open contributions"
           git push origin HEAD:main
