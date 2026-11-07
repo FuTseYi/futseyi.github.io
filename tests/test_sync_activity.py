@@ -133,6 +133,7 @@ class ContributionTests(unittest.TestCase):
         with patch.dict("os.environ", {"GITHUB_TOKEN": "test-token"}), \
              patch.object(activity, "fetch", return_value=user), \
              patch.object(activity, "graphql_window", return_value=[old]) as graph, \
+             patch.object(activity, "graph_history", return_value=([], False)), \
              patch.object(activity, "search", return_value=[]):
             rows, partial = activity.discover(NOW)
         self.assertEqual(graph.call_count, 7)
