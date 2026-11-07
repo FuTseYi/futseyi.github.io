@@ -54,8 +54,13 @@ def fetch(url, payload=None):
     data = json.dumps(payload).encode("utf-8") if payload is not None else None
     if data is not None:
         headers["Content-Type"] = "application/json"
-    with urlopen(Request(url, data=data, headers=headers), timeout=20) as response:
-        return json.load(response)
+    try:
+        with urlopen(Request(url, data=data, headers=headers), timeout=20) as response:
+            return json.load(response)
+    except HTTPError as error:
+        # Log only the endpoint and HTTP code, never the request credentials.
+        print(f"::warning::GitHub API {url.split('?', 1)[0].removeprefix(API)} returned HTTP {error.code}")
+        raise
 
 
 def cutoff(now):
@@ -215,7 +220,14 @@ def load_snapshot():
 def collect(previous=None, now=None):
     now = now or datetime.now(timezone.utc)
     # Without credentials, the REST commit search still works (with narrower rate limits).
-    commits = graphql_commits(now) if os.environ.get("GITHUB_TOKEN") else search_commits(now)
+    if os.environ.get("GITHUB_TOKEN"):
+        try:
+            commits = graphql_commits(now)
+        except (HTTPError, URLError, ValueError, KeyError, TypeError) as error:
+            print(f"::warning::GraphQL commits unavailable ({type(error).__name__}); trying REST commit search.")
+            commits = search_commits(now)
+    else:
+        commits = search_commits(now)
     prs = search_prs(now)
     candidates = merge(commits, prs, (previous or {}).get("entries", []), now=now, limit=None)
     verified = repository_metadata(candidates)
