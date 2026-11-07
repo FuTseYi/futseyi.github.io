@@ -94,6 +94,18 @@ class ContributionTests(unittest.TestCase):
         self.assertEqual([x["name"] for x in rows], ["org/public"])
         self.assertIn("&lt;unsafe&gt;", activity.render({"updated_at": NOW.isoformat(), "entries": rows}))
 
+    def test_public_organization_metadata_retries_without_token_on_403(self):
+        from urllib.error import HTTPError
+        url = activity.API + "/repos/org/public"
+        forbidden = HTTPError(url, 403, "Forbidden", {}, None)
+        public = {"full_name": "org/public", "private": False, "archived": False,
+                  "disabled": False, "description": "Public repo", "language": "Python"}
+        with patch.object(activity, "fetch", side_effect=[forbidden, public]) as fetch:
+            entries = activity.repository_metadata([record("org/public")])
+        self.assertEqual(len(entries), 1)
+        self.assertEqual(entries[0]["name"], "org/public")
+        self.assertEqual(fetch.call_args_list[1].kwargs, {"authenticated": False})
+
     def test_collect_combines_old_verified_history_with_new_discovery(self):
         old = {"entries": [record("org/previous", "2026-09-01T00:00:00Z")]}
         with patch.dict("os.environ", {}, clear=True), \
