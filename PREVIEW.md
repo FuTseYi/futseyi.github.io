@@ -33,7 +33,9 @@ On Windows, substitute `py -3` for `python3`.
 - `--refresh-activity`: Fetch fresh public contribution data instead of reusing an available snapshot.
 - `--port 8766`: Choose another local preview port.
 
-Vercel uses the repository-owned `vercel.json` to invoke `python3 preview.py --build-only` and publish `_site/`. GitHub Pages uses the same builder with `--refresh-activity` for its scheduled updates. Keep these hosts as adapters around the one build pipeline.
+Vercel uses the repository-owned `vercel.json` to invoke `python3 preview.py --build-only --refresh-activity` and publish `_site/`. GitHub Pages uses the same builder with `--refresh-activity` for its scheduled updates. Keep these hosts as adapters around the one build pipeline.
+
+The contribution list covers public, non-archived repositories with an attributed commit or authored non-draft PR in the past 365 days. It sorts by personal contribution date and shows up to 12 repositories (first three before expanding). With `GITHUB_TOKEN` set in the build environment, commit discovery uses GitHub GraphQL contribution records; otherwise it uses paginated public REST commit search. Pull requests use GitHub's public search API. Token values must be configured in the hosting provider, never committed or exposed to the frontend. GitHub search and contribution APIs have their own indexing and result limits, so this is not a complete all-branches git-history audit. A successful refresh rechecks public repository status and merges still-current, previously validated records from `/contributions.json`; a failed refresh retains the previous snapshot and its original timestamp. The live site's JSON is the cross-deployment cache, not the ephemeral Vercel build directory.
 
 The same build entry point is used for verification and the current publishing workflow. It generates the blog and search index, synchronizes staged homepage content, and checks the output. Generated `blog/`, `_site/`, and `sitemap.xml` are ignored by Git.
 
