@@ -32,25 +32,25 @@ query($login: String!, $from: DateTime!, $to: DateTime!) {
       totalRepositoriesWithContributedIssues
       totalRepositoriesWithContributedPullRequestReviews
       commitContributionsByRepository(maxRepositories: 100) {
-        repository { nameWithOwner isPrivate }
+        repository { nameWithOwner visibility description primaryLanguage { name } }
         contributions(first: 1, orderBy: {field: OCCURRED_AT, direction: DESC}) {
           nodes { occurredAt }
         }
       }
       pullRequestContributionsByRepository(maxRepositories: 100) {
-        repository { nameWithOwner isPrivate }
+        repository { nameWithOwner visibility description primaryLanguage { name } }
         contributions(first: 1, orderBy: {direction: DESC}) {
           nodes { occurredAt }
         }
       }
       issueContributionsByRepository(maxRepositories: 100) {
-        repository { nameWithOwner isPrivate }
+        repository { nameWithOwner visibility description primaryLanguage { name } }
         contributions(first: 1, orderBy: {direction: DESC}) {
           nodes { occurredAt }
         }
       }
       pullRequestReviewContributionsByRepository(maxRepositories: 100) {
-        repository { nameWithOwner isPrivate }
+        repository { nameWithOwner visibility description primaryLanguage { name } }
         contributions(first: 1, orderBy: {direction: DESC}) {
           nodes { occurredAt }
         }
@@ -152,12 +152,15 @@ def graphql_window(start, end):
             return graphql_window(start, middle) + graphql_window(middle + timedelta(seconds=1), end)
         for group in groups:
             repo = group["repository"]
-            if repo["isPrivate"]:
+            if repo["visibility"] != "PUBLIC":
                 continue
             nodes = group["contributions"]["nodes"]
             if nodes:
-                entry = candidate(repo["nameWithOwner"], nodes[0]["occurredAt"], activity)
+                entry = candidate(repo["nameWithOwner"], nodes[0]["occurredAt"], activity,
+                                  {"description": repo.get("description"),
+                                   "language": (repo.get("primaryLanguage") or {}).get("name")})
                 if entry:
+                    entry["_public"] = True  # Public visibility verified by GraphQL.
                     rows.append(entry)
     return rows
 
@@ -308,14 +311,26 @@ def discover(now):
         except SNAPSHOT_ERRORS as error:
             partial = True
             print(f"::warning::Comment history incomplete ({type(error).__name__}: {error}).")
+    # REST searches may find a newer event in a repository GraphQL already verified.
+    # Carry the current public visibility and metadata to that newer event.
+    known = {row["name"].lower(): row for row in commits if row.get("_public")}
+    for row in commits:
+        graph = known.get(row["name"].lower())
+        if graph:
+            row["_public"] = True
+            row["description"] = graph["description"]
+            row["language"] = graph["language"]
     return commits, partial
 
 
 def repository_metadata(entries):
-    """Verify repository visibility and metadata before publishing."""
+    """Reuse GraphQL-verified public repos; verify only REST-only candidates."""
     verified = []
+    incomplete = False
     for entry in entries:
-        # Tokens scoped to personal repositories may not read other public organizations.
+        if entry.get("_public"):
+            verified.append(candidate(entry["name"], entry["date"], entry["activity"], entry))
+            continue
         owner = entry["name"].split("/", 1)[0]
         url = API + "/repos/" + entry["name"]
         try:
@@ -323,14 +338,19 @@ def repository_metadata(entries):
         except HTTPError as error:
             if error.code == 404:
                 continue
-            raise
+            incomplete = True
+            print(f"::warning::Public metadata unavailable for {entry['name']} (HTTP {error.code}).")
+            continue
+        except (URLError, TimeoutError):
+            incomplete = True
+            continue
         if repo.get("private") or repo.get("visibility", "public") != "public":
             continue
-        name = repo.get("full_name", entry["name"])
-        item = candidate(name, entry["date"], entry["activity"], repo)
+        item = candidate(repo.get("full_name", entry["name"]), entry["date"],
+                         entry["activity"], repo)
         if item:
             verified.append(item)
-    return verified
+    return verified, incomplete
 
 
 def load_snapshot():
@@ -349,9 +369,9 @@ def load_snapshot():
 def collect(previous=None, now=None):
     now = now or datetime.now(timezone.utc)
     entries, partial = discover(now)
-    verified = repository_metadata(merge(entries, now=now))
+    verified, metadata_incomplete = repository_metadata(merge(entries, now=now))
     return {"updated_at": now.isoformat(), "entries": merge(verified, now=now),
-            "partial": partial}
+            "partial": partial or metadata_incomplete}
 
 
 def render(snapshot):
