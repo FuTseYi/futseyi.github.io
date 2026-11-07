@@ -136,7 +136,7 @@ def graphql_window(start, end):
     response = fetch(API + "/graphql", {"query": GRAPHQL,
                      "variables": {"login": USER, "from": start.isoformat(), "to": end.isoformat()}})
     if response.get("errors"):
-        raise ValueError("GitHub GraphQL returned errors")
+        raise ValueError("GitHub GraphQL: " + response["errors"][0].get("message", "query failed"))
     collection = response["data"]["user"]["contributionsCollection"]
     rows = []
     for field, total, activity in KINDS:
@@ -355,7 +355,7 @@ def main():
         try:
             snapshot = collect(previous)
         except SNAPSHOT_ERRORS as error:
-            print(f"::warning::Public contributions unavailable ({type(error).__name__}); using local snapshot if present.")
+            print(f"::warning::Public contributions unavailable ({type(error).__name__}: {error}); using local snapshot if present.")
     if snapshot is None:
         SNAPSHOT.unlink(missing_ok=True)
         return
