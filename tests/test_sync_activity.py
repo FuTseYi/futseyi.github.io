@@ -133,6 +133,7 @@ class ContributionTests(unittest.TestCase):
         with patch.dict("os.environ", {"GITHUB_TOKEN": "test-token"}), \
              patch.object(activity, "fetch", return_value=user), \
              patch.object(activity, "graphql_window", return_value=[old]) as graph, \
+             patch.object(activity, "graph_history", return_value=([], False)), \
              patch.object(activity, "search", return_value=[]):
             rows, partial = activity.discover(NOW)
         self.assertEqual(graph.call_count, 7)
@@ -183,6 +184,28 @@ class ContributionTests(unittest.TestCase):
             rows, partial = activity.repository_metadata([trusted, record("unknown/repo")])
         self.assertTrue(partial)
         self.assertEqual([r["name"] for r in rows], ["upstream/verified"])
+
+    def test_graphql_author_history_tracks_old_pr_commits_and_discussion_comments(self):
+        repo = {"nameWithOwner": "external/project", "visibility": "PUBLIC",
+                "description": "Public", "primaryLanguage": {"name": "Python"}}
+        datasets = {
+            "pullRequests": [{"createdAt": "2022-02-01T00:00:00Z", "repository": repo,
+                              "commits": {"pageInfo": {"hasPreviousPage": False},
+                                          "nodes": [{"commit": {"authoredDate": "2026-11-01T00:00:00Z",
+                                                               "author": {"user": {"login": "FuTseYi"}}}}]}}],
+            "issueComments": [{"createdAt": "2021-01-01T00:00:00Z", "repository": repo}],
+            "repositoryDiscussions": [{"createdAt": "2020-01-01T00:00:00Z", "repository": repo}],
+            "repositoryDiscussionComments": [{"createdAt": "2025-01-01T00:00:00Z",
+                                              "discussion": {"repository": repo}}],
+        }
+        responses = [{"data": {"user": {kind: {"nodes": nodes,
+                     "pageInfo": {"hasNextPage": False, "endCursor": None}}}}}
+                     for kind, nodes in datasets.items()]
+        with patch.object(activity, "fetch", side_effect=responses):
+            records, partial = activity.graph_history()
+        self.assertFalse(partial)
+        self.assertEqual(len(records), 5)
+        self.assertEqual(activity.merge(records, now=NOW)[0]["date"], "2026-11-01T00:00:00Z")
 
     def test_archived_public_repository_is_still_part_of_history(self):
         repo = {"full_name": "upstream/archived", "private": False, "archived": True,
