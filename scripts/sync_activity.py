@@ -149,7 +149,7 @@ def graphql_window(start, end):
             return graphql_window(start, middle) + graphql_window(middle + timedelta(seconds=1), end)
         for group in groups:
             repo = group["repository"]
-            if repo["isPrivate"] or repo["isArchived"] or repo["isDisabled"]:
+            if repo["isPrivate"]:
                 continue
             nodes = group["contributions"]["nodes"]
             if nodes:
@@ -292,8 +292,7 @@ def repository_metadata(entries):
             if error.code == 404:
                 continue
             raise
-        if (repo.get("private") or repo.get("visibility", "public") != "public"
-                or repo.get("archived") or repo.get("disabled")):
+        if repo.get("private") or repo.get("visibility", "public") != "public":
             continue
         name = repo.get("full_name", entry["name"])
         item = candidate(name, entry["date"], entry["activity"], repo)
