@@ -44,12 +44,12 @@ query($login: String!, $from: DateTime!, $to: DateTime!) {
 """
 
 
-def fetch(url, payload=None):
+def fetch(url, payload=None, authenticated=True):
     """GitHub JSON transport; token never enters generated assets."""
     headers = {"Accept": "application/vnd.github+json",
                "User-Agent": "FuTseYi-homepage", "X-GitHub-Api-Version": "2022-11-28"}
     token = os.environ.get("GITHUB_TOKEN")
-    if token and url.startswith(API + "/"):
+    if authenticated and token and url.startswith(API + "/"):
         headers["Authorization"] = "Bearer " + token
     data = json.dumps(payload).encode("utf-8") if payload is not None else None
     if data is not None:
@@ -183,12 +183,22 @@ def repository_metadata(entries):
     """Recheck public visibility and repo identity before publishing or retaining caches."""
     verified = []
     for entry in entries:
+        url = API + "/repos/" + entry["name"]
         try:
-            repo = fetch(API + "/repos/" + entry["name"])
+            repo = fetch(url)
         except HTTPError as error:
             if error.code == 404:
                 continue
-            raise
+            if error.code != 403:
+                raise
+            # Fine-grained tokens may not access public repositories in other organizations.
+            # This public metadata endpoint supports anonymous access.
+            try:
+                repo = fetch(url, authenticated=False)
+            except HTTPError as retry_error:
+                if retry_error.code == 404:
+                    continue
+                raise
         if (repo.get("private") or repo.get("visibility", "public") != "public"
                 or repo.get("archived") or repo.get("disabled")):
             continue
