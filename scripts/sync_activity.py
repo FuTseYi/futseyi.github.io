@@ -4,6 +4,7 @@ import argparse
 import json
 import os
 import re
+import time
 from datetime import datetime, timedelta, timezone
 from html import escape
 from pathlib import Path
@@ -20,6 +21,8 @@ START = "<!-- CONTRIBUTIONS:START -->"
 END = "<!-- CONTRIBUTIONS:END -->"
 SNAPSHOT_ERRORS = (HTTPError, URLError, TimeoutError, OSError, ValueError, KeyError, TypeError, AttributeError)
 REPO_NAME = re.compile(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+\Z")
+ANONYMOUS_SEARCH = False
+NEXT_ANONYMOUS_SEARCH = 0.0
 GRAPHQL = """
 query($login: String!, $from: DateTime!, $to: DateTime!) {
   user(login: $login) {
@@ -80,7 +83,7 @@ def fetch(url, payload=None, authenticated=True):
             return json.load(response)
     except HTTPError as error:
         # Log only the endpoint and HTTP code, never the request credentials.
-        if error.code != 403:  # A public metadata lookup may recover anonymously.
+        if error.code not in (403, 422) or (error.code == 422 and not url.startswith(API + "/search/issues")):
             print(f"::warning::GitHub API {url.split('?', 1)[0].removeprefix(API)} returned HTTP {error.code}")
         raise
 
@@ -159,6 +162,25 @@ def graphql_window(start, end):
     return rows
 
 
+def search_fetch(url):
+    """Some personal-scoped tokens cannot search other public repositories."""
+    global ANONYMOUS_SEARCH, NEXT_ANONYMOUS_SEARCH
+    if ANONYMOUS_SEARCH:
+        delay = NEXT_ANONYMOUS_SEARCH - time.monotonic()
+        if delay > 0:
+            time.sleep(delay)
+        NEXT_ANONYMOUS_SEARCH = time.monotonic() + 6.5  # GitHub anonymous search: 10/min.
+        return fetch(url, authenticated=False)
+    try:
+        return fetch(url)
+    except HTTPError as error:
+        if error.code != 422:
+            raise
+        ANONYMOUS_SEARCH = True
+        print("::notice::GitHub search token scope is limited; using throttled public search.")
+        return search_fetch(url)
+
+
 def search(kind, start, end):
     """Date-partition GitHub Search so its 1,000-result limit never silently truncates."""
     if kind == "prs":
@@ -172,7 +194,7 @@ def search(kind, start, end):
         clause = "committer-date" if kind == "commits" else "created"
         q = f"{query} {clause}:{after}..{before}"
         params = urlencode({"q": q, "sort": sort, "order": "desc", "per_page": 100, "page": 1})
-        first = fetch(API + endpoint + "?" + params)
+        first = search_fetch(API + endpoint + "?" + params)
         if first.get("incomplete_results"):
             raise ValueError("Incomplete GitHub Search index")
         if first["total_count"] > 1000:
@@ -184,7 +206,7 @@ def search(kind, start, end):
         items = list(first["items"])
         for page in range(2, (first["total_count"] + 99) // 100 + 1):
             params = urlencode({"q": q, "sort": sort, "order": "desc", "per_page": 100, "page": page})
-            result = fetch(API + endpoint + "?" + params)
+            result = search_fetch(API + endpoint + "?" + params)
             if result.get("incomplete_results"):
                 raise ValueError("Incomplete GitHub Search index")
             items.extend(result["items"])
