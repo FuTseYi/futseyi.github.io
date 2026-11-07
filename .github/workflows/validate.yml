@@ -22,7 +22,9 @@ jobs:
       - name: Build and verify complete website
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: python preview.py --build-only --refresh-activity
+        run: |
+          python preview.py --build-only --refresh-activity
+          python -c "import json; from pathlib import Path; assert json.loads(Path('_site/contributions.json').read_text(encoding='utf-8'))['entries'], 'GitHub activity refresh returned no verified contributions'"
       - name: Install browser regression tools
         run: |
           python -m pip install -r requirements-dev.txt
