@@ -89,6 +89,22 @@ class ContributionTests(unittest.TestCase):
         self.assertEqual(len(rows), 101)
         self.assertEqual(fetch.call_count, 2)
 
+    def test_limited_token_falls_back_to_throttled_public_search(self):
+        from urllib.error import HTTPError
+        denied = HTTPError(activity.API + "/search/issues", 422, "Validation Failed", {}, None)
+        with patch.object(activity, "ANONYMOUS_SEARCH", False), \
+             patch.object(activity, "NEXT_ANONYMOUS_SEARCH", 0.0), \
+             patch.object(activity, "fetch", side_effect=[denied, {"items": []}, {"items": []}]) as fetch, \
+             patch.object(activity.time, "sleep") as sleep, \
+             contextlib.redirect_stdout(io.StringIO()):
+            activity.search_fetch(activity.API + "/search/issues?q=first")
+            activity.search_fetch(activity.API + "/search/issues?q=second")
+            self.assertTrue(activity.ANONYMOUS_SEARCH)
+        self.assertEqual(fetch.call_args_list[0].kwargs, {})
+        self.assertEqual(fetch.call_args_list[1].kwargs, {"authenticated": False})
+        self.assertEqual(fetch.call_args_list[2].kwargs, {"authenticated": False})
+        sleep.assert_called_once()
+
     def test_authored_old_pr_commit_is_personal_activity(self):
         pr = {"repository_url": activity.API + "/repos/upstream/repo", "number": 7}
         commits = [
