@@ -4,6 +4,7 @@ import argparse
 import json
 import os
 import re
+import time
 from datetime import datetime, timedelta, timezone
 from html import escape
 from pathlib import Path
@@ -20,6 +21,8 @@ START = "<!-- CONTRIBUTIONS:START -->"
 END = "<!-- CONTRIBUTIONS:END -->"
 SNAPSHOT_ERRORS = (HTTPError, URLError, TimeoutError, OSError, ValueError, KeyError, TypeError, AttributeError)
 REPO_NAME = re.compile(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+\Z")
+ANONYMOUS_SEARCH = False
+NEXT_ANONYMOUS_SEARCH = 0.0
 GRAPHQL = """
 query($login: String!, $from: DateTime!, $to: DateTime!) {
   user(login: $login) {
@@ -80,7 +83,7 @@ def fetch(url, payload=None, authenticated=True):
             return json.load(response)
     except HTTPError as error:
         # Log only the endpoint and HTTP code, never the request credentials.
-        if error.code != 403:  # A public metadata lookup may recover anonymously.
+        if error.code not in (403, 422) or (error.code == 422 and not url.startswith(API + "/search/issues")):
             print(f"::warning::GitHub API {url.split('?', 1)[0].removeprefix(API)} returned HTTP {error.code}")
         raise
 
@@ -159,6 +162,25 @@ def graphql_window(start, end):
     return rows
 
 
+def search_fetch(url):
+    """Some personal-scoped tokens cannot search other public repositories."""
+    global ANONYMOUS_SEARCH, NEXT_ANONYMOUS_SEARCH
+    if ANONYMOUS_SEARCH:
+        delay = NEXT_ANONYMOUS_SEARCH - time.monotonic()
+        if delay > 0:
+            time.sleep(delay)
+        NEXT_ANONYMOUS_SEARCH = time.monotonic() + 6.5  # GitHub anonymous search: 10/min.
+        return fetch(url, authenticated=False)
+    try:
+        return fetch(url)
+    except HTTPError as error:
+        if error.code != 422:
+            raise
+        ANONYMOUS_SEARCH = True
+        print("::notice::GitHub search token scope is limited; using throttled public search.")
+        return search_fetch(url)
+
+
 def search(kind, start, end):
     """Date-partition GitHub Search so its 1,000-result limit never silently truncates."""
     if kind == "prs":
@@ -172,7 +194,7 @@ def search(kind, start, end):
         clause = "committer-date" if kind == "commits" else "created"
         q = f"{query} {clause}:{after}..{before}"
         params = urlencode({"q": q, "sort": sort, "order": "desc", "per_page": 100, "page": 1})
-        first = fetch(API + endpoint + "?" + params)
+        first = search_fetch(API + endpoint + "?" + params)
         if first.get("incomplete_results"):
             raise ValueError("Incomplete GitHub Search index")
         if first["total_count"] > 1000:
@@ -184,7 +206,7 @@ def search(kind, start, end):
         items = list(first["items"])
         for page in range(2, (first["total_count"] + 99) // 100 + 1):
             params = urlencode({"q": q, "sort": sort, "order": "desc", "per_page": 100, "page": page})
-            result = fetch(API + endpoint + "?" + params)
+            result = search_fetch(API + endpoint + "?" + params)
             if result.get("incomplete_results"):
                 raise ValueError("Incomplete GitHub Search index")
             items.extend(result["items"])
@@ -252,11 +274,13 @@ def discover(now):
     created = timestamp(fetch(API + "/users/" + USER)["created_at"])
     windows = list(annual_windows(created, now))
     commits = []
+    partial = False
     # GitHub GraphQL covers attributed commits, authored PRs/issues and submitted reviews.
     if os.environ.get("GITHUB_TOKEN"):
         for start, end in windows:
             commits.extend(graphql_window(start, end))
     else:
+        partial = True
         print("::warning::GITHUB_TOKEN missing: review and issue contribution history may be incomplete.")
         for start, end in windows:
             for item in search("commits", start, end):
@@ -266,17 +290,25 @@ def discover(now):
                     if entry:
                         commits.append(entry)
     for start, end in windows:
-        for pr in search("prs", start, end):
-            if (pr.get("user") or {}).get("login", "").lower() != USER.lower():
-                continue
-            name = pr["repository_url"].removeprefix(API + "/repos/")
-            entry = candidate(name, pr["created_at"], "Pull request")
-            if entry:
-                commits.append(entry)
-                commits.extend(inspect_pr_commits(pr))
-        for item in search("comments", start, end):
-            commits.extend(comment_contributions(item))
-    return commits
+        try:
+            for pr in search("prs", start, end):
+                if (pr.get("user") or {}).get("login", "").lower() != USER.lower():
+                    continue
+                name = pr["repository_url"].removeprefix(API + "/repos/")
+                entry = candidate(name, pr["created_at"], "Pull request")
+                if entry:
+                    commits.append(entry)
+                    commits.extend(inspect_pr_commits(pr))
+        except SNAPSHOT_ERRORS as error:
+            partial = True
+            print(f"::warning::PR history incomplete ({type(error).__name__}: {error}).")
+        try:
+            for item in search("comments", start, end):
+                commits.extend(comment_contributions(item))
+        except SNAPSHOT_ERRORS as error:
+            partial = True
+            print(f"::warning::Comment history incomplete ({type(error).__name__}: {error}).")
+    return commits, partial
 
 
 def repository_metadata(entries):
@@ -316,8 +348,10 @@ def load_snapshot():
 
 def collect(previous=None, now=None):
     now = now or datetime.now(timezone.utc)
-    verified = repository_metadata(merge(discover(now), now=now))
-    return {"updated_at": now.isoformat(), "entries": merge(verified, now=now)}
+    entries, partial = discover(now)
+    verified = repository_metadata(merge(entries, now=now))
+    return {"updated_at": now.isoformat(), "entries": merge(verified, now=now),
+            "partial": partial}
 
 
 def render(snapshot):
@@ -336,7 +370,8 @@ def render(snapshot):
     if not rows:
         rows.append('<p class="section-lead">No verifiable public GitHub contributions available.</p>')
     updated = timestamp(snapshot["updated_at"])
-    rows.append(f'<p class="activity-note">Activity snapshot · {updated:%Y.%m.%d} UTC</p>')
+    status = " · Partial API coverage" if snapshot.get("partial") else ""
+    rows.append(f'<p class="activity-note">Activity snapshot · {updated:%Y.%m.%d} UTC{status}</p>')
     return "\n".join(rows)
 
 

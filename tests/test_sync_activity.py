@@ -89,6 +89,22 @@ class ContributionTests(unittest.TestCase):
         self.assertEqual(len(rows), 101)
         self.assertEqual(fetch.call_count, 2)
 
+    def test_limited_token_falls_back_to_throttled_public_search(self):
+        from urllib.error import HTTPError
+        denied = HTTPError(activity.API + "/search/issues", 422, "Validation Failed", {}, None)
+        with patch.object(activity, "ANONYMOUS_SEARCH", False), \
+             patch.object(activity, "NEXT_ANONYMOUS_SEARCH", 0.0), \
+             patch.object(activity, "fetch", side_effect=[denied, {"items": []}, {"items": []}]) as fetch, \
+             patch.object(activity.time, "sleep") as sleep, \
+             contextlib.redirect_stdout(io.StringIO()):
+            activity.search_fetch(activity.API + "/search/issues?q=first")
+            activity.search_fetch(activity.API + "/search/issues?q=second")
+            self.assertTrue(activity.ANONYMOUS_SEARCH)
+        self.assertEqual(fetch.call_args_list[0].kwargs, {})
+        self.assertEqual(fetch.call_args_list[1].kwargs, {"authenticated": False})
+        self.assertEqual(fetch.call_args_list[2].kwargs, {"authenticated": False})
+        sleep.assert_called_once()
+
     def test_authored_old_pr_commit_is_personal_activity(self):
         pr = {"repository_url": activity.API + "/repos/upstream/repo", "number": 7}
         commits = [
@@ -118,9 +134,25 @@ class ContributionTests(unittest.TestCase):
              patch.object(activity, "fetch", return_value=user), \
              patch.object(activity, "graphql_window", return_value=[old]) as graph, \
              patch.object(activity, "search", return_value=[]):
-            rows = activity.discover(NOW)
+            rows, partial = activity.discover(NOW)
         self.assertEqual(graph.call_count, 7)
         self.assertEqual(len(rows), 7)
+        self.assertFalse(partial)
+
+    def test_failed_supplemental_search_keeps_verified_graphql_results(self):
+        from urllib.error import HTTPError
+        denied = HTTPError(activity.API + "/search/issues", 403, "Rate limited", {}, None)
+        with patch.dict("os.environ", {"GITHUB_TOKEN": "test-token"}), \
+             patch.object(activity, "fetch", return_value={"created_at": "2026-01-01T00:00:00Z"}), \
+             patch.object(activity, "graphql_window", return_value=[record()]), \
+             patch.object(activity, "search", side_effect=denied), \
+             contextlib.redirect_stdout(io.StringIO()):
+            rows, partial = activity.discover(NOW)
+        self.assertTrue(partial)
+        self.assertEqual([r["name"] for r in rows], ["org/example"])
+        html = activity.render({"updated_at": NOW.isoformat(), "entries": rows,
+                                "partial": partial})
+        self.assertIn("Partial API coverage", html)
 
     def test_public_metadata_is_verified_without_organization_token(self):
         repo = {"full_name": "upstream/public", "private": False,
