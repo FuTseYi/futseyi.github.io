@@ -29,6 +29,7 @@ GRAPHQL = """
 query($login: String!, $from: DateTime!, $to: DateTime!) {
   user(login: $login) {
     contributionsCollection(from: $from, to: $to) {
+      totalRepositoriesWithContributedCommits
       commitContributionsByRepository(maxRepositories: 100) {
         repository {
           id nameWithOwner isPrivate isArchived isDisabled
@@ -59,7 +60,8 @@ def fetch(url, payload=None, authenticated=True):
             return json.load(response)
     except HTTPError as error:
         # Log only the endpoint and HTTP code, never the request credentials.
-        print(f"::warning::GitHub API {url.split('?', 1)[0].removeprefix(API)} returned HTTP {error.code}")
+        if error.code != 403:  # A public metadata lookup may recover anonymously.
+            print(f"::warning::GitHub API {url.split('?', 1)[0].removeprefix(API)} returned HTTP {error.code}")
         raise
 
 
@@ -113,7 +115,10 @@ def graphql_commits(now):
                      "variables": {"login": USER, "from": from_date, "to": now.isoformat()}})
     if response.get("errors"):
         raise ValueError("GitHub GraphQL returned errors")
-    groups = response["data"]["user"]["contributionsCollection"]["commitContributionsByRepository"]
+    collection = response["data"]["user"]["contributionsCollection"]
+    groups = collection["commitContributionsByRepository"]
+    if collection["totalRepositoriesWithContributedCommits"] > len(groups):
+        raise ValueError("Incomplete GraphQL repository coverage")
     entries = []
     for group in groups:
         repo = group["repository"]
@@ -239,7 +244,8 @@ def collect(previous=None, now=None):
     else:
         commits = search_commits(now)
     prs = search_prs(now)
-    candidates = merge(commits, prs, (previous or {}).get("entries", []), now=now, limit=None)
+    # A successful fetch must not reinstate historical records that GitHub no longer reports.
+    candidates = merge(commits, prs, now=now, limit=None)
     verified = repository_metadata(candidates)
     return {"updated_at": now.isoformat(), "entries": merge(verified, now=now)}
 
@@ -282,6 +288,8 @@ def main():
     if snapshot is None:
         SNAPSHOT.unlink(missing_ok=True)
         return
+    # A fallback retains its original fetch timestamp but never publishes expired entries.
+    snapshot = {**snapshot, "entries": merge(snapshot["entries"])}
     content = render(snapshot)
     html = re.sub(re.escape(START) + r".*?" + re.escape(END),
                   lambda _: START + "\n" + content + "\n" + END, html, flags=re.S)

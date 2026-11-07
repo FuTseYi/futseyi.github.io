@@ -37,7 +37,7 @@ class ContributionTests(unittest.TestCase):
 
     def test_graphql_reads_personal_date_not_repo_updated_at(self):
         payload = {"data": {"user": {"contributionsCollection": {
-            "commitContributionsByRepository": [
+            "totalRepositoriesWithContributedCommits": 2, "commitContributionsByRepository": [
                 {"repository": {"nameWithOwner": "org/code", "isPrivate": False,
                                 "isArchived": False, "isDisabled": False,
                                 "description": "text", "primaryLanguage": {"name": "Python"}},
@@ -50,6 +50,14 @@ class ContributionTests(unittest.TestCase):
             result = activity.graphql_commits(NOW)
         self.assertEqual([(x["name"], x["date"]) for x in result],
                          [("org/code", "2026-11-03T00:00:00Z")])
+
+    def test_graphql_reports_truncated_repository_coverage(self):
+        response = {"data": {"user": {"contributionsCollection": {
+            "totalRepositoriesWithContributedCommits": 101,
+            "commitContributionsByRepository": []}}}}
+        with patch.object(activity, "fetch", return_value=response):
+            with self.assertRaisesRegex(ValueError, "Incomplete GraphQL"):
+                activity.graphql_commits(NOW)
 
     def test_graphql_error_falls_back_to_rest_search(self):
         old = {"entries": []}
@@ -106,14 +114,36 @@ class ContributionTests(unittest.TestCase):
         self.assertEqual(entries[0]["name"], "org/public")
         self.assertEqual(fetch.call_args_list[1].kwargs, {"authenticated": False})
 
-    def test_collect_combines_old_verified_history_with_new_discovery(self):
+    def test_successful_refresh_does_not_republish_unverified_history(self):
         old = {"entries": [record("org/previous", "2026-09-01T00:00:00Z")]}
         with patch.dict("os.environ", {}, clear=True), \
              patch.object(activity, "search_commits", return_value=[record("org/new")]), \
              patch.object(activity, "search_prs", return_value=[]), \
              patch.object(activity, "repository_metadata", side_effect=lambda rows: rows):
             result = activity.collect(old, NOW)
-        self.assertEqual([x["name"] for x in result["entries"]], ["org/new", "org/previous"])
+        self.assertEqual([x["name"] for x in result["entries"]], ["org/new"])
+
+    def test_failed_refresh_expires_snapshot_without_faking_updated_at(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "_site").mkdir()
+            page = root / "_site/index.html"
+            page.write_text(activity.START + "fallback" + activity.END, encoding="utf-8")
+            cache = root / "_site/contributions.json"
+            now = datetime.now(timezone.utc)
+            original = {"updated_at": (now - timedelta(days=2)).isoformat(),
+                        "entries": [record("org/old", (now - timedelta(days=370)).isoformat()),
+                                    record("org/recent", (now - timedelta(days=10)).isoformat())]}
+            cache.write_text(json.dumps(original), encoding="utf-8")
+            with patch.object(activity, "ROOT", root), patch.object(activity, "SNAPSHOT", cache), \
+                 patch.object(activity, "collect", side_effect=URLError("offline")), \
+                 patch("sys.argv", ["sync_activity.py", "--refresh"]), \
+                 contextlib.redirect_stdout(io.StringIO()):
+                activity.main()
+            result = json.loads(cache.read_text(encoding="utf-8"))
+            self.assertEqual(result["updated_at"], original["updated_at"])
+            self.assertEqual([item["name"] for item in result["entries"]], ["org/recent"])
+            self.assertNotIn("org/old", page.read_text(encoding="utf-8"))
 
     def test_build_failure_preserves_original_snapshot_timestamp(self):
         with tempfile.TemporaryDirectory() as directory:
