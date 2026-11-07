@@ -299,7 +299,7 @@ def repository_metadata(entries):
         item = candidate(name, entry["date"], entry["activity"], repo)
         if item:
             verified.append(item)
-                return verified
+    return verified
 
 
 def load_snapshot():
