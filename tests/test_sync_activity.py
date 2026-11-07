@@ -20,8 +20,8 @@ def record(name="org/example", date="2020-01-01T12:00:00Z", label="Commit"):
 
 
 def group(name, date):
-    return {"repository": {"nameWithOwner": name, "isPrivate": False,
-                           "isArchived": False, "isDisabled": False},
+    return {"repository": {"nameWithOwner": name, "visibility": "PUBLIC",
+                           "description": "Test project", "primaryLanguage": {"name": "Python"}},
             "contributions": {"nodes": [{"occurredAt": date}]}}
 
 
@@ -159,17 +159,37 @@ class ContributionTests(unittest.TestCase):
                 "archived": False, "disabled": False, "description": "<unsafe>",
                 "language": "Python"}
         with patch.object(activity, "fetch", return_value=repo) as fetch:
-            rows = activity.repository_metadata([record("upstream/public")])
+            rows, partial = activity.repository_metadata([record("upstream/public")])
+        self.assertFalse(partial)
         self.assertEqual(len(rows), 1)
         self.assertFalse(fetch.call_args.kwargs["authenticated"])
         self.assertIn("&lt;unsafe&gt;", activity.render({"updated_at": NOW.isoformat(),
                                                        "entries": rows}))
 
+    def test_graphql_verified_repository_skips_anonymous_metadata_request(self):
+        trusted = {**record("upstream/verified"), "_public": True}
+        with patch.object(activity, "fetch", side_effect=AssertionError("unnecessary API call")):
+            rows, partial = activity.repository_metadata([trusted])
+        self.assertFalse(partial)
+        self.assertEqual([r["name"] for r in rows], ["upstream/verified"])
+        self.assertNotIn("_public", rows[0])
+
+    def test_unknown_repository_403_keeps_trusted_contributions(self):
+        from urllib.error import HTTPError
+        denied = HTTPError(activity.API + "/repos/unknown/repo", 403, "Rate limited", {}, None)
+        trusted = {**record("upstream/verified"), "_public": True}
+        with patch.object(activity, "fetch", side_effect=denied), \
+             contextlib.redirect_stdout(io.StringIO()):
+            rows, partial = activity.repository_metadata([trusted, record("unknown/repo")])
+        self.assertTrue(partial)
+        self.assertEqual([r["name"] for r in rows], ["upstream/verified"])
+
     def test_archived_public_repository_is_still_part_of_history(self):
         repo = {"full_name": "upstream/archived", "private": False, "archived": True,
                 "disabled": False, "visibility": "public"}
         with patch.object(activity, "fetch", return_value=repo):
-            rows = activity.repository_metadata([record("upstream/archived")])
+            rows, partial = activity.repository_metadata([record("upstream/archived")])
+        self.assertFalse(partial)
         self.assertEqual([row["name"] for row in rows], ["upstream/archived"])
 
     def test_local_snapshot_preserves_history(self):
