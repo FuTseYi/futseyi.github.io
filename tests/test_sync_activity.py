@@ -92,7 +92,7 @@ class ContributionTests(unittest.TestCase):
             self.assertEqual(fetch.call_count, 2)
 
     def test_visibility_revalidation_and_html_escape(self):
-        def fetch(url):
+        def fetch(url, authenticated=True):
             return {"full_name": url.rsplit("/repos/", 1)[1],
                     "private": url.endswith("/private"), "archived": url.endswith("/archived"),
                     "disabled": False, "description": "<unsafe>", "language": "JavaScript"}
