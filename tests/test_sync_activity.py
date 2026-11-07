@@ -51,6 +51,18 @@ class ContributionTests(unittest.TestCase):
         self.assertEqual([(x["name"], x["date"]) for x in result],
                          [("org/code", "2026-11-03T00:00:00Z")])
 
+    def test_graphql_error_falls_back_to_rest_search(self):
+        old = {"entries": []}
+        with patch.dict("os.environ", {"GITHUB_TOKEN": "test-token"}), \
+             patch.object(activity, "graphql_commits", side_effect=URLError("unavailable")), \
+             patch.object(activity, "search_commits", return_value=[record("org/rest")]) as rest, \
+             patch.object(activity, "search_prs", return_value=[]), \
+             patch.object(activity, "repository_metadata", side_effect=lambda rows: rows), \
+             contextlib.redirect_stdout(io.StringIO()):
+            entries = activity.collect(old, NOW)["entries"]
+        rest.assert_called_once_with(NOW)
+        self.assertEqual([entry["name"] for entry in entries], ["org/rest"])
+
     def test_rest_discovery_separates_commit_author_and_pr_author(self):
         commits = [{"author": {"login": "FuTseYi"}, "repository": {"full_name": "org/code"},
                     "commit": {"committer": {"date": "2026-10-01T10:00:00Z"}}},
