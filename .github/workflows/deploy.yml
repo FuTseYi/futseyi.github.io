@@ -48,14 +48,14 @@ jobs:
       - id: deployment
         uses: actions/deploy-pages@v5
   refresh-vercel:
-    if: github.event_name == 'schedule'
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     needs: publish
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
       - uses: actions/checkout@v7
-      - name: Trigger Vercel via scheduled commit
+      - name: Trigger Vercel via refresh commit
         run: |
           git fetch origin main
           git checkout -B main origin/main
