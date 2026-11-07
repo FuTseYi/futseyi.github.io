@@ -15,8 +15,6 @@ ROOT = Path(__file__).resolve().parents[1]
 USER = "FuTseYi"
 API = "https://api.github.com"
 SNAPSHOT = ROOT / "_site/contributions.json"
-MAX_REPOSITORIES = 12
-WINDOW_DAYS = 365
 EXCLUDED_REPOSITORIES = {"futseyi/futseyi.github.io", "futseyi/futseyi"}
 START = "<!-- CONTRIBUTIONS:START -->"
 END = "<!-- CONTRIBUTIONS:END -->"
@@ -27,11 +25,29 @@ query($login: String!, $from: DateTime!, $to: DateTime!) {
   user(login: $login) {
     contributionsCollection(from: $from, to: $to) {
       totalRepositoriesWithContributedCommits
+      totalRepositoriesWithContributedPullRequests
+      totalRepositoriesWithContributedIssues
+      totalRepositoriesWithContributedPullRequestReviews
       commitContributionsByRepository(maxRepositories: 100) {
-        repository {
-          id nameWithOwner isPrivate isArchived isDisabled
-          description primaryLanguage { name }
+        repository { nameWithOwner isPrivate isArchived isDisabled }
+        contributions(first: 1, orderBy: {field: OCCURRED_AT, direction: DESC}) {
+          nodes { occurredAt }
         }
+      }
+      pullRequestContributionsByRepository(maxRepositories: 100) {
+        repository { nameWithOwner isPrivate isArchived isDisabled }
+        contributions(first: 1, orderBy: {field: OCCURRED_AT, direction: DESC}) {
+          nodes { occurredAt }
+        }
+      }
+      issueContributionsByRepository(maxRepositories: 100) {
+        repository { nameWithOwner isPrivate isArchived isDisabled }
+        contributions(first: 1, orderBy: {field: OCCURRED_AT, direction: DESC}) {
+          nodes { occurredAt }
+        }
+      }
+      pullRequestReviewContributionsByRepository(maxRepositories: 100) {
+        repository { nameWithOwner isPrivate isArchived isDisabled }
         contributions(first: 1, orderBy: {field: OCCURRED_AT, direction: DESC}) {
           nodes { occurredAt }
         }
@@ -40,6 +56,13 @@ query($login: String!, $from: DateTime!, $to: DateTime!) {
   }
 }
 """
+KINDS = (
+    ("commitContributionsByRepository", "totalRepositoriesWithContributedCommits", "Commit"),
+    ("pullRequestContributionsByRepository", "totalRepositoriesWithContributedPullRequests", "Pull request"),
+    ("issueContributionsByRepository", "totalRepositoriesWithContributedIssues", "Issue"),
+    ("pullRequestReviewContributionsByRepository",
+     "totalRepositoriesWithContributedPullRequestReviews", "Review"),
+)
 
 
 def fetch(url, payload=None, authenticated=True):
@@ -62,10 +85,6 @@ def fetch(url, payload=None, authenticated=True):
         raise
 
 
-def cutoff(now):
-    return now - timedelta(days=WINDOW_DAYS)
-
-
 def timestamp(value):
     result = datetime.fromisoformat(value.replace("Z", "+00:00"))
     if result.tzinfo is None:
@@ -85,8 +104,8 @@ def candidate(name, date, activity, repo=None):
             "language": (repo or {}).get("language") or ""}
 
 
-def merge(*groups, now=None, limit=MAX_REPOSITORIES):
-    """A bounded, deterministic union; stale contributions are not retained forever."""
+def merge(*groups, now=None):
+    """Keep one latest verified personal contribution per repository, with no age or count cap."""
     now = now or datetime.now(timezone.utc)
     by_name = {}
     for group in groups:
@@ -95,90 +114,169 @@ def merge(*groups, now=None, limit=MAX_REPOSITORIES):
             if not valid_name(name):
                 continue
             date = timestamp(entry["date"])
-            if not cutoff(now) <= date <= now:
+            if date > now:
                 continue
             key = name.lower()
             if key not in by_name or timestamp(by_name[key]["date"]) < date:
                 by_name[key] = dict(entry)
-    ordered = sorted(by_name.values(), key=lambda e: (timestamp(e["date"]), e["name"].lower()),
-                     reverse=True)
-    return ordered[:limit] if limit is not None else ordered
+    return sorted(by_name.values(), key=lambda e: (timestamp(e["date"]), e["name"].lower()),
+                  reverse=True)
 
 
-def graphql_commits(now):
-    """GitHub's own contribution semantics; latest day rather than repo pushed_at."""
-    from_date = cutoff(now).isoformat()
+def annual_windows(start, end):
+    """Cover account lifetime with disjoint, <= one-year GraphQL windows."""
+    for year in range(start.year, end.year + 1):
+        left = max(start, datetime(year, 1, 1, tzinfo=timezone.utc))
+        right = min(end, datetime(year + 1, 1, 1, tzinfo=timezone.utc) - timedelta(seconds=1))
+        if left <= right:
+            yield left, right
+
+
+def graphql_window(start, end):
     response = fetch(API + "/graphql", {"query": GRAPHQL,
-                     "variables": {"login": USER, "from": from_date, "to": now.isoformat()}})
+                     "variables": {"login": USER, "from": start.isoformat(), "to": end.isoformat()}})
     if response.get("errors"):
         raise ValueError("GitHub GraphQL returned errors")
     collection = response["data"]["user"]["contributionsCollection"]
-    groups = collection["commitContributionsByRepository"]
-    if collection["totalRepositoriesWithContributedCommits"] > len(groups):
-        raise ValueError("Incomplete GraphQL repository coverage")
-    entries = []
-    for group in groups:
-        repo = group["repository"]
-        if repo["isPrivate"] or repo["isArchived"] or repo["isDisabled"]:
-            continue
-        nodes = group["contributions"]["nodes"]
-        if nodes:
-            entry = candidate(repo["nameWithOwner"], nodes[0]["occurredAt"], "Commit",
-                              {"description": repo.get("description"),
-                               "language": (repo.get("primaryLanguage") or {}).get("name")})
-            if entry:
-                entries.append(entry)
-    return entries
+    rows = []
+    for field, total, activity in KINDS:
+        groups = collection[field]
+        if collection[total] > len(groups):
+            # Distinct repositories per window may exceed the GraphQL maxRepositories cap.
+            if (end - start) < timedelta(days=1):
+                raise ValueError("GitHub GraphQL repository coverage exceeds daily capacity")
+            middle = start + (end - start) / 2
+            return graphql_window(start, middle) + graphql_window(middle + timedelta(seconds=1), end)
+        for group in groups:
+            repo = group["repository"]
+            if repo["isPrivate"] or repo["isArchived"] or repo["isDisabled"]:
+                continue
+            nodes = group["contributions"]["nodes"]
+            if nodes:
+                entry = candidate(repo["nameWithOwner"], nodes[0]["occurredAt"], activity)
+                if entry:
+                    rows.append(entry)
+    return rows
 
 
-def search(kind, now):
-    """Search is bounded to a year and paginated; fail rather than silently truncate."""
-    after = cutoff(now).date().isoformat()
-    if kind == "commits":
-        query = f"author:{USER} committer-date:>={after}"
-        endpoint = "/search/commits"
-        sort = "committer-date"
+def search(kind, start, end):
+    """Date-partition GitHub Search so its 1,000-result limit never silently truncates."""
+    if kind == "prs":
+        query, endpoint, sort = f"is:pr author:{USER}", "/search/issues", "created"
+    elif kind == "comments":
+        query, endpoint, sort = f"commenter:{USER}", "/search/issues", "created"
     else:
-        query = f"is:pr author:{USER} draft:false created:>={after}"
-        endpoint = "/search/issues"
-        sort = "created"
-    items = []
-    for page in range(1, 11):
-        params = urlencode({"q": query, "sort": sort, "order": "desc",
-                            "per_page": 100, "page": page})
-        result = fetch(API + endpoint + "?" + params)
-        if result.get("incomplete_results"):
-            raise ValueError("Incomplete GitHub search")
-        items.extend(result["items"])
-        if len(result["items"]) < 100:
-            break
-        if page == 10:
-            raise ValueError("GitHub search exceeded its 1000-result window")
-    return items
+        query, endpoint, sort = f"author:{USER}", "/search/commits", "committer-date"
+    def request(left, right):
+        after, before = left.date().isoformat(), right.date().isoformat()
+        clause = "committer-date" if kind == "commits" else "created"
+        q = f"{query} {clause}:{after}..{before}"
+        params = urlencode({"q": q, "sort": sort, "order": "desc", "per_page": 100, "page": 1})
+        first = fetch(API + endpoint + "?" + params)
+        if first.get("incomplete_results"):
+            raise ValueError("Incomplete GitHub Search index")
+        if first["total_count"] > 1000:
+            if after == before:
+                raise ValueError("GitHub Search exceeded 1,000 results in one day")
+            midpoint = left.date() + timedelta(days=(right.date() - left.date()).days // 2)
+            pivot = datetime(midpoint.year, midpoint.month, midpoint.day, tzinfo=timezone.utc)
+            return request(left, pivot) + request(pivot + timedelta(days=1), right)
+        items = list(first["items"])
+        for page in range(2, (first["total_count"] + 99) // 100 + 1):
+            params = urlencode({"q": q, "sort": sort, "order": "desc", "per_page": 100, "page": page})
+            result = fetch(API + endpoint + "?" + params)
+            if result.get("incomplete_results"):
+                raise ValueError("Incomplete GitHub Search index")
+            items.extend(result["items"])
+        return items
+    return request(start, end)
 
 
-def search_commits(now):
-    entries = []
-    for item in search("commits", now):
-        if (item.get("author") or {}).get("login", "").lower() != USER.lower():
-            continue
-        repo = item["repository"]
-        entry = candidate(repo["full_name"], item["commit"]["committer"]["date"], "Commit")
-        if entry:
-            entries.append(entry)
-    return entries
+def pages(url, authenticated=False):
+    """Walk public REST collections without silently dropping later pages."""
+    for page in range(1, 101):
+        items = fetch(url + ("&" if "?" in url else "?") +
+                      urlencode({"per_page": 100, "page": page}), authenticated=authenticated)
+        yield from items
+        if len(items) < 100:
+            return
+    raise ValueError("GitHub REST pagination exceeded 10,000 items")
 
 
-def search_prs(now):
-    entries = []
-    for item in search("prs", now):
-        if (item.get("user") or {}).get("login", "").lower() != USER.lower():
-            continue
-        entry = candidate(item["repository_url"].removeprefix(API + "/repos/"),
-                          item["created_at"], "Pull request")
-        if entry:
-            entries.append(entry)
-    return entries
+def inspect_pr_commits(pr):
+    """Find personal commits in PR heads, including unmerged contributions on branches."""
+    repo_name = pr["repository_url"].removeprefix(API + "/repos/")
+    if not valid_name(repo_name):
+        return []
+    rows = []
+    url = API + "/repos/" + repo_name + "/pulls/" + str(pr["number"]) + "/commits"
+    try:
+        for commit in pages(url, authenticated=repo_name.split("/")[0].lower() == USER.lower()):
+            if (commit.get("author") or {}).get("login", "").lower() != USER.lower():
+                continue
+            date = (commit.get("commit") or {}).get("author", {}).get("date")
+            if date:
+                entry = candidate(repo_name, date, "Commit")
+                if entry:
+                    rows.append(entry)
+    except HTTPError as error:
+        if error.code != 404:
+            raise
+    return rows
+
+
+def comment_contributions(item):
+    """Never treat an issue's updated_at (which anyone can change) as personal activity."""
+    repo_name = item["repository_url"].removeprefix(API + "/repos/")
+    if not valid_name(repo_name):
+        return []
+    number = item["number"]
+    urls = [API + "/repos/" + repo_name + "/issues/" + str(number) + "/comments"]
+    if "pull_request" in item:
+        urls.append(API + "/repos/" + repo_name + "/pulls/" + str(number) + "/comments")
+    rows = []
+    try:
+        for url in urls:
+            for comment in pages(url, authenticated=repo_name.split("/")[0].lower() == USER.lower()):
+                if (comment.get("user") or {}).get("login", "").lower() == USER.lower():
+                    entry = candidate(repo_name, comment["created_at"], "Comment")
+                    if entry:
+                        rows.append(entry)
+    except HTTPError as error:
+        if error.code != 404:
+            raise
+    return rows
+
+
+def discover(now):
+    created = timestamp(fetch(API + "/users/" + USER)["created_at"])
+    windows = list(annual_windows(created, now))
+    commits = []
+    # GitHub GraphQL covers attributed commits, authored PRs/issues and submitted reviews.
+    if os.environ.get("GITHUB_TOKEN"):
+        for start, end in windows:
+            commits.extend(graphql_window(start, end))
+    else:
+        print("::warning::GITHUB_TOKEN missing: review and issue contribution history may be incomplete.")
+        for start, end in windows:
+            for item in search("commits", start, end):
+                if (item.get("author") or {}).get("login", "").lower() == USER.lower():
+                    entry = candidate(item["repository"]["full_name"],
+                                      item["commit"]["author"]["date"], "Commit")
+                    if entry:
+                        commits.append(entry)
+    for start, end in windows:
+        for pr in search("prs", start, end):
+            if (pr.get("user") or {}).get("login", "").lower() != USER.lower():
+                continue
+            name = pr["repository_url"].removeprefix(API + "/repos/")
+            entry = candidate(name, pr["created_at"], "Pull request")
+            if entry:
+                commits.append(entry)
+                commits.extend(inspect_pr_commits(pr))
+        for item in search("comments", start, end):
+            commits.extend(comment_contributions(item))
+    return commits
 
 
 def repository_metadata(entries):
@@ -201,9 +299,7 @@ def repository_metadata(entries):
         item = candidate(name, entry["date"], entry["activity"], repo)
         if item:
             verified.append(item)
-            if len(verified) >= MAX_REPOSITORIES:
-                break
-    return verified
+                return verified
 
 
 def load_snapshot():
@@ -221,19 +317,7 @@ def load_snapshot():
 
 def collect(previous=None, now=None):
     now = now or datetime.now(timezone.utc)
-    # Without credentials, the REST commit search still works (with narrower rate limits).
-    if os.environ.get("GITHUB_TOKEN"):
-        try:
-            commits = graphql_commits(now)
-        except (HTTPError, URLError, ValueError, KeyError, TypeError) as error:
-            print(f"::warning::GraphQL commits unavailable ({type(error).__name__}); trying REST commit search.")
-            commits = search_commits(now)
-    else:
-        commits = search_commits(now)
-    prs = search_prs(now)
-    # A successful fetch must not reinstate historical records that GitHub no longer reports.
-    candidates = merge(commits, prs, now=now, limit=None)
-    verified = repository_metadata(candidates)
+    verified = repository_metadata(merge(discover(now), now=now))
     return {"updated_at": now.isoformat(), "entries": merge(verified, now=now)}
 
 
@@ -251,7 +335,7 @@ def render(snapshot):
                     f'{escape(name)} <span class="link-arrow" aria-hidden="true"></span></a></h3>'
                     f'{description}<div class="project-tags"><span>{tags}</span></div></div></article>')
     if not rows:
-        rows.append('<p class="section-lead">No recent public commits or pull requests in the available activity window.</p>')
+        rows.append('<p class="section-lead">No verifiable public GitHub contributions available.</p>')
     updated = timestamp(snapshot["updated_at"])
     rows.append(f'<p class="activity-note">Activity snapshot · {updated:%Y.%m.%d} UTC</p>')
     return "\n".join(rows)
@@ -259,7 +343,7 @@ def render(snapshot):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--refresh", action="store_true", help="Fetch fresh public GitHub activity")
+    parser.add_argument("--refresh", action="store_true", help="Fetch public GitHub contributions")
     options = parser.parse_args()
     page = ROOT / "_site/index.html"
     html = page.read_text(encoding="utf-8")
@@ -275,7 +359,7 @@ def main():
     if snapshot is None:
         SNAPSHOT.unlink(missing_ok=True)
         return
-    # A fallback retains its original fetch timestamp but never publishes expired entries.
+    # Preserve original snapshot timestamp on API failure; never invent new activity.
     snapshot = {**snapshot, "entries": merge(snapshot["entries"])}
     content = render(snapshot)
     html = re.sub(re.escape(START) + r".*?" + re.escape(END),
