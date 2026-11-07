@@ -274,11 +274,13 @@ def discover(now):
     created = timestamp(fetch(API + "/users/" + USER)["created_at"])
     windows = list(annual_windows(created, now))
     commits = []
+    partial = False
     # GitHub GraphQL covers attributed commits, authored PRs/issues and submitted reviews.
     if os.environ.get("GITHUB_TOKEN"):
         for start, end in windows:
             commits.extend(graphql_window(start, end))
     else:
+        partial = True
         print("::warning::GITHUB_TOKEN missing: review and issue contribution history may be incomplete.")
         for start, end in windows:
             for item in search("commits", start, end):
@@ -288,17 +290,25 @@ def discover(now):
                     if entry:
                         commits.append(entry)
     for start, end in windows:
-        for pr in search("prs", start, end):
-            if (pr.get("user") or {}).get("login", "").lower() != USER.lower():
-                continue
-            name = pr["repository_url"].removeprefix(API + "/repos/")
-            entry = candidate(name, pr["created_at"], "Pull request")
-            if entry:
-                commits.append(entry)
-                commits.extend(inspect_pr_commits(pr))
-        for item in search("comments", start, end):
-            commits.extend(comment_contributions(item))
-    return commits
+        try:
+            for pr in search("prs", start, end):
+                if (pr.get("user") or {}).get("login", "").lower() != USER.lower():
+                    continue
+                name = pr["repository_url"].removeprefix(API + "/repos/")
+                entry = candidate(name, pr["created_at"], "Pull request")
+                if entry:
+                    commits.append(entry)
+                    commits.extend(inspect_pr_commits(pr))
+        except SNAPSHOT_ERRORS as error:
+            partial = True
+            print(f"::warning::PR history incomplete ({type(error).__name__}: {error}).")
+        try:
+            for item in search("comments", start, end):
+                commits.extend(comment_contributions(item))
+        except SNAPSHOT_ERRORS as error:
+            partial = True
+            print(f"::warning::Comment history incomplete ({type(error).__name__}: {error}).")
+    return commits, partial
 
 
 def repository_metadata(entries):
@@ -338,8 +348,10 @@ def load_snapshot():
 
 def collect(previous=None, now=None):
     now = now or datetime.now(timezone.utc)
-    verified = repository_metadata(merge(discover(now), now=now))
-    return {"updated_at": now.isoformat(), "entries": merge(verified, now=now)}
+    entries, partial = discover(now)
+    verified = repository_metadata(merge(entries, now=now))
+    return {"updated_at": now.isoformat(), "entries": merge(verified, now=now),
+            "partial": partial}
 
 
 def render(snapshot):
@@ -358,7 +370,8 @@ def render(snapshot):
     if not rows:
         rows.append('<p class="section-lead">No verifiable public GitHub contributions available.</p>')
     updated = timestamp(snapshot["updated_at"])
-    rows.append(f'<p class="activity-note">Activity snapshot · {updated:%Y.%m.%d} UTC</p>')
+    status = " · Partial API coverage" if snapshot.get("partial") else ""
+    rows.append(f'<p class="activity-note">Activity snapshot · {updated:%Y.%m.%d} UTC{status}</p>')
     return "\n".join(rows)
 
 
