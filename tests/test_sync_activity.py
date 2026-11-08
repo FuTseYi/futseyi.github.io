@@ -209,7 +209,7 @@ class ContributionTests(unittest.TestCase):
                  patch.object(activity, "collect", return_value=payload):
                 activity.write_source()
                 self.assertEqual(json.loads(path.read_text(encoding="utf-8")), payload)
-                self.assertTrue(path.read_text(encoding="utf-8").endswith("\\n"))
+                self.assertTrue(path.read_text(encoding="utf-8").endswith("\n"))
                 first = path.read_bytes()
                 payload["updated_at"] = (NOW + timedelta(hours=3)).isoformat()
                 activity.write_source()
