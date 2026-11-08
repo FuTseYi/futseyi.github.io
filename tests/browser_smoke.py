@@ -220,7 +220,7 @@ def check_contribution_expansion(page):
         if button.inner_text().startswith("Show more"):
             page.evaluate("window.scrollTo({top: 0, behavior: 'instant'})")
             before = page.evaluate("window.scrollY")
-            button.click()
+            button.evaluate("(element) => element.click()")
             page.wait_for_timeout(800)
             assert page.evaluate("window.scrollY") > before, "Later-year reveal should auto-scroll"
 
