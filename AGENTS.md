@@ -19,7 +19,7 @@ Treat the site as one coherent system. Prefer sound architecture, consistent des
 - `preview.py`: Build verification and local preview. `scripts/site_build.py` owns this site's isolated blog, activity and search pipeline. Keep UI and business choices local to this repository.
 - `vercel.json`: Vercel adapter for the same `_site/` output used by GitHub Pages; never maintain a second site builder.
 
-See [PREVIEW.md](PREVIEW.md) for commands, publishing, and browser checks. Do not commit generated `blog/`, `_site/`, `sitemap.xml`, or activity snapshots.
+See [PREVIEW.md](PREVIEW.md) for commands, publishing, and browser checks. Do not commit generated `blog/`, `_site/`, or `sitemap.xml`; the root `contributions.json` is the **single tracked canonical activity input**, updated only by the GitHub Actions sync.
 
 ## Engineering Principles
 
