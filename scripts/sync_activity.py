@@ -67,7 +67,7 @@ query($login: String!, $from: DateTime!, $to: DateTime!) {
       repositoryContributions(first: 100) {
         nodes {
           occurredAt
-          repository { nameWithOwner visibility description primaryLanguage { name } }
+          repository { nameWithOwner visibility isFork description primaryLanguage { name } }
         }
       }
     }
@@ -174,7 +174,7 @@ def collection(start, end):
                 if entry:
                     entries.append(entry)
     for node in rows["repositoryContributions"]["nodes"]:
-        if node:
+        if node and not node["repository"]["isFork"]:
             entry = contribution(node["repository"], node["occurredAt"], "Repository")
             if entry:
                 entries.append(entry)
