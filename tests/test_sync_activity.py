@@ -15,8 +15,8 @@ import sync_activity as activity
 NOW = datetime(2026, 11, 7, 12, tzinfo=timezone.utc)
 
 
-def repo(name="upstream/project", visibility="PUBLIC"):
-    return {"nameWithOwner": name, "visibility": visibility,
+def repo(name="upstream/project", visibility="PUBLIC", is_fork=False):
+    return {"nameWithOwner": name, "visibility": visibility, "isFork": is_fork,
             "description": "<Safe project>", "primaryLanguage": {"name": "Python"}}
 
 
@@ -74,6 +74,37 @@ class ContributionTests(unittest.TestCase):
         self.assertEqual({entry["activity"] for entry in rows},
                          {"Commit", "Pull request", "Issue", "Review", "Repository"})
         self.assertEqual(len(rows), 5)
+
+    def test_fork_only_creation_does_not_count_as_a_contribution(self):
+        fork_names = ("FuTseYi/jailbreaks", "FuTseYi/Shadowrocket", "FuTseYi/edit")
+        creations = [{"occurredAt": "2026-11-07T00:00:00Z",
+                      "repository": repo(name, is_fork=True)} for name in fork_names]
+        creations.append({"occurredAt": "2025-05-01T00:00:00Z",
+                          "repository": repo("FuTseYi/original")})
+        payload = collection_result({
+            "totalRepositoryContributions": len(creations),
+            "repositoryContributions": {"nodes": creations},
+        })
+        with patch.object(activity, "query", return_value=payload):
+            rows = activity.collection(NOW - timedelta(days=10), NOW)
+        self.assertEqual([entry["name"] for entry in rows], ["FuTseYi/original"])
+        self.assertEqual(rows[0]["activity"], "Repository")
+
+    def test_fork_with_a_real_official_contribution_is_retained(self):
+        fork = repo("FuTseYi/edit", is_fork=True)
+        field, total, _ = activity.KINDS[0]
+        payload = collection_result({
+            field: [group(repository=fork)],
+            total: 1,
+            "totalRepositoryContributions": 1,
+            "repositoryContributions": {"nodes": [{
+                "occurredAt": "2026-11-07T00:00:00Z", "repository": fork
+            }]},
+        })
+        with patch.object(activity, "query", return_value=payload):
+            rows = activity.collection(NOW - timedelta(days=10), NOW)
+        self.assertEqual([(entry["name"], entry["activity"]) for entry in rows],
+                         [("FuTseYi/edit", "Commit")])
 
     def test_nonpublic_and_excluded_repositories_never_render(self):
         self.assertIsNone(activity.contribution(repo(visibility="PRIVATE"),
