@@ -141,6 +141,71 @@ def check_site_navigation(page, width):
         assert page.evaluate("""() => !(window.__scrollHistory || []).some(y => y > 15 && y < 600)"""), "Repeated navigation animated the scroll position"
 
 
+
+def check_contribution_expansion(page):
+    """Use fixed contribution years to verify incremental reveal, independent of live API."""
+    source = (SITE / "index.html").read_text(encoding="utf-8")
+    dates = ("2026-11-06", "2026-10-20", "2026-09-18", "2026-03-14",
+             "2025-12-08", "2025-04-21", "2024-07-15", "2022-03-01")
+    articles = "".join(
+        f'<article class="project-item"><time class="contribution-date" datetime="{date}">{date}</time>'
+        f'<div><h3><a href="https://github.com/example/repo-{i}">Repo {i}</a></h3></div></article>'
+        for i, date in enumerate(dates)
+    )
+    import re
+    source = re.sub(r"<!-- CONTRIBUTIONS:START -->.*?<!-- CONTRIBUTIONS:END -->",
+                    "<!-- CONTRIBUTIONS:START -->" + articles +
+                    '<p class="activity-note">Activity snapshot</p><!-- CONTRIBUTIONS:END -->',
+                    source, flags=re.S)
+    page.route("http://127.0.0.1:8766/", lambda route: route.fulfill(
+        status=200, content_type="text/html", body=source))
+    page.goto("http://127.0.0.1:8766/", wait_until="networkidle")
+    list_items = page.locator("#contribution-list .project-item")
+    button = page.locator("#contribution-list + .list-toggle")
+    assert list_items.count() == 8
+    assert button.count() == 1
+
+    def visible():
+        return list_items.evaluate_all("(items) => items.filter(item => !item.hidden).length")
+
+    assert visible() == 3
+    assert button.inner_text() == "Show more · 2026"
+    assert button.get_attribute("aria-expanded") == "false"
+    assert page.locator("#contribution-list-extra").get_attribute("inert") is not None
+    for year, expected in ((2026, 4), (2025, 6), (2024, 7), (2022, 8)):
+        assert button.inner_text() == f"Show more · {year}"
+        button.click()
+        assert visible() == expected
+        assert button.get_attribute("aria-expanded") == "true"
+        assert page.locator("#contribution-list-extra").get_attribute("inert") is None
+    assert button.inner_text() == "Show less"
+    button.click()
+    assert visible() == 3
+    assert button.get_attribute("aria-expanded") == "false"
+    assert page.locator("#contribution-list-extra").get_attribute("inert") is not None
+    assert button.inner_text() == "Show more · 2026"
+
+    # Three initially visible entries can already span different years.
+    dates = ("2026-11-06", "2025-12-08", "2025-11-07", "2025-04-21", "2024-07-15")
+    articles = "".join(
+        f'<article class="project-item"><time datetime="{date}">{date}</time><div>Repo {i}</div></article>'
+        for i, date in enumerate(dates)
+    )
+    source = re.sub(r"<!-- CONTRIBUTIONS:START -->.*?<!-- CONTRIBUTIONS:END -->",
+                    "<!-- CONTRIBUTIONS:START -->" + articles +
+                    '<p class="activity-note">Activity snapshot</p><!-- CONTRIBUTIONS:END -->',
+                    (SITE / "index.html").read_text(encoding="utf-8"), flags=re.S)
+    page.unroute("http://127.0.0.1:8766/")
+    page.route("http://127.0.0.1:8766/", lambda route: route.fulfill(
+        status=200, content_type="text/html", body=source))
+    page.goto("http://127.0.0.1:8766/", wait_until="networkidle")
+    button = page.locator("#contribution-list + .list-toggle")
+    assert button.inner_text() == "Show more · 2025"
+    button.click()
+    assert page.locator("#contribution-list .project-item:not([hidden])").count() == 4
+    assert button.inner_text() == "Show more · 2024"
+
+
 def check_search(page):
     page.goto("http://127.0.0.1:8766/blog/", wait_until="networkidle")
     page.locator(".search-open").click()
@@ -196,6 +261,7 @@ def main():
             context.close()
             context = browser.new_context(viewport={"width": 1024, "height": 850}, reduced_motion="reduce")
             check_search(context.new_page())
+            check_contribution_expansion(context.new_page())
             context.close()
             context = browser.new_context(viewport={"width": 390, "height": 850}, reduced_motion="reduce")
             page = context.new_page()
