@@ -281,6 +281,8 @@
     document.querySelectorAll('[data-expandable]').forEach((list) => {
       const extra = [...list.querySelectorAll(':scope > .project-item')].slice(3);
       if (!extra.length) return;
+      const yearOf = (item) => item.querySelector('time[datetime]').getAttribute('datetime').slice(0, 4);
+      const years = [...new Set(extra.map(yearOf))];
       const panel = document.createElement('div');
       panel.className = 'expandable-panel';
       panel.id = `${list.id}-extra`;
@@ -293,15 +295,19 @@
       button.type = 'button';
       button.className = 'list-toggle';
       button.setAttribute('aria-controls', panel.id);
-      const setExpanded = (expanded) => {
+      let revealed = 0;
+      const sync = () => {
+        const expanded = revealed > 0;
         list.classList.toggle('is-open', expanded);
         panel.inert = !expanded;
+        extra.forEach((item) => { item.hidden = years.indexOf(yearOf(item)) >= revealed; });
         button.setAttribute('aria-expanded', String(expanded));
-        button.textContent = expanded ? 'Show less' : 'Show more';
+        button.textContent = revealed === years.length ? 'Show less' : `Show more · ${years[revealed]}`;
       };
-      setExpanded(false);
+      sync();
       button.addEventListener('click', () => {
-        setExpanded(!list.classList.contains('is-open'));
+        revealed = revealed === years.length ? 0 : revealed + 1;
+        sync();
         releaseTarget();
       });
       panel.addEventListener('transitionend', (event) => {
