@@ -170,15 +170,18 @@ def check_contribution_expansion(page):
 
     assert visible() == 3
     assert button.inner_text() == "Show more · 2026"
+    assert button.get_attribute("data-has-more") == "true"
     assert button.get_attribute("aria-expanded") == "false"
     assert page.locator("#contribution-list-extra").get_attribute("inert") is not None
     for year, expected in ((2026, 4), (2025, 6), (2024, 7), (2022, 8)):
         assert button.inner_text() == f"Show more · {year}"
         button.click()
         assert visible() == expected
+        assert button.get_attribute("data-has-more") == ("false" if year == 2022 else "true")
         assert button.get_attribute("aria-expanded") == "true"
         assert page.locator("#contribution-list-extra").get_attribute("inert") is None
     assert button.inner_text() == "Show less"
+    assert button.evaluate("(e) => getComputedStyle(e, ':after').transform").count(",") == 5
     button.click()
     assert visible() == 3
     assert button.get_attribute("aria-expanded") == "false"
@@ -204,6 +207,22 @@ def check_contribution_expansion(page):
     button.click()
     assert page.locator("#contribution-list .project-item:not([hidden])").count() == 4
     assert button.inner_text() == "Show more · 2024"
+
+    # Motion-enabled users get an automatic scroll for every successive year,
+    # even after the first panel-opening CSS transition has already completed.
+    page.unroute("http://127.0.0.1:8766/")
+    page.goto("http://127.0.0.1:8766/", wait_until="networkidle")
+    page.emulate_media(reduced_motion="no-preference")
+    button = page.locator("#contribution-list + .list-toggle")
+    if button.count():
+        button.click()
+        page.wait_for_timeout(350)
+        if button.inner_text().startswith("Show more"):
+            page.evaluate("window.scrollTo({top: 0, behavior: 'instant'})")
+            before = page.evaluate("window.scrollY")
+            button.click()
+            page.wait_for_timeout(800)
+            assert page.evaluate("window.scrollY") > before, "Later-year reveal should auto-scroll"
 
 
 def check_search(page):
