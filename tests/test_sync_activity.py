@@ -1,4 +1,5 @@
-"""Offline regression tests for full-history GitHub contribution discovery."""
+"""Offline regression tests for the official all-time GitHub contribution collector."""
+
 import contextlib
 import io
 import json
@@ -14,208 +15,132 @@ import sync_activity as activity
 NOW = datetime(2026, 11, 7, 12, tzinfo=timezone.utc)
 
 
-def record(name="org/example", date="2020-01-01T12:00:00Z", label="Commit"):
+def repo(name="upstream/project", visibility="PUBLIC"):
+    return {"nameWithOwner": name, "visibility": visibility,
+            "description": "<Safe project>", "primaryLanguage": {"name": "Python"}}
+
+
+def record(name="upstream/project", date="2020-01-01T12:00:00Z", label="Commit"):
     return {"name": name, "date": date, "activity": label,
-            "description": "Safe <text>", "language": "Python"}
+            "description": "Example", "language": "Python"}
 
 
-def group(name, date):
-    return {"repository": {"nameWithOwner": name, "visibility": "PUBLIC",
-                           "description": "Test project", "primaryLanguage": {"name": "Python"}},
-            "contributions": {"nodes": [{"occurredAt": date}]}}
-
-
-def graphql(groups=None, totals=None):
-    groups = groups or {}
-    totals = totals or {}
-    collection = {}
+def collection_result(overrides=None):
+    rows = {"repositoryContributions": {"nodes": []}, "totalRepositoryContributions": 0}
     for field, total, _ in activity.KINDS:
-        collection[field] = groups.get(field, [])
-        collection[total] = totals.get(total, len(collection[field]))
-    return {"data": {"user": {"contributionsCollection": collection}}}
+        rows[field] = []
+        rows[total] = 0
+    rows.update(overrides or {})
+    return {"contributionsCollection": rows}
+
+
+def group(date="2026-11-01T00:00:00Z", repository=None):
+    return {"repository": repository or repo(), "contributions": {"nodes": [{"occurredAt": date}]}}
 
 
 class ContributionTests(unittest.TestCase):
-    def test_merge_preserves_old_history_with_no_repository_cap(self):
-        entries = [record(f"org/project-{i}", f"2020-01-{i+1:02d}T12:00:00Z")
-                   for i in range(20)]
-        entries += [record("ORG/PROJECT-0", "2026-11-06T12:00:00Z", "Pull request"),
-                    record("FuTseYi/FuTseYi"), record("FuTseYi/futseyi.github.io")]
-        rows = activity.merge(entries, now=NOW)
-        self.assertEqual(len(rows), 20)
-        self.assertEqual(rows[0]["name"], "ORG/PROJECT-0")
-        self.assertEqual(rows[0]["activity"], "Pull request")
-        self.assertEqual(rows[-1]["date"][:4], "2020")
+    def test_merge_keeps_every_year_and_repository_without_artificial_limit(self):
+        rows = [record(f"org/project-{i}", f"2020-01-{i + 1:02d}T12:00:00Z")
+                for i in range(20)]
+        rows += [record("ORG/PROJECT-0", "2026-11-06T12:00:00Z", "Review"),
+                 record("FuTseYi/futseyi.github.io"), record("FuTseYi/FuTseYi")]
+        merged = activity.merge(rows, NOW)
+        self.assertEqual(len(merged), 20)
+        self.assertEqual(merged[0]["name"], "ORG/PROJECT-0")
+        self.assertEqual(merged[0]["activity"], "Review")
+        self.assertEqual(merged[-1]["date"][:4], "2020")
 
-    def test_annual_windows_cover_all_years_without_overlap(self):
-        start = datetime(2018, 7, 3, tzinfo=timezone.utc)
-        windows = list(activity.annual_windows(start, NOW))
-        self.assertEqual(len(windows), 9)
-        self.assertEqual(windows[0][0], start)
-        self.assertEqual(windows[-1][1], NOW)
-        for (_, right), (left, _) in zip(windows, windows[1:]):
-            self.assertEqual(left - right, timedelta(seconds=1))
+    def test_leap_year_is_covered_without_one_year_query_overflow(self):
+        periods = list(activity.windows(2024, NOW))
+        self.assertEqual(len(periods), 2)
+        self.assertEqual(periods[0][0], datetime(2024, 1, 1, tzinfo=timezone.utc))
+        self.assertEqual(periods[-1][1], datetime(2024, 12, 31, 23, 59, 59,
+                                                  tzinfo=timezone.utc))
+        self.assertEqual(periods[1][0] - periods[0][1], timedelta(seconds=1))
+        self.assertTrue(all(end - start < timedelta(days=365) for start, end in periods))
 
-    def test_graphql_covers_commit_pr_issue_and_review(self):
-        keys = [field for field, _, _ in activity.KINDS]
-        result = graphql({key: [group(f"org/repo-{i}", "2021-03-01T00:00:00Z")]
-                          for i, key in enumerate(keys)})
-        with patch.object(activity, "fetch", return_value=result):
-            rows = activity.graphql_window(NOW - timedelta(days=2), NOW)
-        self.assertEqual({r["activity"] for r in rows},
-                         {"Commit", "Pull request", "Issue", "Review"})
+    def test_official_categories_include_repository_creation(self):
+        fields = [field for field, _, _ in activity.KINDS]
+        payload = {field: [group(repository=repo(f"org/repo-{i}"))]
+                   for i, field in enumerate(fields)}
+        for field, total, _ in activity.KINDS:
+            payload[total] = 1
+        payload["totalRepositoryContributions"] = 1
+        payload["repositoryContributions"] = {"nodes": [{
+            "occurredAt": "2022-05-01T00:00:00Z", "repository": repo("org/new")
+        }]}
+        with patch.object(activity, "query", return_value=collection_result(payload)):
+            rows = activity.collection(NOW - timedelta(days=5), NOW)
+        self.assertEqual({entry["activity"] for entry in rows},
+                         {"Commit", "Pull request", "Issue", "Review", "Repository"})
+        self.assertEqual(len(rows), 5)
 
-    def test_graphql_splits_incomplete_repo_coverage(self):
-        field, count, _ = activity.KINDS[0]
-        bad = graphql(totals={count: 101})
-        okay = graphql({field: [group("org/old", "2026-11-01T00:00:00Z")]})
-        with patch.object(activity, "fetch", side_effect=[bad, okay, okay]) as fetch:
-            rows = activity.graphql_window(NOW - timedelta(days=30), NOW)
+    def test_nonpublic_and_excluded_repositories_never_render(self):
+        self.assertIsNone(activity.contribution(repo(visibility="PRIVATE"),
+                                                "2026-11-01T00:00:00Z", "Commit"))
+        self.assertIsNone(activity.contribution(repo("FuTseYi/FuTseYi"),
+                                                "2026-11-01T00:00:00Z", "Commit"))
+        self.assertIsNone(activity.contribution(repo("FuTseYi/futseyi.github.io"),
+                                                "2026-11-01T00:00:00Z", "Commit"))
+        self.assertIsNotNone(activity.contribution(repo("org/archived"),
+                                                  "2020-01-01T00:00:00Z", "Commit"))
+
+    def test_graphql_incomplete_repositories_split_instead_of_truncate(self):
+        field, total, _ = activity.KINDS[0]
+        oversized = collection_result({total: 101})
+        leaf = collection_result({field: [group()], total: 1})
+        with patch.object(activity, "query", side_effect=[oversized, leaf, leaf]) as query:
+            rows = activity.collection(NOW - timedelta(days=10), NOW)
         self.assertEqual(len(rows), 2)
-        self.assertEqual(fetch.call_count, 3)
+        self.assertEqual(query.call_count, 3)
 
-    def test_search_splits_more_than_one_thousand_in_a_day(self):
-        too_many = {"total_count": 1001, "items": [], "incomplete_results": False}
-        with patch.object(activity, "fetch", return_value=too_many):
-            with self.assertRaisesRegex(ValueError, "one day"):
-                activity.search("prs", NOW, NOW)
+    def test_daily_oversized_result_is_an_explicit_failure(self):
+        _, total, _ = activity.KINDS[0]
+        with patch.object(activity, "query", return_value=collection_result({total: 101})):
+            with self.assertRaisesRegex(ValueError, "within one day"):
+                activity.collection(NOW, NOW)
 
-    def test_search_paginated_without_losing_old_prs(self):
-        first = {"total_count": 101, "items": [{"number": i} for i in range(100)],
-                 "incomplete_results": False}
-        second = {"total_count": 101, "items": [{"number": 100}], "incomplete_results": False}
-        with patch.object(activity, "fetch", side_effect=[first, second]) as fetch:
-            rows = activity.search("prs", NOW - timedelta(days=1), NOW)
-        self.assertEqual(len(rows), 101)
-        self.assertEqual(fetch.call_count, 2)
+    def test_repository_creation_overflow_is_not_silently_truncated(self):
+        oversized = collection_result({"totalRepositoryContributions": 101})
+        with patch.object(activity, "query", return_value=oversized):
+            with self.assertRaisesRegex(ValueError, "within one day"):
+                activity.collection(NOW, NOW)
 
-    def test_limited_token_falls_back_to_throttled_public_search(self):
-        from urllib.error import HTTPError
-        denied = HTTPError(activity.API + "/search/issues", 422, "Validation Failed", {}, None)
-        with patch.object(activity, "ANONYMOUS_SEARCH", False), \
-             patch.object(activity, "NEXT_ANONYMOUS_SEARCH", 0.0), \
-             patch.object(activity, "fetch", side_effect=[denied, {"items": []}, {"items": []}]) as fetch, \
-             patch.object(activity.time, "sleep") as sleep, \
-             contextlib.redirect_stdout(io.StringIO()):
-            activity.search_fetch(activity.API + "/search/issues?q=first")
-            activity.search_fetch(activity.API + "/search/issues?q=second")
-            self.assertTrue(activity.ANONYMOUS_SEARCH)
-        self.assertEqual(fetch.call_args_list[0].kwargs, {})
-        self.assertEqual(fetch.call_args_list[1].kwargs, {"authenticated": False})
-        self.assertEqual(fetch.call_args_list[2].kwargs, {"authenticated": False})
-        sleep.assert_called_once()
+    def test_contribution_years_govern_full_history(self):
+        with patch.object(activity, "query", side_effect=[
+                {"contributionsCollection": {"contributionYears": [2026, 2024, 2020, 2024]}},
+                collection_result(), collection_result(), collection_result(),
+                collection_result(), collection_result()]) as query:
+            result = activity.collect(NOW)
+        self.assertEqual(result["entries"], [])
+        periods = [call.kwargs for call in query.call_args_list[1:]]
+        self.assertEqual(len(periods), 5)  # 2020 and 2024 are leap years.
+        self.assertEqual({datetime.fromisoformat(p["from"]).year for p in periods},
+                         {2020, 2024, 2026})
+        self.assertEqual(result["updated_at"], NOW.isoformat())
 
-    def test_authored_old_pr_commit_is_personal_activity(self):
-        pr = {"repository_url": activity.API + "/repos/upstream/repo", "number": 7}
-        commits = [
-            {"author": {"login": "Other"}, "commit": {"author": {"date": "2026-11-06T00:00:00Z"}}},
-            {"author": {"login": "FuTseYi"}, "commit": {"author": {"date": "2026-11-05T00:00:00Z"}}},
-        ]
-        with patch.object(activity, "fetch", return_value=commits) as fetch:
-            rows = activity.inspect_pr_commits(pr)
-        self.assertEqual([(r["activity"], r["date"]) for r in rows],
-                         [("Commit", "2026-11-05T00:00:00Z")])
-        self.assertEqual(fetch.call_args.kwargs["authenticated"], False)
+    def test_snapshot_output_escapes_repository_metadata(self):
+        html = activity.render({"updated_at": NOW.isoformat(),
+                                "entries": [record(label="Code push")]})
+        self.assertIn("Commit · Python", html)
+        self.assertNotIn("Code push", html)
+        row = activity.contribution(repo(), "2026-11-01T00:00:00Z", "Issue")
+        html = activity.render({"updated_at": NOW.isoformat(), "entries": [row]})
+        self.assertIn("&lt;Safe project&gt;", html)
+        self.assertNotIn("<Safe project>", html)
 
-    def test_other_peoples_comments_do_not_refresh_personal_date(self):
-        issue = {"repository_url": activity.API + "/repos/upstream/repo", "number": 2}
-        comments = [
-            {"user": {"login": "Other"}, "created_at": "2026-11-06T00:00:00Z"},
-            {"user": {"login": "FuTseYi"}, "created_at": "2023-03-01T00:00:00Z"},
-        ]
-        with patch.object(activity, "fetch", return_value=comments):
-            rows = activity.comment_contributions(issue)
-        self.assertEqual([r["date"] for r in rows], ["2023-03-01T00:00:00Z"])
+    def test_graphql_error_is_not_published_as_incomplete_success(self):
+        with patch.object(activity, "urlopen") as urlopen, \
+             patch.dict("os.environ", {"GITHUB_TOKEN": "dummy"}):
+            from unittest.mock import MagicMock
+            response = MagicMock()
+            response.__enter__.return_value = response
+            response.read.return_value = json.dumps({"errors": [{"message": "Access denied"}]}).encode()
+            urlopen.return_value = response
+            with self.assertRaisesRegex(ValueError, "Access denied"):
+                activity.query(activity.YEARS_QUERY, login=activity.USER)
 
-    def test_discover_account_lifetime_not_recent_event_window(self):
-        user = {"created_at": "2020-04-01T00:00:00Z"}
-        old = record("org/old", "2020-06-01T00:00:00Z")
-        with patch.dict("os.environ", {"GITHUB_TOKEN": "test-token"}), \
-             patch.object(activity, "fetch", return_value=user), \
-             patch.object(activity, "graphql_window", return_value=[old]) as graph, \
-             patch.object(activity, "graph_history", return_value=([], False)), \
-             patch.object(activity, "search", return_value=[]):
-            rows, partial = activity.discover(NOW)
-        self.assertEqual(graph.call_count, 7)
-        self.assertEqual(len(rows), 7)
-        self.assertFalse(partial)
-
-    def test_failed_supplemental_search_keeps_verified_graphql_results(self):
-        from urllib.error import HTTPError
-        denied = HTTPError(activity.API + "/search/issues", 403, "Rate limited", {}, None)
-        with patch.dict("os.environ", {"GITHUB_TOKEN": "test-token"}), \
-             patch.object(activity, "fetch", return_value={"created_at": "2026-01-01T00:00:00Z"}), \
-             patch.object(activity, "graphql_window", return_value=[record()]), \
-             patch.object(activity, "search", side_effect=denied), \
-             contextlib.redirect_stdout(io.StringIO()):
-            rows, partial = activity.discover(NOW)
-        self.assertTrue(partial)
-        self.assertEqual([r["name"] for r in rows], ["org/example"])
-        html = activity.render({"updated_at": NOW.isoformat(), "entries": rows,
-                                "partial": partial})
-        self.assertIn("Partial API coverage", html)
-
-    def test_public_metadata_is_verified_without_organization_token(self):
-        repo = {"full_name": "upstream/public", "private": False,
-                "archived": False, "disabled": False, "description": "<unsafe>",
-                "language": "Python"}
-        with patch.object(activity, "fetch", return_value=repo) as fetch:
-            rows, partial = activity.repository_metadata([record("upstream/public")])
-        self.assertFalse(partial)
-        self.assertEqual(len(rows), 1)
-        self.assertFalse(fetch.call_args.kwargs["authenticated"])
-        self.assertIn("&lt;unsafe&gt;", activity.render({"updated_at": NOW.isoformat(),
-                                                       "entries": rows}))
-
-    def test_graphql_verified_repository_skips_anonymous_metadata_request(self):
-        trusted = {**record("upstream/verified"), "_public": True}
-        with patch.object(activity, "fetch", side_effect=AssertionError("unnecessary API call")):
-            rows, partial = activity.repository_metadata([trusted])
-        self.assertFalse(partial)
-        self.assertEqual([r["name"] for r in rows], ["upstream/verified"])
-        self.assertNotIn("_public", rows[0])
-
-    def test_unknown_repository_403_keeps_trusted_contributions(self):
-        from urllib.error import HTTPError
-        denied = HTTPError(activity.API + "/repos/unknown/repo", 403, "Rate limited", {}, None)
-        trusted = {**record("upstream/verified"), "_public": True}
-        with patch.object(activity, "fetch", side_effect=denied), \
-             contextlib.redirect_stdout(io.StringIO()):
-            rows, partial = activity.repository_metadata([trusted, record("unknown/repo")])
-        self.assertTrue(partial)
-        self.assertEqual([r["name"] for r in rows], ["upstream/verified"])
-
-    def test_graphql_author_history_tracks_old_pr_commits_and_discussion_comments(self):
-        repo = {"nameWithOwner": "external/project", "visibility": "PUBLIC",
-                "description": "Public", "primaryLanguage": {"name": "Python"}}
-        datasets = {
-            "pullRequests": [{"createdAt": "2022-02-01T00:00:00Z", "repository": repo,
-                              "commits": {"pageInfo": {"hasPreviousPage": False},
-                                          "nodes": [{"commit": {"authoredDate": "2026-11-01T00:00:00Z",
-                                                               "author": {"user": {"login": "FuTseYi"}}}}]}}],
-            "issueComments": [{"createdAt": "2021-01-01T00:00:00Z", "repository": repo}],
-            "repositoryDiscussions": [{"createdAt": "2020-01-01T00:00:00Z", "repository": repo}],
-            "repositoryDiscussionComments": [{"createdAt": "2025-01-01T00:00:00Z",
-                                              "discussion": {"repository": repo}}],
-        }
-        responses = [{"data": {"user": {kind: {"nodes": nodes,
-                     "pageInfo": {"hasNextPage": False, "endCursor": None}}}}}
-                     for kind, nodes in datasets.items()]
-        with patch.object(activity, "fetch", side_effect=responses):
-            records, partial = activity.graph_history()
-        self.assertFalse(partial)
-        self.assertEqual(len(records), 5)
-        self.assertEqual(activity.merge(records, now=NOW)[0]["date"], "2026-11-01T00:00:00Z")
-
-    def test_archived_public_repository_is_still_part_of_history(self):
-        repo = {"full_name": "upstream/archived", "private": False, "archived": True,
-                "disabled": False, "visibility": "public"}
-        with patch.object(activity, "fetch", return_value=repo):
-            rows, partial = activity.repository_metadata([record("upstream/archived")])
-        self.assertFalse(partial)
-        self.assertEqual([row["name"] for row in rows], ["upstream/archived"])
-
-    def test_local_snapshot_preserves_history(self):
+    def test_snapshot_load_is_local_and_keeps_older_entries(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "contributions.json"
             data = {"updated_at": NOW.isoformat(), "entries": [record()]}
@@ -224,24 +149,28 @@ class ContributionTests(unittest.TestCase):
                 path.write_text(json.dumps(data), encoding="utf-8")
                 self.assertEqual(activity.load_snapshot(), data)
 
-    def test_failed_refresh_keeps_original_timestamp_and_history(self):
+    def test_failed_explicit_refresh_does_not_overwrite_snapshot(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             (root / "_site").mkdir()
             page = root / "_site/index.html"
-            page.write_text(activity.START + "fallback" + activity.END, encoding="utf-8")
+            source = activity.START + "fallback" + activity.END
+            page.write_text(source, encoding="utf-8")
             cache = root / "_site/contributions.json"
-            original = {"updated_at": "2026-11-01T00:00:00Z", "entries": [record()]}
+            original = {"updated_at": "2026-11-01T00:00:00Z",
+                        "entries": [record()]}
             cache.write_text(json.dumps(original), encoding="utf-8")
-            with patch.object(activity, "ROOT", root), patch.object(activity, "SNAPSHOT", cache), \
+            with patch.object(activity, "ROOT", root), \
+                 patch.object(activity, "SNAPSHOT", cache), \
+                 patch.dict("os.environ", {"GITHUB_TOKEN": "test-token"}), \
                  patch.object(activity, "collect", side_effect=URLError("offline")), \
-                 patch("sys.argv", ["sync_activity.py", "--refresh"]), \
-                 contextlib.redirect_stdout(io.StringIO()):
-                activity.main()
+                 patch("sys.argv", ["sync_activity.py", "--refresh"]):
+                with self.assertRaisesRegex(RuntimeError, "refresh failed"):
+                    activity.main()
             self.assertEqual(json.loads(cache.read_text(encoding="utf-8")), original)
-            self.assertIn("org/example", page.read_text(encoding="utf-8"))
+            self.assertEqual(page.read_text(encoding="utf-8"), source)
 
-    def test_no_snapshot_offline_retains_homepage_fallback(self):
+    def test_missing_token_keeps_homepage_fallback_for_local_build(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             (root / "_site").mkdir()
@@ -250,11 +179,23 @@ class ContributionTests(unittest.TestCase):
             page.write_text(source, encoding="utf-8")
             with patch.object(activity, "ROOT", root), \
                  patch.object(activity, "SNAPSHOT", root / "_site/contributions.json"), \
-                 patch.object(activity, "collect", side_effect=URLError("offline")), \
-                 patch("sys.argv", ["sync_activity.py", "--refresh"]), \
-                 contextlib.redirect_stdout(io.StringIO()):
+                 patch.dict("os.environ", {}, clear=True), \
+                 patch("sys.argv", ["sync_activity.py"]):
                 activity.main()
             self.assertEqual(page.read_text(encoding="utf-8"), source)
+
+    def test_explicit_refresh_requires_token(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "_site").mkdir()
+            (root / "_site/index.html").write_text(
+                activity.START + "fallback" + activity.END, encoding="utf-8")
+            with patch.object(activity, "ROOT", root), \
+                 patch.object(activity, "SNAPSHOT", root / "_site/contributions.json"), \
+                 patch.dict("os.environ", {}, clear=True), \
+                 patch("sys.argv", ["sync_activity.py", "--refresh"]):
+                with self.assertRaisesRegex(ValueError, "GITHUB_TOKEN"):
+                    activity.main()
 
 
 if __name__ == "__main__":
