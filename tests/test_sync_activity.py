@@ -171,35 +171,32 @@ class ContributionTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "Access denied"):
                 activity.query(activity.YEARS_QUERY, login=activity.USER)
 
-    def test_snapshot_load_is_local_and_keeps_older_entries(self):
+    def test_tracked_snapshot_loads_older_verified_content(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "contributions.json"
             data = {"updated_at": NOW.isoformat(), "entries": [record()]}
-            with patch.object(activity, "SNAPSHOT", path):
+            with patch.object(activity, "SOURCE_SNAPSHOT", path):
                 self.assertIsNone(activity.load_snapshot())
                 path.write_text(json.dumps(data), encoding="utf-8")
                 self.assertEqual(activity.load_snapshot(), data)
 
-    def test_failed_explicit_refresh_does_not_overwrite_snapshot(self):
+    def test_missing_or_corrupt_source_fails_closed_before_page_changes(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             (root / "_site").mkdir()
             page = root / "_site/index.html"
-            source = activity.START + "fallback" + activity.END
-            page.write_text(source, encoding="utf-8")
-            cache = root / "_site/contributions.json"
-            original = {"updated_at": "2026-11-01T00:00:00Z",
-                        "entries": [record()]}
-            cache.write_text(json.dumps(original), encoding="utf-8")
+            html = activity.START + "fallback" + activity.END
+            page.write_text(html, encoding="utf-8")
+            source = root / "contributions.json"
             with patch.object(activity, "ROOT", root), \
-                 patch.object(activity, "SNAPSHOT", cache), \
-                 patch.dict("os.environ", {"GITHUB_TOKEN": "test-token"}), \
-                 patch.object(activity, "collect", side_effect=URLError("offline")), \
-                 patch("sys.argv", ["sync_activity.py", "--refresh"]):
-                with self.assertRaisesRegex(RuntimeError, "refresh failed"):
+                 patch.object(activity, "SOURCE_SNAPSHOT", source), \
+                 patch("sys.argv", ["sync_activity.py"]):
+                with self.assertRaisesRegex(ValueError, "tracked contributions.json"):
                     activity.main()
-            self.assertEqual(json.loads(cache.read_text(encoding="utf-8")), original)
-            self.assertEqual(page.read_text(encoding="utf-8"), source)
+                source.write_text('{"updated_at": "not-a-date", "entries": []}', encoding="utf-8")
+                with self.assertRaisesRegex(ValueError, "tracked contributions.json"):
+                    activity.main()
+            self.assertEqual(page.read_text(encoding="utf-8"), html)
 
     def test_tracked_snapshot_changes_only_when_contributions_change(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -225,32 +222,31 @@ class ContributionTests(unittest.TestCase):
                     activity.write_source()
             self.assertEqual(path.read_text(encoding="utf-8"), "original")
 
-    def test_missing_token_keeps_homepage_fallback_for_local_build(self):
+    def test_offline_build_uses_committed_data_without_a_github_token(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             (root / "_site").mkdir()
             page = root / "_site/index.html"
-            source = activity.START + "fallback" + activity.END
-            page.write_text(source, encoding="utf-8")
+            page.write_text(activity.START + "fallback" + activity.END, encoding="utf-8")
+            source = root / "contributions.json"
+            cached = root / "_site/contributions.json"
+            data = {"updated_at": NOW.isoformat(), "entries": [record()]}
+            source.write_text(json.dumps(data), encoding="utf-8")
             with patch.object(activity, "ROOT", root), \
-                 patch.object(activity, "SNAPSHOT", root / "_site/contributions.json"), \
+                 patch.object(activity, "SOURCE_SNAPSHOT", source), \
+                 patch.object(activity, "SNAPSHOT", cached), \
                  patch.dict("os.environ", {}, clear=True), \
+                 patch.object(activity, "query", side_effect=AssertionError("offline build queried GitHub")), \
                  patch("sys.argv", ["sync_activity.py"]):
                 activity.main()
-            self.assertEqual(page.read_text(encoding="utf-8"), source)
+            self.assertIn("upstream/project", page.read_text(encoding="utf-8"))
+            self.assertEqual(json.loads(cached.read_text(encoding="utf-8")), data)
 
-    def test_explicit_refresh_requires_token(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            (root / "_site").mkdir()
-            (root / "_site/index.html").write_text(
-                activity.START + "fallback" + activity.END, encoding="utf-8")
-            with patch.object(activity, "ROOT", root), \
-                 patch.object(activity, "SNAPSHOT", root / "_site/contributions.json"), \
-                 patch.dict("os.environ", {}, clear=True), \
-                 patch("sys.argv", ["sync_activity.py", "--refresh"]):
-                with self.assertRaisesRegex(ValueError, "GITHUB_TOKEN"):
-                    activity.main()
+    def test_only_explicit_source_sync_requires_a_github_token(self):
+        with patch.dict("os.environ", {}, clear=True), \
+             patch("sys.argv", ["sync_activity.py", "--write-source"]):
+            with self.assertRaisesRegex(ValueError, "GITHUB_TOKEN"):
+                activity.main()
 
 
 if __name__ == "__main__":
