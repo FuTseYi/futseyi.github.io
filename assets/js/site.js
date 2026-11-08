@@ -303,12 +303,14 @@
         panel.inert = !expanded;
         extra.forEach((item) => { item.hidden = years.indexOf(yearOf(item)) >= revealed; });
         button.setAttribute('aria-expanded', String(expanded));
+        button.dataset.hasMore = String(revealed < years.length);
         button.textContent = revealed === years.length ? 'Show less' : dated ? `Show more · ${years[revealed]}` : 'Show more';
       };
       sync();
       button.addEventListener('click', () => {
         revealed = revealed === years.length ? 0 : revealed + 1;
         sync();
+        if (revealed > 0) requestAnimationFrame(() => scrollExpandedIntoView(list));
         releaseTarget();
       });
       panel.addEventListener('transitionend', (event) => {
