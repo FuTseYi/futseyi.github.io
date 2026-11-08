@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="随着个人项目、学习资料和归档文件越来越多，我希望找到一种能够兼顾多设备访问、自动同步和本地空间管理的方案。">
+<meta property="og:site_name" content="FuTseYi (Shine)">
+<meta property="og:title" content="百度网盘与 OneDrive 的文件同步与备份实践">
+<meta property="og:description" content="随着个人项目、学习资料和归档文件越来越多，我希望找到一种能够兼顾多设备访问、自动同步和本地空间管理的方案。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.futseyi.com/blog/baidu-netdisk-onedrive-sync-backup/">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.futseyi.com/assets/images/profile/me.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1378">
+<meta property="og:image:height" content="2065">
+<meta property="og:image:alt" content="FuTseYi&#x27;s profile photo">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:site" content="@FuTseYi">
+<meta name="twitter:title" content="百度网盘与 OneDrive 的文件同步与备份实践">
+<meta name="twitter:description" content="随着个人项目、学习资料和归档文件越来越多，我希望找到一种能够兼顾多设备访问、自动同步和本地空间管理的方案。">
+<meta name="twitter:image" content="https://www.futseyi.com/assets/images/profile/me.jpg">
+<meta name="twitter:image:alt" content="FuTseYi&#x27;s profile photo">
+<meta property="article:tag" content="百度网盘">
+<meta property="article:tag" content="OneDrive">
+<meta property="article:tag" content="Cloud Storage">
+<meta property="article:tag" content="Backup">
+<title>百度网盘与 OneDrive 的文件同步与备份实践 · FuTseYi</title><link rel="canonical" href="https://www.futseyi.com/blog/baidu-netdisk-onedrive-sync-backup/">
+<link rel="icon" href="/assets/icons/favicon.ico" sizes="any">
+<link rel="icon" href="/assets/icons/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="/assets/icons/site.webmanifest">
+<link rel="preload" href="/assets/fonts/caveat-handwriting.woff2" as="font" type="font/woff2" crossorigin>
+<script data-theme-init>
+    (() => {
+      document.documentElement.classList.add('js');
+      let theme = 'system';
+      try { theme = localStorage.getItem('site-theme') || 'system'; } catch {}
+      if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+    })();
+  </script>
+<link rel="stylesheet" href="/assets/css/style.css?v=525538209899"><script src="https://cdn.jsdelivr.net/npm/swup@4.10.0/dist/Swup.umd.js" defer></script>
+<script src="/assets/js/site.js?v=7c24c70d02eb" defer></script>
+<script src="/assets/js/atmosphere.js?v=a822ac798e30" defer></script>
+</head>
+<body class="blog-page article-page">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header" id="site-header">
+  <div class="header-inner">
+    <a class="brand" href="/" aria-label="FuTseYi (Shine) homepage"><img src="/assets/icons/favicon.svg" alt="" width="36" height="36"></a>
+    <button class="theme-control" type="button" aria-label="Color theme: System. Switch to Light" title="System theme. Click for Light" data-mode="system">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <g data-theme-icon="system"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></g>
+        <g data-theme-icon="light"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.4 1.4m11.2 11.2L19 19M5 19l1.4-1.4M17.6 6.4 19 5"/></g>
+        <g data-theme-icon="dark"><path d="M20.5 14A8.5 8.5 0 0 1 10 3.5 8.5 8.5 0 1 0 20.5 14Z"/></g>
+      </svg>
+    </button>
+    <button class="nav-toggle" type="button" aria-controls="primary-navigation" aria-expanded="false" aria-label="Open navigation menu">
+      <span class="menu-icon" aria-hidden="true"><span></span><span></span><span></span></span>
+    </button>
+    <nav class="nav-links" id="primary-navigation" aria-label="Main navigation">
+      <a href="/#about">About</a>
+      <a href="/#education">Education</a>
+
+      <a href="/#active-in">Active In</a>
+      <a href="/#contributions">Contributions</a>
+      <a href="/blog/" class="is-active" aria-current="page">Blog</a>
+
+    </nav>
+  </div>
+</header>
+<main class="blog-container wrap" id="main"><div class="article-layout"><div class="article-main"><a class="back-link" href="/blog/"><span class="link-arrow link-arrow-left" aria-hidden="true"></span>All posts</a><div class="article-head"><span class="blog-kicker">BLOG & NOTES</span><h1>百度网盘与 OneDrive 的文件同步与备份实践</h1><div class="article-meta"><time class="post-date" datetime="2026-10-12">Oct 12, 2026</time><a class="post-date" href="https://github.com/FuTseYi/futseyi.github.io/edit/main/posts/baidu-netdisk-onedrive-sync-backup/index.md" target="_blank" rel="noopener noreferrer"><em>Edit on GitHub</em></a></div><div class="post-tags"><a class="post-tag" href="/blog/tags/#tag-82071ba1957a"># 百度网盘</a><a class="post-tag" href="/blog/tags/#tag-80753c986574"># OneDrive</a><a class="post-tag" href="/blog/tags/#tag-ff7f9006731d"># Cloud Storage</a><a class="post-tag" href="/blog/tags/#tag-dd96994d01e7"># Backup</a></div></div><div class="article-toc-inline"><button class="article-toc-toggle" type="button" aria-expanded="false" aria-controls="article-toc-links">On this page</button><div class="article-toc-panel"><div class="article-toc-clip"><nav id="article-toc-links" aria-label="Article contents"><a href="#1" class="toc-level-1">1 我为什么重新整理云盘方案</a><a href="#2-onedrive" class="toc-level-1">2 OneDrive 与百度网盘的使用体验</a><a href="#3-git" class="toc-level-1">3 同步空间与 Git 仓库的边界</a><a href="#4" class="toc-level-1">4 释放本地空间时需要注意什么</a><a href="#5" class="toc-level-1">5 同步不等于备份</a><a href="#6" class="toc-level-1">6 最终分工</a><a href="#7" class="toc-level-1">7 总结</a></nav></div></div></div><article class="article" data-pagefind-body><h2 id="1">1 我为什么重新整理云盘方案</h2>
+<p>随着个人项目、学习资料和归档文件越来越多，我希望找到一种能够兼顾多设备访问、自动同步和本地空间管理的方案。</p>
+<p>之前我主要使用 OneDrive，也尝试过让不同网盘共同管理同一个文件夹。但实际使用后发现，云盘同步、Git 版本管理和独立备份是三件不同的事，不能简单地把多个同步客户端叠在一起。</p>
+<p>这次整理的重点，是让每种工具承担清晰的职责。</p>
+<h2 id="2-onedrive">2 OneDrive 与百度网盘的使用体验</h2>
+<p>我分别从日常同步和文件管理的角度使用两种服务。</p>
+<p><strong>OneDrive</strong> 更适合与 Windows 系统和 Microsoft 生态配合。按需文件功能可以释放本地空间，需要时再下载云端内容。</p>
+<p><strong>百度网盘同步空间</strong> 则提供了另一种管理体验：可以把指定文件夹纳入同步空间，也可以按需释放本地文件。对我来说，它在手机端上传文件、电脑端统一归档的流程比较顺手。</p>
+<p>还有一个实际差异是，我发现百度网盘可以存取 Live Photo 格式的照片，这也是我在整理个人照片时比较看重的一点。</p>
+<p>两者并不是非此即彼。是否保留某个服务，应取决于设备生态、文件类型、同步体验和实际成本，而不是只看容量。</p>
+<h2 id="3-git">3 同步空间与 Git 仓库的边界</h2>
+<p>我曾把 Git 管理的个人归档仓库放进百度网盘同步空间。2026 年 10 月 12 日执行：</p>
+<div class="codehilite"><pre><span></span><code>git<span class="w"> </span>pull<span class="w"> </span>--tags<span class="w"> </span>origin<span class="w"> </span>main
+</code></pre></div>
+
+<p>遇到过：</p>
+<div class="codehilite"><pre><span></span><code>fatal: bad object refs/heads/main.baiduyun.uploading.cfg
+error: https://github.com/FuTseYi/Personal_Folders.git did not send all necessary objects
+</code></pre></div>
+
+<p>关闭同步客户端、重新同步后，问题没有再次出现。这说明普通文件同步工具与 Git 同时操作仓库内部文件时，可能发生时序冲突。</p>
+<p>因此，我不再把“云盘同步了整个目录”理解为“Git 仓库就获得了可靠备份”。更稳妥的做法是：</p>
+<ul>
+<li>活跃开发仓库由 Git 和远端仓库管理</li>
+<li>网盘同步普通文件和已经完成的归档内容</li>
+<li>需要备份 Git 历史时，额外保存 Git bundle 或镜像</li>
+<li>避免多个设备同时打开并修改同一个同步目录中的仓库</li>
+</ul>
+<h2 id="4">4 释放本地空间时需要注意什么</h2>
+<p>百度网盘和 OneDrive 的按需文件机制，能够减少本地磁盘占用，但它们并不意味着文件永远不会重新下载。</p>
+<p>我还观察到一个情况：手机端向百度网盘同步空间上传文件后，即使电脑端此前选择了释放空间，Git 访问相关目录时仍可能触发文件重新下载。等本地 Git 操作完成并推送到远端后，再释放空间就比较顺畅。</p>
+<p>这提醒我，释放空间与本地程序访问之间存在关联。只要某个应用需要读取文件，云盘客户端就可能重新将它下载到本地。</p>
+<p>日常管理时可以：</p>
+<ol>
+<li>将真正需要频繁编辑的目录保留在本地</li>
+<li>将不常访问的归档文件设置为按需下载或释放空间</li>
+<li>Git 操作完成后再执行空间释放</li>
+<li>不要在同步进行时强制移动、删除或批量改写文件</li>
+</ol>
+<h2 id="5">5 同步不等于备份</h2>
+<p>这是整套方案里最重要的原则。</p>
+<p>同步的目标是让多个位置保持一致；备份的目标是在误删、覆盖、损坏或账号异常后，仍然能够恢复到过去的状态。</p>
+<p>如果一个文件被误删，同步服务可能会把删除操作传播到其他设备。因此，单纯拥有两个同步客户端，并不等于拥有两份独立备份。</p>
+<p>对于重要资料，我会额外保留独立的历史副本：</p>
+<ul>
+<li>普通文件：按时间创建归档快照</li>
+<li>Git 项目：使用 Git bundle 或镜像保留完整提交历史</li>
+<li>应用数据：按应用支持的格式导出</li>
+<li>关键资料：定期检查备份是否能够实际恢复</li>
+</ul>
+<p>例如，仓库快照可以采用带日期的命名方式，避免新备份覆盖旧版本。备份是否可靠，最终要通过恢复测试确认，而不是只看上传是否成功。</p>
+<h2 id="6">6 最终分工</h2>
+<p>经过这轮实践，我更倾向于使用下面的结构：</p>
+<div class="codehilite"><pre><span></span><code>GitHub
+  └─ 代码版本、提交历史、协作
+
+百度网盘同步空间
+  └─ 日常文件、多设备同步、照片归档
+
+OneDrive
+  └─ Windows / Microsoft 生态中的文件同步
+
+独立备份
+  └─ 历史快照、Git bundle、重要应用数据
+</code></pre></div>
+
+<p>不需要让每个文件夹同时被所有服务接管。按内容和用途选择一个主要同步位置，再为重要数据建立独立备份，整体会更清晰。</p>
+<h2 id="7">7 总结</h2>
+<p>云盘的价值不只是容量，而是让文件在不同设备之间更容易流动。但同步工具、版本控制和备份工具有不同的目标，混用时必须划清边界。</p>
+<p><strong>同步负责可访问，Git 负责可追溯，备份负责可恢复。</strong> 把这三件事分开设计，才能让个人文件归档长期稳定地运行。</p></article></div><nav class="page-toc article-toc is-visible" aria-label="On this page"><span class="toc-title">ON THIS PAGE</span><a href="#1" class="toc-level-1">1 我为什么重新整理云盘方案</a><a href="#2-onedrive" class="toc-level-1">2 OneDrive 与百度网盘的使用体验</a><a href="#3-git" class="toc-level-1">3 同步空间与 Git 仓库的边界</a><a href="#4" class="toc-level-1">4 释放本地空间时需要注意什么</a><a href="#5" class="toc-level-1">5 同步不等于备份</a><a href="#6" class="toc-level-1">6 最终分工</a><a href="#7" class="toc-level-1">7 总结</a></nav></div><nav class="post-neighbors" aria-label="Adjacent posts"><a class="post-neighbor previous" href="/blog/raindrop-cross-browser-bookmarks/"><span class="post-neighbor-label"><i class="link-arrow link-arrow-left" aria-hidden="true"></i>Previous post</span><strong>使用 Raindrop.io 统一管理跨浏览器书签</strong></a><a class="post-neighbor next" href="/blog/git-baidu-netdisk-sync-conflict/"><span class="post-neighbor-label">Next post<i class="link-arrow" aria-hidden="true"></i></span><strong>Git 仓库与百度网盘同步冲突排查</strong></a></nav></main>
+<footer class="site-footer">
+  <div class="wrap footer-utility">
+    <a class="footer-license" href="https://github.com/FuTseYi/futseyi.github.io/blob/main/LICENSING.md" target="_blank" rel="noopener noreferrer"><span>Go ahead, steal it</span><span class="link-arrow" aria-hidden="true"></span><span>CC BY 4.0 &middot; Code MIT</span></a>
+    <a class="footer-back-top" href="#main">Back to top <span class="link-arrow link-arrow-up" aria-hidden="true"></span></a>
+  </div>
+  <div class="footer-divider"><div class="wrap footer-inner">
+    <a class="footer-brand" href="https://github.com/FuTseYi/futseyi.github.io" target="_blank" rel="noopener noreferrer">&copy; <time data-current-year datetime="2026">2026</time> <span>FuTseYi <span class="alias">(Shine)</span></span></a>
+    <nav class="hero-links footer-social" aria-label="Social links"><a href="mailto:hello@futseyi.com" aria-label="Email" title="Email"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 6 9 7 9-7"/></svg></a>
+<a href="https://github.com/FuTseYi" target="_blank" rel="noopener noreferrer" aria-label="GitHub" title="GitHub"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 19c-4.3 1.3-4.3-2.2-6-2.6m12 5v-3.4c0-1 .1-1.5-.5-2.1 3.3-.4 6.8-1.6 6.8-7.3a5.7 5.7 0 0 0-1.5-4c.2-.4.7-1.9-.2-3.9 0 0-1.2-.4-4 1.5a13.7 13.7 0 0 0-7.2 0C5.6.3 4.4.7 4.4.7c-.9 2-.4 3.5-.2 3.9a5.7 5.7 0 0 0-1.5 4c0 5.7 3.5 6.9 6.8 7.3-.5.5-.6 1.1-.5 2.1v3.4"/></svg></a>
+<a href="https://www.linkedin.com/in/futseyi" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" title="LinkedIn"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 10v7m0-10v.01M11 17v-7m0 3a3 3 0 0 1 6 0v4"/></svg></a>
+          <a href="https://x.com/FuTseYi" target="_blank" rel="noopener noreferrer" aria-label="X" title="X"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 4h4l12 16h-4L4 4ZM4 20 20 4"/></svg></a></nav>
+  </div></div>
+</footer>
+</body></html>

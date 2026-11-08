@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Jetson 系列产品烧录系统的方法一般有两种，">
+<meta property="og:site_name" content="FuTseYi (Shine)">
+<meta property="og:title" content="Jetson Orin Nano 系统烧录指南">
+<meta property="og:description" content="Jetson 系列产品烧录系统的方法一般有两种，">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.futseyi.com/blog/jetson-orin-nano-flashing/">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.futseyi.com/assets/images/profile/me.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1378">
+<meta property="og:image:height" content="2065">
+<meta property="og:image:alt" content="FuTseYi&#x27;s profile photo">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:site" content="@FuTseYi">
+<meta name="twitter:title" content="Jetson Orin Nano 系统烧录指南">
+<meta name="twitter:description" content="Jetson 系列产品烧录系统的方法一般有两种，">
+<meta name="twitter:image" content="https://www.futseyi.com/assets/images/profile/me.jpg">
+<meta name="twitter:image:alt" content="FuTseYi&#x27;s profile photo">
+<meta property="article:tag" content="Jetson Orin Nano">
+<meta property="article:tag" content="NVIDIA">
+<meta property="article:tag" content="Linux">
+<title>Jetson Orin Nano 系统烧录指南 · FuTseYi</title><link rel="canonical" href="https://www.futseyi.com/blog/jetson-orin-nano-flashing/">
+<link rel="icon" href="/assets/icons/favicon.ico" sizes="any">
+<link rel="icon" href="/assets/icons/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="/assets/icons/site.webmanifest">
+<link rel="preload" href="/assets/fonts/caveat-handwriting.woff2" as="font" type="font/woff2" crossorigin>
+<script data-theme-init>
+    (() => {
+      document.documentElement.classList.add('js');
+      let theme = 'system';
+      try { theme = localStorage.getItem('site-theme') || 'system'; } catch {}
+      if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+    })();
+  </script>
+<link rel="stylesheet" href="/assets/css/style.css?v=525538209899"><script src="https://cdn.jsdelivr.net/npm/swup@4.10.0/dist/Swup.umd.js" defer></script>
+<script src="/assets/js/site.js?v=7c24c70d02eb" defer></script>
+<script src="/assets/js/atmosphere.js?v=a822ac798e30" defer></script>
+</head>
+<body class="blog-page article-page">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header" id="site-header">
+  <div class="header-inner">
+    <a class="brand" href="/" aria-label="FuTseYi (Shine) homepage"><img src="/assets/icons/favicon.svg" alt="" width="36" height="36"></a>
+    <button class="theme-control" type="button" aria-label="Color theme: System. Switch to Light" title="System theme. Click for Light" data-mode="system">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <g data-theme-icon="system"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></g>
+        <g data-theme-icon="light"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.4 1.4m11.2 11.2L19 19M5 19l1.4-1.4M17.6 6.4 19 5"/></g>
+        <g data-theme-icon="dark"><path d="M20.5 14A8.5 8.5 0 0 1 10 3.5 8.5 8.5 0 1 0 20.5 14Z"/></g>
+      </svg>
+    </button>
+    <button class="nav-toggle" type="button" aria-controls="primary-navigation" aria-expanded="false" aria-label="Open navigation menu">
+      <span class="menu-icon" aria-hidden="true"><span></span><span></span><span></span></span>
+    </button>
+    <nav class="nav-links" id="primary-navigation" aria-label="Main navigation">
+      <a href="/#about">About</a>
+      <a href="/#education">Education</a>
+
+      <a href="/#active-in">Active In</a>
+      <a href="/#contributions">Contributions</a>
+      <a href="/blog/" class="is-active" aria-current="page">Blog</a>
+
+    </nav>
+  </div>
+</header>
+<main class="blog-container wrap" id="main"><div class="article-layout"><div class="article-main"><a class="back-link" href="/blog/"><span class="link-arrow link-arrow-left" aria-hidden="true"></span>All posts</a><div class="article-head"><span class="blog-kicker">BLOG & NOTES</span><h1>Jetson Orin Nano 系统烧录指南</h1><div class="article-meta"><time class="post-date" datetime="2025-07-09">Jul 9, 2025</time><a class="post-date" href="https://github.com/FuTseYi/futseyi.github.io/edit/main/posts/jetson-orin-nano-flashing/index.md" target="_blank" rel="noopener noreferrer"><em>Edit on GitHub</em></a></div><div class="post-tags"><a class="post-tag" href="/blog/tags/#tag-590555cc76f4"># Jetson Orin Nano</a><a class="post-tag" href="/blog/tags/#tag-088472395b26"># NVIDIA</a><a class="post-tag" href="/blog/tags/#tag-83ad8510bbd3"># Linux</a></div></div><div class="article-toc-inline"><button class="article-toc-toggle" type="button" aria-expanded="false" aria-controls="article-toc-links">On this page</button><div class="article-toc-panel"><div class="article-toc-clip"><nav id="article-toc-links" aria-label="Article contents"><a href="#1" class="toc-level-1">1 前言</a><a href="#2" class="toc-level-1">2 环境搭建过程</a><a href="#21-ubuntu" class="toc-level-2">2.1 在安装有 Ubuntu 系统的电脑主机上安装应用库</a><a href="#22-nvidia" class="toc-level-2">2.2 从 NVIDIA 官网下载所需版本的驱动程序包，和示例根文件系统包</a><a href="#23" class="toc-level-2">2.3 查阅指导文档</a><a href="#3" class="toc-level-1">3 开始动手烧录系统</a></nav></div></div></div><article class="article" data-pagefind-body><h2 id="1">1 前言</h2>
+<p>Jetson 系列产品烧录系统的方法一般有两种，</p>
+<ul>
+<li>一种为使用 NVIDIA 官方提供的 SDK manager 软件给 Jetson 设备烧录系统。</li>
+<li>另一种即为当前文档所描述的，在安装 Ubuntu 系统的电脑主机上搭建系统烧写目录 Linux_for_Tegra，使用 flash.sh 脚本进行烧录，</li>
+</ul>
+<p>此方法不仅仅适用于烧录系统，还可用于提取配置好的 Jetson 系统。</p>
+<blockquote>
+<p>搭建 Jetson 系列产品烧录系统的环境需要在电脑主机上安装 Ubuntu 系统。
+且安装的 Ubuntu 系统版本为 16.04 LTS 或者 18.04 LTS。</p>
+</blockquote>
+<h2 id="2">2 环境搭建过程</h2>
+<h3 id="21-ubuntu">2.1 在安装有 Ubuntu 系统的电脑主机上安装应用库</h3>
+<div class="codehilite"><pre><span></span><code>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>qemu-user-static<span class="w"> </span>
+sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>python<span class="w"> </span>
+</code></pre></div>
+
+<p>搭建环境的过程需要以上应用库来将某些 NVIDIA 软件组件安装到 Jetson 开发工具包中。</p>
+<h3 id="22-nvidia">2.2 从 NVIDIA 官网下载所需版本的驱动程序包，和示例根文件系统包</h3>
+<ul>
+<li>下载链接如下：<a href="https://developer.nvidia.com/embedded/linux-tegra-archive">https://developer.nvidia.com/embedded/linux-tegra-archive</a>。</li>
+</ul>
+<p><img alt="2025-07-10_09-57-05.png" src="assets/20250710095709144.png" loading="lazy" decoding="async"  width="1920" height="911" /></p>
+<blockquote>
+<p>这里我选择较为稳定的版本 35.3.1</p>
+</blockquote>
+<ul>
+<li>下载相关文件到 ubuntu 系统中
+<img alt="2025-07-10_10-01-14.png" src="assets/20250710100223016.png" loading="lazy" decoding="async"  width="1665" height="205" />
+<img alt="2025-07-10_10-08-36.png" src="assets/20250710100920813.png" loading="lazy" decoding="async"  width="1408" height="928" /></li>
+</ul>
+<h3 id="23">2.3 查阅指导文档</h3>
+<ul>
+<li>选择版本进入后点击查看指导文档（Jetson Linux Developer Guide）</li>
+</ul>
+<p><img alt="2025-07-10_09-58-08.png" src="assets/20250710095908458.png" loading="lazy" decoding="async"  width="1920" height="911" /></p>
+<ul>
+<li>选择目录中<strong>Quick Start</strong>，滑动到 Environment Variables 部分开始着手操作
+<img alt="2025-07-10_10-07-04.png" src="assets/20250710100716011.png" loading="lazy" decoding="async"  width="1920" height="911" /></li>
+</ul>
+<h2 id="3">3 开始动手烧录系统</h2>
+<ul>
+<li>通过以上操作,已经将相关驱动文件放入同一个文件夹 (我命名为 Jetson)</li>
+<li>
+<p>Jetson 设备硬件操作
+<img alt="2025-07-10_10-32-19.png" src="assets/20250710103225255.png" loading="lazy" decoding="async"  width="1840" height="1384" /></p>
+</li>
+<li>
+<p>具体步骤:
+1. 解压包</p>
+</li>
+</ul>
+<div class="codehilite"><pre><span></span><code><span class="m">1</span>.<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>jeston
+<span class="m">2</span>.<span class="w"> </span>tar<span class="w"> </span>xf<span class="w"> </span>Jetson_Linux_R35.3.1_aarch64.tbz2
+<span class="m">3</span>.<span class="w"> </span>sudo<span class="w"> </span>tar<span class="w"> </span>xpf<span class="w"> </span>Tegra_Linux_Sample-Root-Filesystem_R35.3.1_aarch64.tbz2<span class="w"> </span>-C<span class="w"> </span>Linux_for_Tegra/rootfs/<span class="w"> </span><span class="c1">#解压到Linux_for_Tegra/rootfs/中</span>
+<span class="m">4</span>.<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>Linux_for_Tegra/
+<span class="m">5</span>.<span class="w"> </span>sudo<span class="w"> </span>./apply_binaries.sh<span class="w"> </span>
+<span class="m">6</span>.<span class="w"> </span>sudo<span class="w"> </span>./tools/l4t_flash_prerequisites.sh
+</code></pre></div>
+
+<ol start="2">
+<li>开始烧录</li>
+</ol>
+<div class="codehilite"><pre><span></span><code><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>Linux_for_Tegra
+</code></pre></div>
+
+<p>查看<strong>Quick Start</strong>的第六点,选择烧入的方式 (NVMe,USB,SD)</p>
+<p><img alt="2025-07-10_10-36-13.png" src="assets/20250710103616045.png" loading="lazy" decoding="async"  width="1920" height="911" /></p>
+<p>这里 Jetson orin Nano 是板载了固态 NVMe,故使用第一条命令</p>
+<div class="codehilite"><pre><span></span><code>sudo<span class="w"> </span>./tools/kernel_flash/l4t_initrd_flash.sh<span class="w"> </span>--external-device<span class="w"> </span>nvme0n1p1<span class="w"> </span><span class="se">\ </span><span class="w">  </span>-c<span class="w"> </span>tools/kernel_flash/flash_l4t_external.xml<span class="w"> </span>-p<span class="w"> </span><span class="s2">"-c bootloader/t186ref/cfg/flash_t234_qspi.xml"</span><span class="w"> </span><span class="se">\ </span><span class="w">  </span>--showlogs<span class="w"> </span>--network<span class="w"> </span>usb0<span class="w"> </span>jetson-orin-nano-devkit<span class="w"> </span>internal
+</code></pre></div>
+
+<blockquote>
+<p>在烧录过程中,Jetson 设备与主机连接会断开,并重新连接,要及时确认连接到主机中才能继续烧录</p>
+<p>重新连接后若出现如图所示问题:</p>
+<p><img alt="usb问题.png" src="assets/20250710104406430.png" loading="lazy" decoding="async"  width="371" height="137" /></p>
+<p>可以换根数据线 or 换个在主机端换个数据口插</p>
+</blockquote>
+<ul>
+<li>在烧录进行时,最后一步是 Step3</li>
+</ul>
+<p><img alt="2025-07-10_10-46-33.png" src="assets/20250710104650792.png" loading="lazy" decoding="async"  width="409" height="232" /></p>
+<ul>
+<li>出现 successful 就是大功告成啦!</li>
+</ul>
+<p><img alt="2025-07-10_10-47-39.png" src="assets/20250710104748635.png" loading="lazy" decoding="async"  width="1001" height="179" /></p></article></div><nav class="page-toc article-toc is-visible" aria-label="On this page"><span class="toc-title">ON THIS PAGE</span><a href="#1" class="toc-level-1">1 前言</a><a href="#2" class="toc-level-1">2 环境搭建过程</a><a href="#21-ubuntu" class="toc-level-2">2.1 在安装有 Ubuntu 系统的电脑主机上安装应用库</a><a href="#22-nvidia" class="toc-level-2">2.2 从 NVIDIA 官网下载所需版本的驱动程序包，和示例根文件系统包</a><a href="#23" class="toc-level-2">2.3 查阅指导文档</a><a href="#3" class="toc-level-1">3 开始动手烧录系统</a></nav></div><nav class="post-neighbors" aria-label="Adjacent posts"><a class="post-neighbor previous" href="/blog/rknn-yolov7/"><span class="post-neighbor-label"><i class="link-arrow link-arrow-left" aria-hidden="true"></i>Previous post</span><strong>YOLOv7 目标检测模型训练与 RKNN 适配</strong></a><a class="post-neighbor next" href="/blog/lan-vpn-proxy-for-devices/"><span class="post-neighbor-label">Next post<i class="link-arrow" aria-hidden="true"></i></span><strong>通过局域网主机共享代理：以 Jetson 为例</strong></a></nav></main>
+<footer class="site-footer">
+  <div class="wrap footer-utility">
+    <a class="footer-license" href="https://github.com/FuTseYi/futseyi.github.io/blob/main/LICENSING.md" target="_blank" rel="noopener noreferrer"><span>Go ahead, steal it</span><span class="link-arrow" aria-hidden="true"></span><span>CC BY 4.0 &middot; Code MIT</span></a>
+    <a class="footer-back-top" href="#main">Back to top <span class="link-arrow link-arrow-up" aria-hidden="true"></span></a>
+  </div>
+  <div class="footer-divider"><div class="wrap footer-inner">
+    <a class="footer-brand" href="https://github.com/FuTseYi/futseyi.github.io" target="_blank" rel="noopener noreferrer">&copy; <time data-current-year datetime="2026">2026</time> <span>FuTseYi <span class="alias">(Shine)</span></span></a>
+    <nav class="hero-links footer-social" aria-label="Social links"><a href="mailto:hello@futseyi.com" aria-label="Email" title="Email"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 6 9 7 9-7"/></svg></a>
+<a href="https://github.com/FuTseYi" target="_blank" rel="noopener noreferrer" aria-label="GitHub" title="GitHub"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 19c-4.3 1.3-4.3-2.2-6-2.6m12 5v-3.4c0-1 .1-1.5-.5-2.1 3.3-.4 6.8-1.6 6.8-7.3a5.7 5.7 0 0 0-1.5-4c.2-.4.7-1.9-.2-3.9 0 0-1.2-.4-4 1.5a13.7 13.7 0 0 0-7.2 0C5.6.3 4.4.7 4.4.7c-.9 2-.4 3.5-.2 3.9a5.7 5.7 0 0 0-1.5 4c0 5.7 3.5 6.9 6.8 7.3-.5.5-.6 1.1-.5 2.1v3.4"/></svg></a>
+<a href="https://www.linkedin.com/in/futseyi" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" title="LinkedIn"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 10v7m0-10v.01M11 17v-7m0 3a3 3 0 0 1 6 0v4"/></svg></a>
+          <a href="https://x.com/FuTseYi" target="_blank" rel="noopener noreferrer" aria-label="X" title="X"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 4h4l12 16h-4L4 4ZM4 20 20 4"/></svg></a></nav>
+  </div></div>
+</footer>
+</body></html>

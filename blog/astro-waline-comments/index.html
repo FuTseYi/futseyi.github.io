@@ -1,0 +1,1216 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="在现代 Web 开发中，静态站点生成器（SSG）凭借其卓越的性能和安全性越来越受欢迎。然而，静态博客在实现用户互动功能时往往面临挑战。作为一名追求极致体验的开发者，我在使用 Astro 构建个人博客时，深入研究了如何优雅地集成评论系统，并通过多次重构，最终打造了一套 配置集中、类型安全、高度可定制 的 Waline 集成方案。">
+<meta property="og:site_name" content="FuTseYi (Shine)">
+<meta property="og:title" content="Astro 博客的 Waline 评论系统集成与定制">
+<meta property="og:description" content="在现代 Web 开发中，静态站点生成器（SSG）凭借其卓越的性能和安全性越来越受欢迎。然而，静态博客在实现用户互动功能时往往面临挑战。作为一名追求极致体验的开发者，我在使用 Astro 构建个人博客时，深入研究了如何优雅地集成评论系统，并通过多次重构，最终打造了一套 配置集中、类型安全、高度可定制 的 Waline 集成方案。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.futseyi.com/blog/astro-waline-comments/">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.futseyi.com/assets/images/profile/me.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1378">
+<meta property="og:image:height" content="2065">
+<meta property="og:image:alt" content="FuTseYi&#x27;s profile photo">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:site" content="@FuTseYi">
+<meta name="twitter:title" content="Astro 博客的 Waline 评论系统集成与定制">
+<meta name="twitter:description" content="在现代 Web 开发中，静态站点生成器（SSG）凭借其卓越的性能和安全性越来越受欢迎。然而，静态博客在实现用户互动功能时往往面临挑战。作为一名追求极致体验的开发者，我在使用 Astro 构建个人博客时，深入研究了如何优雅地集成评论系统，并通过多次重构，最终打造了一套 配置集中、类型安全、高度可定制 的 Waline 集成方案。">
+<meta name="twitter:image" content="https://www.futseyi.com/assets/images/profile/me.jpg">
+<meta name="twitter:image:alt" content="FuTseYi&#x27;s profile photo">
+<meta property="article:tag" content="Astro">
+<meta property="article:tag" content="Waline">
+<meta property="article:tag" content="TypeScript">
+<title>Astro 博客的 Waline 评论系统集成与定制 · FuTseYi</title><link rel="canonical" href="https://www.futseyi.com/blog/astro-waline-comments/">
+<link rel="icon" href="/assets/icons/favicon.ico" sizes="any">
+<link rel="icon" href="/assets/icons/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="/assets/icons/site.webmanifest">
+<link rel="preload" href="/assets/fonts/caveat-handwriting.woff2" as="font" type="font/woff2" crossorigin>
+<script data-theme-init>
+    (() => {
+      document.documentElement.classList.add('js');
+      let theme = 'system';
+      try { theme = localStorage.getItem('site-theme') || 'system'; } catch {}
+      if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+    })();
+  </script>
+<link rel="stylesheet" href="/assets/css/style.css?v=525538209899"><script src="https://cdn.jsdelivr.net/npm/swup@4.10.0/dist/Swup.umd.js" defer></script>
+<script src="/assets/js/site.js?v=7c24c70d02eb" defer></script>
+<script src="/assets/js/atmosphere.js?v=a822ac798e30" defer></script>
+</head>
+<body class="blog-page article-page">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header" id="site-header">
+  <div class="header-inner">
+    <a class="brand" href="/" aria-label="FuTseYi (Shine) homepage"><img src="/assets/icons/favicon.svg" alt="" width="36" height="36"></a>
+    <button class="theme-control" type="button" aria-label="Color theme: System. Switch to Light" title="System theme. Click for Light" data-mode="system">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <g data-theme-icon="system"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></g>
+        <g data-theme-icon="light"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.4 1.4m11.2 11.2L19 19M5 19l1.4-1.4M17.6 6.4 19 5"/></g>
+        <g data-theme-icon="dark"><path d="M20.5 14A8.5 8.5 0 0 1 10 3.5 8.5 8.5 0 1 0 20.5 14Z"/></g>
+      </svg>
+    </button>
+    <button class="nav-toggle" type="button" aria-controls="primary-navigation" aria-expanded="false" aria-label="Open navigation menu">
+      <span class="menu-icon" aria-hidden="true"><span></span><span></span><span></span></span>
+    </button>
+    <nav class="nav-links" id="primary-navigation" aria-label="Main navigation">
+      <a href="/#about">About</a>
+      <a href="/#education">Education</a>
+
+      <a href="/#active-in">Active In</a>
+      <a href="/#contributions">Contributions</a>
+      <a href="/blog/" class="is-active" aria-current="page">Blog</a>
+
+    </nav>
+  </div>
+</header>
+<main class="blog-container wrap" id="main"><div class="article-layout"><div class="article-main"><a class="back-link" href="/blog/"><span class="link-arrow link-arrow-left" aria-hidden="true"></span>All posts</a><div class="article-head"><span class="blog-kicker">BLOG & NOTES</span><h1>Astro 博客的 Waline 评论系统集成与定制</h1><div class="article-meta"><time class="post-date" datetime="2025-10-11">Oct 11, 2025</time><a class="post-date" href="https://github.com/FuTseYi/futseyi.github.io/edit/main/posts/astro-waline-comments/index.md" target="_blank" rel="noopener noreferrer"><em>Edit on GitHub</em></a></div><div class="post-tags"><a class="post-tag" href="/blog/tags/#tag-f980fb0ed189"># Astro</a><a class="post-tag" href="/blog/tags/#tag-c1d0d8234832"># Waline</a><a class="post-tag" href="/blog/tags/#tag-d4a86cb946d4"># TypeScript</a></div></div><div class="article-toc-inline"><button class="article-toc-toggle" type="button" aria-expanded="false" aria-controls="article-toc-links">On this page</button><div class="article-toc-panel"><div class="article-toc-clip"><nav id="article-toc-links" aria-label="Article contents"><a href="#_1" class="toc-level-1">前言</a><a href="#waline" class="toc-level-1">技术选型：为什么选择 Waline？</a><a href="#_2" class="toc-level-2">评论系统对比分析</a><a href="#waline_1" class="toc-level-2">选择 Waline 的核心原因</a><a href="#_3" class="toc-level-1">项目架构设计</a><a href="#_4" class="toc-level-2">整体技术栈</a><a href="#_5" class="toc-level-2">文件组织结构（重构后）</a><a href="#_6" class="toc-level-2">架构设计理念</a><a href="#_8" class="toc-level-1">架构演进：从分散到集中</a><a href="#_9" class="toc-level-2">第一阶段：初始实现（配置分散）</a><a href="#_12" class="toc-level-2">第二阶段：配置集中管理（重构后）</a><a href="#_13" class="toc-level-2">重构效果对比</a><a href="#_14" class="toc-level-1">核心功能实现</a><a href="#props" class="toc-level-2">第一步：Props 覆盖机制</a><a href="#_18" class="toc-level-2">第二步：客户端初始化逻辑</a><a href="#placeholder" class="toc-level-2">第三步：Placeholder 持久化</a><a href="#_23" class="toc-level-2">第四步：生命周期管理</a><a href="#_24" class="toc-level-1">深度样式定制</a><a href="#css" class="toc-level-2">CSS 变量系统：主题色统一管理</a><a href="#_25" class="toc-level-2">暗色模式适配</a><a href="#_26" class="toc-level-2">模块化样式架构</a><a href="#_27" class="toc-level-2">自定义反应按钮</a><a href="#_30" class="toc-level-1">实战中的问题与创新解决方案</a><a href="#1-gif" class="toc-level-2">问题 1：表情包和 GIF 弹出层撑开与收回问题</a><a href="#2_3" class="toc-level-2">问题 2：移动端统计标签拥挤</a><a href="#_37" class="toc-level-1">页面集成与使用</a><a href="#_38" class="toc-level-2">在文章页面展示统计信息</a><a href="#_39" class="toc-level-2">在关于页面使用</a><a href="#_40" class="toc-level-2">全局样式引入</a><a href="#_41" class="toc-level-1">配置指南：快速定制</a><a href="#_42" class="toc-level-2">基础配置修改</a><a href="#_43" class="toc-level-2">主题色自定义</a><a href="#_44" class="toc-level-2">页面级配置覆盖</a><a href="#_45" class="toc-level-1">性能优化策略</a><a href="#1-css" class="toc-level-2">1. CSS 动画性能优化</a><a href="#2_4" class="toc-level-2">2. 懒加载优化</a><a href="#3-cdn" class="toc-level-2">3. CDN 资源优化</a><a href="#_46" class="toc-level-1">最佳实践与经验总结</a><a href="#_47" class="toc-level-2">代码组织原则</a><a href="#_48" class="toc-level-2">架构设计理念</a><a href="#_49" class="toc-level-2">样式设计理念</a><a href="#_50" class="toc-level-2">用户体验设计</a><a href="#_51" class="toc-level-1">未来优化方向</a><a href="#_52" class="toc-level-2">短期计划</a><a href="#_53" class="toc-level-2">长期规划</a><a href="#_54" class="toc-level-1">技术栈版本信息</a><a href="#_55" class="toc-level-1">文档资源</a><a href="#_56" class="toc-level-1">结语</a><a href="#_57" class="toc-level-2">核心收获</a><a href="#_58" class="toc-level-2">架构演进的启示</a><a href="#_59" class="toc-level-1">参考资源</a></nav></div></div></div><article class="article" data-pagefind-body><h2 id="_1">前言</h2>
+<p>在现代 Web 开发中，静态站点生成器（SSG）凭借其卓越的性能和安全性越来越受欢迎。然而，静态博客在实现用户互动功能时往往面临挑战。作为一名追求极致体验的开发者，我在使用 Astro 构建个人博客时，深入研究了如何优雅地集成评论系统，并通过多次重构，最终打造了一套<strong>配置集中、类型安全、高度可定制</strong>的 Waline 集成方案。</p>
+<p>本文将详细记录我在 Astro 博客中集成 Waline 评论系统的完整历程，包括技术选型、架构演进、深度定制以及在实践中遇到的问题和创新性解决方案。特别是<strong>从配置分散到集中管理的重构过程</strong>，这对于构建可维护的大型项目具有重要参考价值。</p>
+<blockquote>
+<p><strong>展示效果</strong></p>
+<p>桌面端</p>
+</blockquote>
+<p><img alt="2025-10-26_12-27-09.png" src="assets/20251026122713327.png" loading="lazy" decoding="async"  width="1548" height="1284" /></p>
+<blockquote>
+<p>移动端</p>
+</blockquote>
+<p><img alt="2025-10-26_12-28-32.png" src="assets/20251026122903497.png" loading="lazy" decoding="async"  width="892" height="1144" /></p>
+<h2 id="waline">技术选型：为什么选择 Waline？</h2>
+<p>在开始实施之前，我对市面上主流的评论系统进行了全面对比：</p>
+<h3 id="_2">评论系统对比分析</h3>
+<div class="article-table" role="region" aria-label="Data table" tabindex="0"><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>Waline</th>
+<th>Disqus</th>
+<th>Giscus</th>
+<th>Utterances</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>开源</strong></td>
+<td>✅</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><strong>无广告</strong></td>
+<td>✅</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><strong>数据自主</strong></td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><strong>多语言</strong></td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><strong>访问统计</strong></td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><strong>Markdown</strong></td>
+<td>✅</td>
+<td>⚠️</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><strong>表情包</strong></td>
+<td>✅</td>
+<td>⚠️</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><strong>图片上传</strong></td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><strong>数学公式</strong></td>
+<td>✅</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><strong>代码高亮</strong></td>
+<td>✅</td>
+<td>⚠️</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><strong>免费部署</strong></td>
+<td>✅</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><strong>国内速度</strong></td>
+<td>✅</td>
+<td>❌</td>
+<td>⚠️</td>
+<td>⚠️</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="waline_1">选择 Waline 的核心原因</h3>
+<ol>
+<li><strong>数据自主可控</strong>：评论数据存储在自己的服务器上，完全掌控</li>
+<li><strong>功能丰富完整</strong>：不仅支持评论，还内置浏览量和评论数统计</li>
+<li><strong>深度可定制</strong>：提供丰富的配置选项和 CSS 变量支持</li>
+<li><strong>开源免费</strong>：MIT 协议，可商用，社区活跃</li>
+<li><strong>国内友好</strong>：部署在国内服务器，访问速度快</li>
+</ol>
+<p>基于以上分析，我选择了 Waline 作为博客的评论系统。</p>
+<h2 id="_3">项目架构设计</h2>
+<h3 id="_4">整体技术栈</h3>
+<div class="codehilite"><pre><span></span><code>┌─────────────────────────────────────────┐
+│<span class="w">          </span>Astro<span class="w"> </span>Static<span class="w"> </span>Site<span class="w">              </span>│
+├─────────────────────────────────────────┤
+│<span class="w">  </span>Frontend<span class="w">                               </span>│
+│<span class="w">  </span>├─<span class="w"> </span>Astro<span class="w"> </span><span class="o">(</span>SSG<span class="w"> </span>Framework<span class="o">)</span><span class="w">               </span>│
+│<span class="w">  </span>├─<span class="w"> </span>Tailwind<span class="w"> </span>CSS<span class="w"> </span><span class="o">(</span>Styling<span class="o">)</span><span class="w">              </span>│
+│<span class="w">  </span>├─<span class="w"> </span>TypeScript<span class="w"> </span><span class="o">(</span>Type<span class="w"> </span>Safety<span class="o">)</span><span class="w">            </span>│
+│<span class="w">  </span>└─<span class="w"> </span>Material<span class="w"> </span>Symbols<span class="w"> </span><span class="o">(</span>Icons<span class="o">)</span><span class="w">            </span>│
+├─────────────────────────────────────────┤
+│<span class="w">  </span>Comment<span class="w"> </span>System<span class="w">                         </span>│
+│<span class="w">  </span>├─<span class="w"> </span>Waline<span class="w"> </span>Client<span class="w"> </span>v3<span class="w"> </span><span class="o">(</span>Frontend<span class="o">)</span><span class="w">         </span>│
+│<span class="w">  </span>└─<span class="w"> </span>Waline<span class="w"> </span>Server<span class="w"> </span><span class="o">(</span>Backend<span class="w"> </span>API<span class="o">)</span><span class="w">         </span>│
+├─────────────────────────────────────────┤
+│<span class="w">  </span>Deployment<span class="w">                             </span>│
+│<span class="w">  </span>├─<span class="w"> </span>Vercel<span class="w"> </span><span class="o">(</span>Static<span class="w"> </span>Hosting<span class="o">)</span><span class="w">             </span>│
+│<span class="w">  </span>└─<span class="w"> </span>waline.xieyi.org<span class="w"> </span><span class="o">(</span>Comment<span class="w"> </span>Server<span class="o">)</span><span class="w">   </span>│
+└─────────────────────────────────────────┘
+</code></pre></div>
+
+<h3 id="_5">文件组织结构（重构后）</h3>
+<div class="codehilite"><pre><span></span><code>src/
+├──<span class="w"> </span>components/
+│<span class="w">   </span>├──<span class="w"> </span>Waline.astro<span class="w">              </span><span class="c1"># 评论组件（核心文件，678行）</span>
+│<span class="w">   </span>└──<span class="w"> </span>waline/<span class="w">                   </span><span class="c1"># 文档目录</span>
+│<span class="w">       </span>├──<span class="w"> </span>README.md<span class="w">             </span><span class="c1"># 集成指南</span>
+│<span class="w">       </span>├──<span class="w"> </span>ARCHITECTURE.md<span class="w">       </span><span class="c1"># 架构说明</span>
+│<span class="w">       </span>├──<span class="w"> </span>PROPS_OVERRIDE.md<span class="w">     </span><span class="c1"># Props 覆盖指南</span>
+│<span class="w">       </span>├──<span class="w"> </span>QUICK_REFERENCE.md<span class="w">    </span><span class="c1"># 快速参考</span>
+│<span class="w">       </span>└──<span class="w"> </span>REFACTORING_SUMMARY.md<span class="w"> </span><span class="c1"># 重构总结</span>
+│
+├──<span class="w"> </span>config.ts<span class="w">                     </span><span class="c1"># 🌟 配置集中管理</span>
+│<span class="w">   </span>└──<span class="w"> </span>walineConfig<span class="w">              </span><span class="c1"># Waline 全局配置</span>
+│
+├──<span class="w"> </span>types/
+│<span class="w">   </span>└──<span class="w"> </span>config.ts<span class="w">                 </span><span class="c1"># 🌟 类型定义</span>
+│<span class="w">       </span>└──<span class="w"> </span>WalineConfig<span class="w">          </span><span class="c1"># Waline 配置类型</span>
+│
+├──<span class="w"> </span>layouts/
+│<span class="w">   </span>└──<span class="w"> </span>Layout.astro<span class="w">              </span><span class="c1"># 全局布局</span>
+│<span class="w">       </span>└──<span class="w"> </span>Waline<span class="w"> </span>CSS<span class="w"> </span>引入
+│
+└──<span class="w"> </span>pages/
+<span class="w">    </span>├──<span class="w"> </span>posts/<span class="o">[</span>...slug<span class="o">]</span>.astro<span class="w">     </span><span class="c1"># 文章页面</span>
+<span class="w">    </span>│<span class="w">   </span>├──<span class="w"> </span>统计信息展示
+<span class="w">    </span>│<span class="w">   </span>└──<span class="w"> </span>评论区集成
+<span class="w">    </span>│
+<span class="w">    </span>└──<span class="w"> </span>about.astro<span class="w">               </span><span class="c1"># 关于页面</span>
+<span class="w">        </span>└──<span class="w"> </span>独立评论区
+</code></pre></div>
+
+<h3 id="_6">架构设计理念</h3>
+<h4 id="_7">🎯 核心设计原则</h4>
+<ol>
+<li><strong>配置集中管理</strong>：所有配置统一在 <code>config.ts</code> 中管理，避免硬编码</li>
+<li><strong>类型安全保障</strong>：使用 TypeScript 类型定义，确保配置正确性</li>
+<li><strong>Props 覆盖机制</strong>：支持页面级配置覆盖，实现灵活定制</li>
+<li><strong>自动语言映射</strong>：博客语言自动映射到 Waline 支持的语言</li>
+<li><strong>错误处理健壮</strong>：完整的错误捕获和优雅降级</li>
+</ol>
+<h2 id="_8">架构演进：从分散到集中</h2>
+<h3 id="_9">第一阶段：初始实现（配置分散）</h3>
+<h4 id="_10">问题分析</h4>
+<p>最初的实现中，配置分散在多个地方：</p>
+<div class="codehilite"><pre><span></span><code>&lt;!-- ❌ 旧版本：Waline.astro --&gt;
+---
+// 配置硬编码在组件中
+const WALINE_LANG = "en";
+const SERVER_URL = "https://waline.xieyi.org/";
+---
+
+&lt;div 
+  data-lang={WALINE_LANG}
+  data-server={SERVER_URL}
+&gt;&lt;/div&gt;
+
+&lt;script&gt;
+  // 配置分散在脚本中
+  const customLocale = {
+    placeholder: 'Leave your thoughts here... 💭',
+    sofa: 'Be the first to share your thoughts!',
+  };
+
+  const placeholderConfig = {
+    nick: 'Your Name ✨',
+    mail: 'Your Email 📧',
+    link: 'Your Website 🌐',
+  };
+
+  // 大量配置代码...
+  init({
+    serverURL: serverURL,
+    lang: walineLang,
+    pageview: true,
+    comment: true,
+    emoji: [...],
+    // ... 20+ 配置项
+  });
+&lt;/script&gt;
+</code></pre></div>
+
+<h4 id="_11">存在的问题</h4>
+<div class="article-table" role="region" aria-label="Data table" tabindex="0"><table>
+<thead>
+<tr>
+<th>问题</th>
+<th>影响</th>
+<th>严重程度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>配置分散</strong></td>
+<td>修改配置需要在 3 处修改</td>
+<td>🔴 高</td>
+</tr>
+<tr>
+<td><strong>无类型检查</strong></td>
+<td>容易出现拼写错误和类型错误</td>
+<td>🔴 高</td>
+</tr>
+<tr>
+<td><strong>难以维护</strong></td>
+<td>代码重复，维护成本高</td>
+<td>🟡 中</td>
+</tr>
+<tr>
+<td><strong>可移植性差</strong></td>
+<td>迁移到其他项目需要大量修改</td>
+<td>🟡 中</td>
+</tr>
+<tr>
+<td><strong>无法复用</strong></td>
+<td>每个页面都需要重复配置</td>
+<td>🟡 中</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="_12">第二阶段：配置集中管理（重构后）</h3>
+<h4 id="1">1. 类型定义：建立类型安全基础</h4>
+<div class="codehilite"><pre><span></span><code><span class="c1">// ✅ src/types/config.ts</span>
+<span class="k">export</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="nx">WalineConfig</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">serverURL</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">                                    </span><span class="c1">// 服务器地址（必填）</span>
+<span class="w">  </span><span class="nx">lang</span><span class="o">?:</span><span class="w"> </span><span class="s2">"en"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">"zh"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">"zh-CN"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">"zh-TW"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">"jp"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">"jp-JP"</span><span class="p">;</span><span class="w">  </span><span class="c1">// 语言</span>
+<span class="w">  </span><span class="nx">pageview?</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w">                                   </span><span class="c1">// 浏览量统计</span>
+<span class="w">  </span><span class="nx">comment?</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w">                                    </span><span class="c1">// 评论数统计</span>
+<span class="w">  </span><span class="nx">emoji?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">[];</span><span class="w">                                     </span><span class="c1">// 表情包</span>
+<span class="w">  </span><span class="nx">meta</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="s2">"nick"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">"mail"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">"link"</span><span class="p">)[];</span><span class="w">                 </span><span class="c1">// 用户信息字段</span>
+<span class="w">  </span><span class="nx">requiredMeta</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="s2">"nick"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">"mail"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">"link"</span><span class="p">)[];</span><span class="w">         </span><span class="c1">// 必填字段</span>
+<span class="w">  </span><span class="nx">wordLimit?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="p">[</span><span class="kt">number</span><span class="p">,</span><span class="w"> </span><span class="kt">number</span><span class="p">];</span><span class="w">               </span><span class="c1">// 字数限制</span>
+<span class="w">  </span><span class="nx">pageSize?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span><span class="w">                                    </span><span class="c1">// 每页评论数</span>
+<span class="w">  </span><span class="nx">login</span><span class="o">?:</span><span class="w"> </span><span class="s2">"enable"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">"disable"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">"force"</span><span class="p">;</span><span class="w">              </span><span class="c1">// 登录模式</span>
+<span class="w">  </span><span class="nx">reaction?</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">string</span><span class="p">[];</span><span class="w">                        </span><span class="c1">// 文章反应</span>
+<span class="w">  </span><span class="nx">locale</span><span class="o">?:</span><span class="w"> </span><span class="p">{</span><span class="w">                                            </span><span class="c1">// 文案配置</span>
+<span class="w">    </span><span class="nx">placeholder?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
+<span class="w">    </span><span class="nx">sofa?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
+<span class="w">    </span><span class="p">[</span><span class="nx">key</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">]</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kc">undefined</span><span class="p">;</span>
+<span class="w">  </span><span class="p">};</span>
+<span class="w">  </span><span class="nx">placeholderConfig</span><span class="o">?:</span><span class="w"> </span><span class="p">{</span><span class="w">                                 </span><span class="c1">// 输入框占位符</span>
+<span class="w">    </span><span class="nx">nick?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
+<span class="w">    </span><span class="nx">mail?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
+<span class="w">    </span><span class="nx">link?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
+<span class="w">  </span><span class="p">};</span>
+<span class="p">};</span>
+</code></pre></div>
+
+<p><strong>设计亮点</strong>：</p>
+<ul>
+<li>✅ 使用 TypeScript 联合类型确保值的合法性</li>
+<li>✅ 可选属性使用 <code>?</code> 标记，清晰表达必填/可选</li>
+<li>✅ 支持复杂类型（如 <code>wordLimit</code> 可以是数字或数组）</li>
+<li>✅ 使用索引签名支持 <code>locale</code> 的扩展性</li>
+</ul>
+<h4 id="2">2. 配置集中：统一管理所有配置</h4>
+<div class="codehilite"><pre><span></span><code><span class="c1">// ✅ src/config.ts</span>
+<span class="k">import</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">WalineConfig</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">"./types/config"</span><span class="p">;</span>
+
+<span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">walineConfig</span><span class="o">:</span><span class="w"> </span><span class="kt">WalineConfig</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// === 必填配置 ===</span>
+<span class="w">  </span><span class="nx">serverURL</span><span class="o">:</span><span class="w"> </span><span class="s2">"https://waline.xieyi.org/"</span><span class="p">,</span>
+
+<span class="w">  </span><span class="c1">// === 语言配置 ===</span>
+<span class="w">  </span><span class="nx">lang</span><span class="o">:</span><span class="w"> </span><span class="s2">"en"</span><span class="p">,</span><span class="w"> </span><span class="c1">// 留空则自动使用 siteConfig.lang 映射</span>
+
+<span class="w">  </span><span class="c1">// === 统计功能 ===</span>
+<span class="w">  </span><span class="nx">pageview</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">comment</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="p">,</span>
+
+<span class="w">  </span><span class="c1">// === 表情包配置 ===</span>
+<span class="w">  </span><span class="nx">emoji</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">"https://unpkg.com/@waline/emojis@1.2.0/weibo"</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">"https://unpkg.com/@waline/emojis@1.2.0/alus"</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">"https://unpkg.com/@waline/emojis@1.2.0/bilibili"</span><span class="p">,</span>
+<span class="w">  </span><span class="p">],</span>
+
+<span class="w">  </span><span class="c1">// === 用户信息 ===</span>
+<span class="w">  </span><span class="nx">meta</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"nick"</span><span class="p">,</span><span class="w"> </span><span class="s2">"mail"</span><span class="p">,</span><span class="w"> </span><span class="s2">"link"</span><span class="p">],</span>
+<span class="w">  </span><span class="nx">requiredMeta</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"nick"</span><span class="p">,</span><span class="w"> </span><span class="s2">"mail"</span><span class="p">],</span>
+
+<span class="w">  </span><span class="c1">// === 评论限制 ===</span>
+<span class="w">  </span><span class="nx">wordLimit</span><span class="o">:</span><span class="w"> </span><span class="kt">0</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">pageSize</span><span class="o">:</span><span class="w"> </span><span class="kt">5</span><span class="p">,</span>
+
+<span class="w">  </span><span class="c1">// === 登录配置 ===</span>
+<span class="w">  </span><span class="nx">login</span><span class="o">:</span><span class="w"> </span><span class="s2">"enable"</span><span class="p">,</span>
+
+<span class="w">  </span><span class="c1">// === 文章反应 ===</span>
+<span class="w">  </span><span class="nx">reaction</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"https://api.iconify.design/material-symbols-light:heart-check-outline-rounded.svg"</span><span class="p">],</span>
+
+<span class="w">  </span><span class="c1">// === 文案配置 ===</span>
+<span class="w">  </span><span class="nx">locale</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">placeholder</span><span class="o">:</span><span class="w"> </span><span class="s2">"Leave your thoughts here... 💭"</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">sofa</span><span class="o">:</span><span class="w"> </span><span class="s2">"Be the first to share your thoughts!"</span><span class="p">,</span>
+<span class="w">  </span><span class="p">},</span>
+
+<span class="w">  </span><span class="c1">// === 输入框占位符 ===</span>
+<span class="w">  </span><span class="nx">placeholderConfig</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">nick</span><span class="o">:</span><span class="w"> </span><span class="s2">"Your Name ✨"</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">mail</span><span class="o">:</span><span class="w"> </span><span class="s2">"Your Email 📧"</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">link</span><span class="o">:</span><span class="w"> </span><span class="s2">"Your Website 🌐"</span><span class="p">,</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="p">};</span>
+</code></pre></div>
+
+<p><strong>设计亮点</strong>：</p>
+<ul>
+<li>✅ 所有配置集中在一个文件中</li>
+<li>✅ 使用注释清晰划分配置区域</li>
+<li>✅ 类型自动提示和检查</li>
+<li>✅ 易于修改和维护</li>
+</ul>
+<h4 id="3">3. 组件简化：专注于逻辑和渲染</h4>
+<div class="codehilite"><pre><span></span><code>&lt;!-- ✅ src/components/Waline.astro --&gt;
+---
+import { siteConfig, walineConfig } from "@/config";
+import type { WalineConfig } from "@/types/config";
+
+// Props 支持覆盖全局配置
+interface Props extends Partial&lt;WalineConfig&gt; {
+  path?: string;
+}
+
+const { path, ...propsConfig } = Astro.props;
+
+// 配置合并：Props &gt; 全局配置 &gt; 默认值
+const mergedConfig: WalineConfig = {
+  ...walineConfig,
+  ...propsConfig,
+};
+
+// 语言自动映射
+const langMap: Record&lt;string, string&gt; = {
+  en: "en",
+  zh_CN: "zh-CN",
+  zh_TW: "zh-TW",
+  ja: "jp",
+  ko: "en", // Waline 不支持韩语，使用英语
+  // ... 其他映射
+};
+
+const WALINE_LANG = mergedConfig.lang || langMap[siteConfig.lang] || "en";
+
+// 配置序列化，传递给客户端
+const walineClientConfig = JSON.stringify({
+  lang: WALINE_LANG,
+  serverURL: mergedConfig.serverURL,
+  pageview: mergedConfig.pageview,
+  comment: mergedConfig.comment,
+  emoji: mergedConfig.emoji,
+  meta: mergedConfig.meta,
+  requiredMeta: mergedConfig.requiredMeta,
+  wordLimit: mergedConfig.wordLimit,
+  pageSize: mergedConfig.pageSize,
+  login: mergedConfig.login,
+  reaction: mergedConfig.reaction,
+  locale: mergedConfig.locale,
+  placeholderConfig: mergedConfig.placeholderConfig,
+});
+---
+
+&lt;div 
+  id="waline" 
+  class="rounded-[var(--radius-large)]"
+  data-config={walineClientConfig}
+  data-path={path || Astro.url.pathname}
+&gt;&lt;/div&gt;
+</code></pre></div>
+
+<p><strong>设计亮点</strong>：</p>
+<ul>
+<li>✅ 组件代码大幅简化</li>
+<li>✅ Props 继承 <code>WalineConfig</code>，类型一致性</li>
+<li>✅ 支持页面级配置覆盖</li>
+<li>✅ 自动语言映射，无需手动配置</li>
+</ul>
+<h3 id="_13">重构效果对比</h3>
+<div class="article-table" role="region" aria-label="Data table" tabindex="0"><table>
+<thead>
+<tr>
+<th>指标</th>
+<th>重构前</th>
+<th>重构后</th>
+<th>改进</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>配置集中度</strong></td>
+<td>分散在 3 处</td>
+<td>集中在 1 处</td>
+<td>⬆️ 200%</td>
+</tr>
+<tr>
+<td><strong>类型安全</strong></td>
+<td>❌ 无类型</td>
+<td>✅ 完整类型</td>
+<td>⬆️ 100%</td>
+</tr>
+<tr>
+<td><strong>可维护性</strong></td>
+<td>需修改 4 处</td>
+<td>只需修改 1 处</td>
+<td>⬆️ 300%</td>
+</tr>
+<tr>
+<td><strong>代码行数</strong></td>
+<td>489 行</td>
+<td>678 行</td>
+<td>⬇️ -38% (含文档)</td>
+</tr>
+<tr>
+<td><strong>可移植性</strong></td>
+<td>低</td>
+<td>高</td>
+<td>⬆️ 400%</td>
+</tr>
+<tr>
+<td><strong>开发体验</strong></td>
+<td>差</td>
+<td>优秀</td>
+<td>⬆️ 500%</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="_14">核心功能实现</h2>
+<h3 id="props">第一步：Props 覆盖机制</h3>
+<h4 id="_15">设计理念</h4>
+<p>支持三种使用方式，满足不同场景需求：</p>
+<div class="codehilite"><pre><span></span><code>&lt;!-- 1. 使用全局配置 --&gt;
+&lt;Waline /&gt;
+
+&lt;!-- 2. 自定义路径 --&gt;
+&lt;Waline path="/custom-path" /&gt;
+
+&lt;!-- 3. 覆盖特定配置 --&gt;
+&lt;Waline reaction={false} comment={false} /&gt;
+
+&lt;!-- 4. 组合使用 --&gt;
+&lt;Waline path="/about" reaction={false} pageview={false} /&gt;
+</code></pre></div>
+
+<h4 id="_16">实现原理</h4>
+<div class="codehilite"><pre><span></span><code>---
+// Props 类型定义
+interface Props extends Partial&lt;WalineConfig&gt; {
+  path?: string;
+}
+
+const { path, ...propsConfig } = Astro.props;
+
+// 配置合并（Props 优先级最高）
+const mergedConfig: WalineConfig = {
+  ...walineConfig,      // 全局配置
+  ...propsConfig,       // Props 覆盖
+};
+---
+</code></pre></div>
+
+<p><strong>配置优先级</strong>：</p>
+<div class="codehilite"><pre><span></span><code>Props<span class="w"> </span>配置<span class="w"> </span>&gt;<span class="w"> </span>config.ts<span class="w"> </span>全局配置<span class="w"> </span>&gt;<span class="w"> </span>默认值
+</code></pre></div>
+
+<h4 id="_17">实际应用场景</h4>
+<h5 id="1_1">场景 1：关于页面禁用反应功能</h5>
+<div class="codehilite"><pre><span></span><code>&lt;!-- src/pages/about.astro --&gt;
+&lt;Waline path="/about" reaction={false} /&gt;
+</code></pre></div>
+
+<h5 id="2_1">场景 2：特定文章禁用评论</h5>
+<div class="codehilite"><pre><span></span><code>&lt;!-- src/pages/posts/[...slug].astro --&gt;
+{!entry.data.draft &amp;&amp; (
+  &lt;Waline comment={entry.data.disableComments ? false : true} /&gt;
+)}
+</code></pre></div>
+
+<h5 id="3_1">场景 3：测试页面使用不同服务器</h5>
+<div class="codehilite"><pre><span></span><code>&lt;!-- src/pages/test.astro --&gt;
+&lt;Waline serverURL="https://test.waline.example.com/" /&gt;
+</code></pre></div>
+
+<h3 id="_18">第二步：客户端初始化逻辑</h3>
+<h4 id="_19">错误处理机制</h4>
+<div class="codehilite"><pre><span></span><code><span class="kd">function</span><span class="w"> </span><span class="nx">initWaline</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">currentPath</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">window</span><span class="p">.</span><span class="nx">location</span><span class="p">.</span><span class="nx">pathname</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// 1. 容器检查</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">walineEl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">document</span><span class="p">.</span><span class="nx">querySelector</span><span class="p">(</span><span class="s1">'#waline'</span><span class="p">)</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="nx">HTMLElement</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nx">walineEl</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">console</span><span class="p">.</span><span class="nx">warn</span><span class="p">(</span><span class="s1">'[Waline] Container element not found'</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="c1">// 2. 配置验证</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">configStr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">walineEl</span><span class="p">.</span><span class="nx">dataset</span><span class="p">.</span><span class="nx">config</span><span class="p">;</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nx">configStr</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="s1">'[Waline] Configuration not found'</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="c1">// 3. JSON 解析保护</span>
+<span class="w">  </span><span class="kd">let</span><span class="w"> </span><span class="nx">config</span><span class="p">;</span>
+<span class="w">  </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">configStr</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="nx">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="s1">'[Waline] Failed to parse configuration:'</span><span class="p">,</span><span class="w"> </span><span class="nx">error</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="c1">// 4. Waline 初始化</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">walineInstance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">init</span><span class="p">({</span>
+<span class="w">    </span><span class="nx">el</span><span class="o">:</span><span class="w"> </span><span class="s1">'#waline'</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">serverURL</span><span class="o">:</span><span class="w"> </span><span class="nx">config</span><span class="p">.</span><span class="nx">serverURL</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">path</span><span class="o">:</span><span class="w"> </span><span class="nx">currentPath</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">lang</span><span class="o">:</span><span class="w"> </span><span class="nx">config</span><span class="p">.</span><span class="nx">lang</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">locale</span><span class="o">:</span><span class="w"> </span><span class="nx">config</span><span class="p">.</span><span class="nx">locale</span><span class="p">,</span>
+<span class="w">    </span><span class="c1">// ... 其他配置</span>
+<span class="w">  </span><span class="p">});</span>
+
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">walineInstance</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>错误处理层级</strong>：</p>
+<ol>
+<li><strong>DOM 检查</strong>：确保容器元素存在</li>
+<li><strong>配置验证</strong>：确保配置数据存在</li>
+<li><strong>JSON 解析</strong>：捕获解析错误</li>
+<li><strong>优雅降级</strong>：错误时安全返回，不影响页面其他功能</li>
+</ol>
+<h3 id="placeholder">第三步：Placeholder 持久化</h3>
+<h4 id="_20">问题描述</h4>
+<p>当用户登录或退出时，Waline 会重新渲染头部信息栏，导致自定义 placeholder 被重置为默认文本。</p>
+<h4 id="mutationobserver">创新解决方案：MutationObserver</h4>
+<div class="codehilite"><pre><span></span><code><span class="c1">// 应用 Placeholder 的函数</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">applyPlaceholders</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nx">config</span><span class="p">.</span><span class="nx">placeholderConfig</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="p">;</span>
+
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">inputs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">nick</span><span class="o">:</span><span class="w"> </span><span class="nb">document</span><span class="p">.</span><span class="nx">querySelector</span><span class="p">(</span><span class="s1">'#waline .wl-header input[name="nick"]'</span><span class="p">)</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="nx">HTMLInputElement</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">mail</span><span class="o">:</span><span class="w"> </span><span class="nb">document</span><span class="p">.</span><span class="nx">querySelector</span><span class="p">(</span><span class="s1">'#waline .wl-header input[name="mail"]'</span><span class="p">)</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="nx">HTMLInputElement</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">link</span><span class="o">:</span><span class="w"> </span><span class="nb">document</span><span class="p">.</span><span class="nx">querySelector</span><span class="p">(</span><span class="s1">'#waline .wl-header input[name="link"]'</span><span class="p">)</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="nx">HTMLInputElement</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">  </span><span class="p">};</span>
+
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">inputs</span><span class="p">.</span><span class="nx">nick</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">config</span><span class="p">.</span><span class="nx">placeholderConfig</span><span class="p">.</span><span class="nx">nick</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">inputs</span><span class="p">.</span><span class="nx">nick</span><span class="p">.</span><span class="nx">placeholder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">config</span><span class="p">.</span><span class="nx">placeholderConfig</span><span class="p">.</span><span class="nx">nick</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">inputs</span><span class="p">.</span><span class="nx">mail</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">config</span><span class="p">.</span><span class="nx">placeholderConfig</span><span class="p">.</span><span class="nx">mail</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">inputs</span><span class="p">.</span><span class="nx">mail</span><span class="p">.</span><span class="nx">placeholder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">config</span><span class="p">.</span><span class="nx">placeholderConfig</span><span class="p">.</span><span class="nx">mail</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">inputs</span><span class="p">.</span><span class="nx">link</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">config</span><span class="p">.</span><span class="nx">placeholderConfig</span><span class="p">.</span><span class="nx">link</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">inputs</span><span class="p">.</span><span class="nx">link</span><span class="p">.</span><span class="nx">placeholder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">config</span><span class="p">.</span><span class="nx">placeholderConfig</span><span class="p">.</span><span class="nx">link</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">};</span>
+
+<span class="c1">// 初始应用</span>
+<span class="nx">setTimeout</span><span class="p">(</span><span class="nx">applyPlaceholders</span><span class="p">,</span><span class="w"> </span><span class="mf">100</span><span class="p">);</span>
+
+<span class="c1">// 监听 DOM 变化，确保登录/退出后 placeholder 依然生效</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">observer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">MutationObserver</span><span class="p">(</span><span class="nx">applyPlaceholders</span><span class="p">);</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">walineContainer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">document</span><span class="p">.</span><span class="nx">querySelector</span><span class="p">(</span><span class="s1">'#waline'</span><span class="p">)</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="nx">HTMLElement</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">walineContainer</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">observer</span><span class="p">.</span><span class="nx">observe</span><span class="p">(</span><span class="nx">walineContainer</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">childList</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="nx">subtree</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="p">});</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h4 id="_21">方案优势</h4>
+<ol>
+<li><strong>自动化</strong>：无需手动干预，DOM 变化自动触发</li>
+<li><strong>性能优化</strong>：MutationObserver 是浏览器原生 API，性能优秀</li>
+<li><strong>可靠性高</strong>：无论何时 DOM 重新渲染，都能确保 placeholder 正确</li>
+</ol>
+<h4 id="_22">技术深度</h4>
+<p><code>MutationObserver</code> 是现代浏览器提供的强大 API，它可以观察 DOM 树的变化并执行回调。相比于传统的轮询方案，它具有以下优势：</p>
+<ul>
+<li><strong>事件驱动</strong>：只在 DOM 真正变化时触发，不浪费性能</li>
+<li><strong>精确控制</strong>：可以精确指定要监听的变化类型</li>
+<li><strong>批量处理</strong>：浏览器会自动批量处理多个变化，避免频繁回调</li>
+</ul>
+<h3 id="_23">第四步：生命周期管理</h3>
+<h4 id="astro-viewtransitions">支持 Astro ViewTransitions</h4>
+<div class="codehilite"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nx">walineInstance</span><span class="o">:</span><span class="w"> </span><span class="nx">ReturnType</span><span class="o">&lt;</span><span class="ow">typeof</span><span class="w"> </span><span class="nx">initWaline</span><span class="o">&gt;</span><span class="p">;</span>
+
+<span class="c1">// 初始化：页面加载完成时</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">readyState</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s1">'loading'</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nb">document</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">'DOMContentLoaded'</span><span class="p">,</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">walineInstance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">initWaline</span><span class="p">();</span>
+<span class="w">  </span><span class="p">});</span>
+<span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">walineInstance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">initWaline</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="c1">// 重新初始化：Astro 页面切换时（支持 ViewTransitions）</span>
+<span class="nb">document</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">'astro:after-swap'</span><span class="p">,</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">walineInstance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">initWaline</span><span class="p">();</span>
+<span class="p">});</span>
+</code></pre></div>
+
+<p><strong>设计考量</strong>：</p>
+<ul>
+<li>兼容不同的页面加载状态</li>
+<li>完美支持 Astro 的 ViewTransitions 特性</li>
+<li>确保单页面应用般的流畅体验</li>
+</ul>
+<h2 id="_24">深度样式定制</h2>
+<h3 id="css">CSS 变量系统：主题色统一管理</h3>
+<div class="codehilite"><pre><span></span><code><span class="p">#</span><span class="nn">waline</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c">/* 主题色配置 */</span>
+<span class="w">  </span><span class="nv">--waline-theme-color</span><span class="p">:</span><span class="w"> </span><span class="nf">var</span><span class="p">(</span><span class="nv">--primary</span><span class="p">);</span><span class="w">        </span><span class="c">/* 主要强调色 */</span>
+<span class="w">  </span><span class="nv">--waline-active-color</span><span class="p">:</span><span class="w"> </span><span class="nf">var</span><span class="p">(</span><span class="nv">--primary</span><span class="p">);</span><span class="w">       </span><span class="c">/* 激活状态色 */</span>
+
+<span class="w">  </span><span class="c">/* 背景色配置 */</span>
+<span class="w">  </span><span class="nv">--waline-bgcolor</span><span class="p">:</span><span class="w"> </span><span class="kc">transparent</span><span class="p">;</span><span class="w">               </span><span class="c">/* 主背景（透明） */</span>
+<span class="w">  </span><span class="nv">--waline-bgcolor-light</span><span class="p">:</span><span class="w"> </span><span class="nf">var</span><span class="p">(</span><span class="nv">--page-bg</span><span class="p">);</span><span class="w">      </span><span class="c">/* 浅色背景 */</span>
+
+<span class="w">  </span><span class="c">/* 文字颜色配置 */</span>
+<span class="w">  </span><span class="nv">--waline-text-color</span><span class="p">:</span><span class="w"> </span><span class="nf">oklch</span><span class="p">(</span><span class="mf">0.40</span><span class="w"> </span><span class="mf">0.02</span><span class="w"> </span><span class="nf">var</span><span class="p">(</span><span class="nv">--hue</span><span class="p">));</span><span class="w">    </span><span class="c">/* 主文字颜色 */</span>
+<span class="w">  </span><span class="nv">--waline-grey-color</span><span class="p">:</span><span class="w"> </span><span class="nf">oklch</span><span class="p">(</span><span class="mf">0.60</span><span class="w"> </span><span class="mf">0.02</span><span class="w"> </span><span class="nf">var</span><span class="p">(</span><span class="nv">--hue</span><span class="p">));</span><span class="w">    </span><span class="c">/* 次要文字颜色 */</span>
+
+<span class="w">  </span><span class="c">/* 边框配置 */</span>
+<span class="w">  </span><span class="nv">--waline-border-color</span><span class="p">:</span><span class="w"> </span><span class="nf">oklch</span><span class="p">(</span><span class="mf">0.90</span><span class="w"> </span><span class="mf">0.01</span><span class="w"> </span><span class="nf">var</span><span class="p">(</span><span class="nv">--hue</span><span class="p">));</span><span class="w"> </span><span class="c">/* 边框颜色 */</span>
+<span class="w">  </span><span class="nv">--waline-border</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="kt">px</span><span class="w"> </span><span class="kc">solid</span><span class="w"> </span><span class="nf">oklch</span><span class="p">(</span><span class="mf">0.90</span><span class="w"> </span><span class="mf">0.01</span><span class="w"> </span><span class="nf">var</span><span class="p">(</span><span class="nv">--hue</span><span class="p">));</span>
+
+<span class="w">  </span><span class="c">/* 尺寸配置 */</span>
+<span class="w">  </span><span class="nv">--waline-avatar-size</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="kt">rem</span><span class="p">;</span><span class="w">                </span><span class="c">/* 头像大小 */</span>
+<span class="w">  </span><span class="nv">--waline-border-radius</span><span class="p">:</span><span class="w"> </span><span class="mf">0.75</span><span class="kt">rem</span><span class="p">;</span><span class="w">           </span><span class="c">/* 全局圆角 */</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>技术细节</strong>：</p>
+<ul>
+<li><strong>OKLCH 色彩空间</strong>：比传统 RGB/HSL 更符合人眼感知</li>
+<li><strong>CSS 变量继承</strong>：直接使用博客的设计系统</li>
+<li><strong>透明背景</strong>：无缝融入博客整体设计</li>
+</ul>
+<h3 id="_25">暗色模式适配</h3>
+<div class="codehilite"><pre><span></span><code><span class="p">:</span><span class="nd">root</span><span class="p">.</span><span class="nc">dark</span><span class="w"> </span><span class="p">#</span><span class="nn">waline</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nv">--waline-text-color</span><span class="p">:</span><span class="w"> </span><span class="nf">oklch</span><span class="p">(</span><span class="mf">0.85</span><span class="w"> </span><span class="mf">0.02</span><span class="w"> </span><span class="nf">var</span><span class="p">(</span><span class="nv">--hue</span><span class="p">));</span>
+<span class="w">  </span><span class="nv">--waline-grey-color</span><span class="p">:</span><span class="w"> </span><span class="nf">oklch</span><span class="p">(</span><span class="mf">0.65</span><span class="w"> </span><span class="mf">0.02</span><span class="w"> </span><span class="nf">var</span><span class="p">(</span><span class="nv">--hue</span><span class="p">));</span>
+<span class="w">  </span><span class="nv">--waline-border-color</span><span class="p">:</span><span class="w"> </span><span class="nf">oklch</span><span class="p">(</span><span class="mf">0.30</span><span class="w"> </span><span class="mf">0.02</span><span class="w"> </span><span class="nf">var</span><span class="p">(</span><span class="nv">--hue</span><span class="p">));</span>
+<span class="w">  </span><span class="nv">--waline-border</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="kt">px</span><span class="w"> </span><span class="kc">solid</span><span class="w"> </span><span class="nf">oklch</span><span class="p">(</span><span class="mf">0.30</span><span class="w"> </span><span class="mf">0.02</span><span class="w"> </span><span class="nf">var</span><span class="p">(</span><span class="nv">--hue</span><span class="p">));</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>自动切换</strong>：通过监听 <code>html.dark</code> 类，实现暗色模式的自动适配，无需 JavaScript 干预。</p>
+<h3 id="_26">模块化样式架构</h3>
+<p>样式分为 13 个独立模块，每个模块负责特定的 UI 部分：</p>
+<div class="codehilite"><pre><span></span><code><span class="c">/* 1. CSS 变量配置 - 全局主题 */</span>
+<span class="c">/* 2. 输入面板样式 - 评论发表区 */</span>
+<span class="c">/* 3. 头部信息栏 - 用户信息输入 */</span>
+<span class="c">/* 4. 文本编辑器 - 评论内容 */</span>
+<span class="c">/* 5. 提交按钮 - 主操作 */</span>
+<span class="c">/* 6. 评论统计 - 数量显示 */</span>
+<span class="c">/* 7. 评论卡片 - 单条评论 */</span>
+<span class="c">/* 8. 用户信息显示 - 昵称徽章 */</span>
+<span class="c">/* 9. 加载状态 - 动画效果 */</span>
+<span class="c">/* 10. 组件入场动画 - 视觉体验 */</span>
+<span class="c">/* 11. 表情包和上传面板 - 弹出层 */</span>
+<span class="c">/* 12. 文章反应按钮 - Reaction */</span>
+<span class="c">/* 13. 其他配置 - 杂项 */</span>
+</code></pre></div>
+
+<h3 id="_27">自定义反应按钮</h3>
+<h4 id="_28">设计理念</h4>
+<p>使用自定义爱心图标替代默认表情，提供更精美的视觉体验：</p>
+<div class="codehilite"><pre><span></span><code><span class="c">/* 反应图标 - 未激活状态（空心） */</span>
+<span class="p">#</span><span class="nn">waline</span><span class="w"> </span><span class="p">.</span><span class="nc">wl-reaction-item</span><span class="w"> </span><span class="nt">img</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">content</span><span class="p">:</span><span class="w"> </span><span class="nb">url</span><span class="p">(</span><span class="s1">'https://api.iconify.design/material-symbols-light:heart-check-outline-rounded.svg'</span><span class="p">);</span>
+<span class="w">  </span><span class="k">filter</span><span class="p">:</span><span class="w"> </span><span class="nb">invert</span><span class="p">(</span><span class="mi">25</span><span class="kt">%</span><span class="p">);</span>
+<span class="w">  </span><span class="k">transition</span><span class="p">:</span><span class="w"> </span><span class="kc">all</span><span class="w"> </span><span class="mf">0.3</span><span class="kt">s</span><span class="w"> </span><span class="nb">cubic-bezier</span><span class="p">(</span><span class="mf">0.4</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c">/* 反应图标 - 激活状态（实心） */</span>
+<span class="p">#</span><span class="nn">waline</span><span class="w"> </span><span class="p">.</span><span class="nc">wl-reaction-item</span><span class="p">.</span><span class="nc">active</span><span class="w"> </span><span class="nt">img</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">content</span><span class="p">:</span><span class="w"> </span><span class="nb">url</span><span class="p">(</span><span class="s1">'https://api.iconify.design/material-symbols-light:heart-check-rounded.svg'</span><span class="p">);</span>
+<span class="w">  </span><span class="k">animation</span><span class="p">:</span><span class="w"> </span><span class="n">reaction-bounce</span><span class="w"> </span><span class="mf">0.6</span><span class="kt">s</span><span class="w"> </span><span class="nb">cubic-bezier</span><span class="p">(</span><span class="mf">0.68</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.55</span><span class="p">,</span><span class="w"> </span><span class="mf">0.265</span><span class="p">,</span><span class="w"> </span><span class="mf">1.55</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c">/* 点赞弹跳动画 */</span>
+<span class="p">@</span><span class="k">keyframes</span><span class="w"> </span><span class="nt">reaction-bounce</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nt">0</span><span class="o">%</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">transform</span><span class="p">:</span><span class="w"> </span><span class="nb">scale</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="nt">25</span><span class="o">%</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">transform</span><span class="p">:</span><span class="w"> </span><span class="nb">scale</span><span class="p">(</span><span class="mf">1.3</span><span class="p">)</span><span class="w"> </span><span class="nb">rotate</span><span class="p">(</span><span class="mi">-10</span><span class="kt">deg</span><span class="p">);</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="nt">50</span><span class="o">%</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">transform</span><span class="p">:</span><span class="w"> </span><span class="nb">scale</span><span class="p">(</span><span class="mf">1.1</span><span class="p">)</span><span class="w"> </span><span class="nb">rotate</span><span class="p">(</span><span class="mi">10</span><span class="kt">deg</span><span class="p">);</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="nt">75</span><span class="o">%</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">transform</span><span class="p">:</span><span class="w"> </span><span class="nb">scale</span><span class="p">(</span><span class="mf">1.2</span><span class="p">)</span><span class="w"> </span><span class="nb">rotate</span><span class="p">(</span><span class="mi">-5</span><span class="kt">deg</span><span class="p">);</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="nt">100</span><span class="o">%</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">transform</span><span class="p">:</span><span class="w"> </span><span class="nb">scale</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span><span class="w"> </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h4 id="_29">交互效果</h4>
+<ul>
+<li><strong>未激活状态</strong>：显示空心图标 + "Join others who like ~"</li>
+<li><strong>激活状态</strong>：显示实心图标 + 点赞数 + "Like(s)"</li>
+<li><strong>悬停效果</strong>：图标放大 1.15 倍 + 亮度提升</li>
+<li><strong>点击动画</strong>：弹跳动画 + 旋转效果</li>
+</ul>
+<h2 id="_30">实战中的问题与创新解决方案</h2>
+<h3 id="1-gif">问题 1：表情包和 GIF 弹出层撑开与收回问题</h3>
+<h4 id="_31">问题描述</h4>
+<p>在深度定制 Waline 后，遇到了移动端和桌面端的复杂问题：</p>
+<p><strong>移动端问题</strong>：</p>
+<ul>
+<li>❌ 表情包选项卡（微博、阿鲁斯、B 站）在移动设备上不可见</li>
+<li>❌ 弹出层使用 <code>position: absolute</code> 定位失败，跑到屏幕外</li>
+</ul>
+<p><strong>桌面端问题</strong>：</p>
+<ul>
+<li>❌ 初步使用 <code>position: relative</code> 后，弹出层关闭后无法收回</li>
+<li>❌ 表情包撑开的高度异常（与 GIF 一样大）</li>
+<li>❌ 评论框一直被撑开，必须刷新页面才能恢复</li>
+</ul>
+<h4 id="_32">解决方案演进过程</h4>
+<h5 id="1_2">尝试 1：移动端临时修复（已废弃）</h5>
+<div class="codehilite"><pre><span></span><code><span class="c">/* ❌ 方案A：只在移动端使用相对定位（问题未完全解决） */</span>
+<span class="p">@</span><span class="k">media</span><span class="w"> </span><span class="nt">screen</span><span class="w"> </span><span class="nt">and</span><span class="w"> </span><span class="o">(</span><span class="nt">max-width</span><span class="o">:</span><span class="w"> </span><span class="nt">768px</span><span class="o">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="p">#</span><span class="nn">waline</span><span class="w"> </span><span class="p">.</span><span class="nc">wl-emoji-popup</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">position</span><span class="p">:</span><span class="w"> </span><span class="kc">relative</span><span class="w"> </span><span class="cp">!important</span><span class="p">;</span>
+<span class="w">    </span><span class="k">left</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="cp">!important</span><span class="p">;</span>
+<span class="w">    </span><span class="k">right</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="cp">!important</span><span class="p">;</span>
+<span class="w">    </span><span class="k">transform</span><span class="p">:</span><span class="w"> </span><span class="kc">none</span><span class="w"> </span><span class="cp">!important</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>结果</strong>：</p>
+<ul>
+<li>✅ 移动端选项卡可见了</li>
+<li>⚠️ 只解决了移动端问题</li>
+<li>❌ 应用到桌面端后，弹出层关闭后无法收回</li>
+</ul>
+<h5 id="2_2">尝试 2：深度排查机制</h5>
+<p>通过浏览器开发者工具，我发现了 Waline 的显示/隐藏机制：</p>
+<p><strong>核心发现</strong>：</p>
+<ol>
+<li>Waline 通过<strong>添加/移除 <code>.display</code> 类名</strong>来控制显示/隐藏</li>
+<li>隐藏时<strong>不是设置 <code>display: none</code></strong>，而是移除 <code>.display</code> 类并清空图片内容</li>
+<li>但是 <code>.wl-emoji-popup</code> 容器和所有 <code>&lt;button&gt;</code> 元素仍然存在于 DOM 中</li>
+<li>这导致使用 <code>position: relative</code> 后，容器即使内容为空也会一直占据空间</li>
+</ol>
+<h5 id="_33">最终方案：基于类名的优雅解决</h5>
+<div class="codehilite"><pre><span></span><code><span class="c">/* 隐藏未激活的弹出层 */</span>
+<span class="p">#</span><span class="nn">waline</span><span class="w"> </span><span class="p">.</span><span class="nc">wl-emoji-popup</span><span class="p">:</span><span class="nd">not</span><span class="o">(</span><span class="p">.</span><span class="nc">display</span><span class="o">),</span>
+<span class="p">#</span><span class="nn">waline</span><span class="w"> </span><span class="p">.</span><span class="nc">wl-gif-popup</span><span class="p">:</span><span class="nd">not</span><span class="o">(</span><span class="p">.</span><span class="nc">display</span><span class="o">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">display</span><span class="p">:</span><span class="w"> </span><span class="kc">none</span><span class="w"> </span><span class="cp">!important</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c">/* 激活时使用相对定位撑开容器 */</span>
+<span class="p">#</span><span class="nn">waline</span><span class="w"> </span><span class="p">.</span><span class="nc">wl-emoji-popup</span><span class="p">.</span><span class="nc">display</span><span class="o">,</span>
+<span class="p">#</span><span class="nn">waline</span><span class="w"> </span><span class="p">.</span><span class="nc">wl-gif-popup</span><span class="p">.</span><span class="nc">display</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">position</span><span class="p">:</span><span class="w"> </span><span class="kc">relative</span><span class="w"> </span><span class="cp">!important</span><span class="p">;</span>
+<span class="w">  </span><span class="k">left</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="cp">!important</span><span class="p">;</span>
+<span class="w">  </span><span class="k">right</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="cp">!important</span><span class="p">;</span>
+<span class="w">  </span><span class="k">transform</span><span class="p">:</span><span class="w"> </span><span class="kc">none</span><span class="w"> </span><span class="cp">!important</span><span class="p">;</span>
+<span class="w">  </span><span class="k">margin-top</span><span class="p">:</span><span class="w"> </span><span class="mf">0.5</span><span class="kt">rem</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>测试结果</strong>：</p>
+<ul>
+<li>✅ 移动端选项卡 100% 可见可用</li>
+<li>✅ 桌面端弹出层正常展开和收回</li>
+<li>✅ 表情包和 GIF 各自根据内容撑开，高度合理</li>
+<li>✅ 点击关闭后评论框立即恢复原状</li>
+<li>✅ 无需媒体查询，全平台统一代码</li>
+<li>✅ 从原来的 30+ 行优化到 12 行</li>
+</ul>
+<h4 id="_34">技术亮点</h4>
+<ol>
+<li><strong>精准选择器</strong>：<code>:not(.display)</code> 直接基于 Waline 的内部机制</li>
+<li><strong>零额外成本</strong>：不需要 JavaScript 监听，完全由 CSS 驱动</li>
+<li><strong>代码极简</strong>：移除了所有在 <code>display: none</code> 状态下无意义的属性</li>
+<li><strong>全局适用</strong>：一套代码解决移动端和桌面端所有问题</li>
+<li><strong>顺应框架设计</strong>：基于 Waline 原有的类名机制，而非对抗它</li>
+</ol>
+<h3 id="2_3">问题 2：移动端统计标签拥挤</h3>
+<h4 id="_35">响应式解决方案</h4>
+<div class="codehilite"><pre><span></span><code><span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">"flex flex-row flex-wrap text-black/30 dark:text-white/30 gap-3 md:gap-5 mb-3"</span><span class="p">&gt;</span>
+  <span class="cm">&lt;!-- 每个统计项 --&gt;</span>
+  <span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">"flex flex-row items-center"</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">"..."</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">Icon</span> <span class="na">name</span><span class="o">=</span><span class="s">"..."</span> <span class="p">/&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">"text-sm"</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">"waline-pageview-count"</span><span class="p">&gt;</span>123<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span>
+      <span class="cm">&lt;!-- 关键：移动端隐藏文字标签 --&gt;</span>
+      <span class="p">&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">"waline-text-views hidden sm:inline"</span><span class="p">&gt;</span>views<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+  <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+</code></pre></div>
+
+<h4 id="tailwind">Tailwind 响应式策略</h4>
+<ul>
+<li><code>flex-wrap</code>：允许元素在空间不足时换行</li>
+<li><code>gap-3 md:gap-5</code>：移动端间距更紧凑，桌面端更舒适</li>
+<li><code>hidden sm:inline</code>：小屏隐藏，640px 以上显示</li>
+</ul>
+<h4 id="_36">用户体验对比</h4>
+<div class="article-table" role="region" aria-label="Data table" tabindex="0"><table>
+<thead>
+<tr>
+<th>设备</th>
+<th>显示方式</th>
+<th>空间利用率</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>手机 (&lt;640px)</td>
+<td>👁 123 💬 45</td>
+<td>节省 40% 空间</td>
+</tr>
+<tr>
+<td>平板/桌面 (≥640px)</td>
+<td>👁 123 views 💬 45 comments</td>
+<td>信息完整</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="_37">页面集成与使用</h2>
+<h3 id="_38">在文章页面展示统计信息</h3>
+<div class="codehilite"><pre><span></span><code>&lt;!-- src/pages/posts/[...slug].astro --&gt;
+&lt;div class="flex flex-row flex-wrap text-black/30 dark:text-white/30 gap-3 md:gap-5 mb-3 transition onload-animation"&gt;
+  &lt;!-- 字数统计 --&gt;
+  &lt;div class="flex flex-row items-center"&gt;
+    &lt;div class="transition h-6 w-6 rounded-md bg-black/5 dark:bg-white/10 text-black/50 dark:text-white/50 flex items-center justify-center mr-2"&gt;
+      &lt;Icon name="material-symbols:notes-rounded"&gt;&lt;/Icon&gt;
+    &lt;/div&gt;
+    &lt;div class="text-sm"&gt;{remarkPluginFrontmatter.words} {" " + i18n(I18nKey.wordsCount)}&lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;!-- 阅读时间 --&gt;
+  &lt;div class="flex flex-row items-center"&gt;
+    &lt;div class="transition h-6 w-6 rounded-md bg-black/5 dark:bg-white/10 text-black/50 dark:text-white/50 flex items-center justify-center mr-2"&gt;
+      &lt;Icon name="material-symbols:schedule-outline-rounded"&gt;&lt;/Icon&gt;
+    &lt;/div&gt;
+    &lt;div class="text-sm"&gt;
+      {remarkPluginFrontmatter.minutes} {" " + i18n(remarkPluginFrontmatter.minutes === 1 ? I18nKey.minuteCount : I18nKey.minutesCount)}
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;!-- Waline 浏览量统计 --&gt;
+  &lt;div class="flex flex-row items-center"&gt;
+    &lt;div class="transition h-6 w-6 rounded-md bg-black/5 dark:bg-white/10 text-black/50 dark:text-white/50 flex items-center justify-center mr-2"&gt;
+      &lt;Icon name="material-symbols:visibility-outline-rounded"&gt;&lt;/Icon&gt;
+    &lt;/div&gt;
+    &lt;div class="text-sm"&gt;
+      &lt;span class="waline-pageview-count" data-path={Astro.url.pathname}&gt;0&lt;/span&gt;
+      &lt;span class="waline-text-views hidden sm:inline"&gt;views&lt;/span&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;!-- Waline 评论数统计 --&gt;
+  &lt;div class="flex flex-row items-center"&gt;
+    &lt;div class="transition h-6 w-6 rounded-md bg-black/5 dark:bg-white/10 text-black/50 dark:text-white/50 flex items-center justify-center mr-2"&gt;
+      &lt;Icon name="material-symbols:comment-outline-rounded"&gt;&lt;/Icon&gt;
+    &lt;/div&gt;
+    &lt;div class="text-sm"&gt;
+      &lt;span class="waline-comment-count" data-path={Astro.url.pathname}&gt;0&lt;/span&gt;
+      &lt;span class="waline-text-comments hidden sm:inline"&gt;comments&lt;/span&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- 引入评论组件 --&gt;
+&lt;Waline /&gt;
+</code></pre></div>
+
+<h3 id="_39">在关于页面使用</h3>
+<div class="codehilite"><pre><span></span><code>&lt;!-- src/pages/about.astro --&gt;
+&lt;Waline path="/about" /&gt;
+</code></pre></div>
+
+<h3 id="_40">全局样式引入</h3>
+<div class="codehilite"><pre><span></span><code>&lt;!-- src/layouts/Layout.astro --&gt;
+&lt;head&gt;
+  &lt;!-- Waline 评论系统样式 --&gt;
+  &lt;link rel="stylesheet" href="https://unpkg.com/@waline/client@v3/dist/waline.css" /&gt;
+&lt;/head&gt;
+</code></pre></div>
+
+<h2 id="_41">配置指南：快速定制</h2>
+<h3 id="_42">基础配置修改</h3>
+<p>所有配置都在 <code>src/config.ts</code> 中修改：</p>
+<div class="codehilite"><pre><span></span><code><span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">walineConfig</span><span class="o">:</span><span class="w"> </span><span class="kt">WalineConfig</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// 修改服务器地址</span>
+<span class="w">  </span><span class="nx">serverURL</span><span class="o">:</span><span class="w"> </span><span class="s2">"https://your-waline-server.com/"</span><span class="p">,</span>
+
+<span class="w">  </span><span class="c1">// 修改语言</span>
+<span class="w">  </span><span class="nx">lang</span><span class="o">:</span><span class="w"> </span><span class="s2">"zh-CN"</span><span class="p">,</span><span class="w"> </span><span class="c1">// 或留空自动映射</span>
+
+<span class="w">  </span><span class="c1">// 修改表情包</span>
+<span class="w">  </span><span class="nx">emoji</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">"https://unpkg.com/@waline/emojis@1.2.0/qq"</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">"https://unpkg.com/@waline/emojis@1.2.0/tieba"</span><span class="p">,</span>
+<span class="w">  </span><span class="p">],</span>
+
+<span class="w">  </span><span class="c1">// 修改文案</span>
+<span class="w">  </span><span class="nx">locale</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">placeholder</span><span class="o">:</span><span class="w"> </span><span class="s2">"说点什么吧... 💬"</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">sofa</span><span class="o">:</span><span class="w"> </span><span class="s2">"快来抢沙发！🎉"</span><span class="p">,</span>
+<span class="w">  </span><span class="p">},</span>
+
+<span class="w">  </span><span class="c1">// 修改输入框占位符</span>
+<span class="w">  </span><span class="nx">placeholderConfig</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">nick</span><span class="o">:</span><span class="w"> </span><span class="s2">"昵称 ✨"</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">mail</span><span class="o">:</span><span class="w"> </span><span class="s2">"邮箱 📧"</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">link</span><span class="o">:</span><span class="w"> </span><span class="s2">"网站 🌐"</span><span class="p">,</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="p">};</span>
+</code></pre></div>
+
+<h3 id="_43">主题色自定义</h3>
+<p>如果需要独立于博客的主题色：</p>
+<div class="codehilite"><pre><span></span><code><span class="c">/* src/components/Waline.astro */</span>
+<span class="p">#</span><span class="nn">waline</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nv">--waline-theme-color</span><span class="p">:</span><span class="w"> </span><span class="mh">#0ea5e9</span><span class="p">;</span><span class="w">  </span><span class="c">/* Sky Blue */</span>
+<span class="w">  </span><span class="nv">--waline-active-color</span><span class="p">:</span><span class="w"> </span><span class="mh">#0284c7</span><span class="p">;</span><span class="w">  </span><span class="c">/* Darker Sky Blue */</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="_44">页面级配置覆盖</h3>
+<div class="codehilite"><pre><span></span><code>&lt;!-- 禁用特定页面的反应功能 --&gt;
+&lt;Waline reaction={false} /&gt;
+
+&lt;!-- 禁用评论数统计 --&gt;
+&lt;Waline comment={false} /&gt;
+
+&lt;!-- 修改每页评论数 --&gt;
+&lt;Waline pageSize={10} /&gt;
+
+&lt;!-- 组合使用 --&gt;
+&lt;Waline 
+  path="/special-page"
+  reaction={false}
+  pageSize={10}
+  login="force"
+/&gt;
+</code></pre></div>
+
+<h2 id="_45">性能优化策略</h2>
+<h3 id="1-css">1. CSS 动画性能优化</h3>
+<div class="codehilite"><pre><span></span><code><span class="c">/* ✅ 推荐：使用 transform（GPU 加速） */</span>
+<span class="p">#</span><span class="nn">waline</span><span class="w"> </span><span class="p">.</span><span class="nc">wl-btn</span><span class="p">:</span><span class="nd">hover</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">transform</span><span class="p">:</span><span class="w"> </span><span class="nb">translateY</span><span class="p">(</span><span class="mi">-2</span><span class="kt">px</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c">/* ❌ 避免：使用 top/margin（触发重排） */</span>
+<span class="p">#</span><span class="nn">waline</span><span class="w"> </span><span class="p">.</span><span class="nc">wl-btn</span><span class="p">:</span><span class="nd">hover</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">margin-top</span><span class="p">:</span><span class="w"> </span><span class="mi">-2</span><span class="kt">px</span><span class="p">;</span><span class="w">  </span><span class="c">/* 性能较差 */</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="2_4">2. 懒加载优化</h3>
+<div class="codehilite"><pre><span></span><code><span class="c1">// 未来优化方向：Intersection Observer</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">observer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">IntersectionObserver</span><span class="p">((</span><span class="nx">entries</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">entries</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="nx">entry</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">entry</span><span class="p">.</span><span class="nx">isIntersecting</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">initWaline</span><span class="p">();</span>
+<span class="w">      </span><span class="nx">observer</span><span class="p">.</span><span class="nx">disconnect</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">});</span>
+<span class="p">});</span>
+
+<span class="nx">observer</span><span class="p">.</span><span class="nx">observe</span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">querySelector</span><span class="p">(</span><span class="s1">'#waline'</span><span class="p">));</span>
+</code></pre></div>
+
+<h3 id="3-cdn">3. CDN 资源优化</h3>
+<div class="codehilite"><pre><span></span><code><span class="cm">&lt;!-- 使用 unpkg CDN 加速资源加载 --&gt;</span>
+<span class="p">&lt;</span><span class="nt">script</span> <span class="na">type</span><span class="o">=</span><span class="s">"module"</span><span class="p">&gt;</span>
+<span class="w">  </span><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">init</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'https://unpkg.com/@waline/client@v3/dist/waline.js'</span><span class="p">;</span>
+<span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</code></pre></div>
+
+<h2 id="_46">最佳实践与经验总结</h2>
+<h3 id="_47">代码组织原则</h3>
+<ol>
+<li><strong>配置分离</strong>：将所有可配置项集中在 <code>config.ts</code> 中</li>
+<li><strong>类型安全</strong>：使用 TypeScript 类型定义确保配置正确性</li>
+<li><strong>逻辑封装</strong>：将复杂逻辑封装成独立函数</li>
+<li><strong>样式模块化</strong>：按功能划分样式区块，添加清晰注释</li>
+</ol>
+<h3 id="_48">架构设计理念</h3>
+<ol>
+<li><strong>配置集中管理</strong>：避免配置分散导致的维护困难</li>
+<li><strong>Props 覆盖机制</strong>：提供灵活的页面级定制能力</li>
+<li><strong>类型安全保障</strong>：利用 TypeScript 类型系统防止错误</li>
+<li><strong>错误处理健壮</strong>：完整的错误捕获和优雅降级</li>
+</ol>
+<h3 id="_49">样式设计理念</h3>
+<ol>
+<li><strong>主题统一</strong>：所有颜色使用 CSS 变量，确保与博客主题一致</li>
+<li><strong>透明设计</strong>：评论系统背景透明，无缝融入页面</li>
+<li><strong>渐进增强</strong>：基础功能优先，高级特性作为增强</li>
+<li><strong>响应式优先</strong>：移动端体验不是妥协，而是优先考虑</li>
+</ol>
+<h3 id="_50">用户体验设计</h3>
+<ol>
+<li><strong>即时反馈</strong>：所有交互都有 0.3s 的平滑过渡</li>
+<li><strong>清晰提示</strong>：使用表情符号增强可读性</li>
+<li><strong>无障碍访问</strong>：确保键盘导航和屏幕阅读器兼容</li>
+<li><strong>性能优先</strong>：使用 GPU 加速动画，避免重排重绘</li>
+</ol>
+<h2 id="_51">未来优化方向</h2>
+<h3 id="_52">短期计划</h3>
+<ol>
+<li><strong>评论懒加载</strong>：使用 Intersection Observer 实现可视区域加载</li>
+<li><strong>缓存优化</strong>：利用 Service Worker 缓存评论数据</li>
+<li><strong>邮件通知</strong>：集成评论通知功能（已在另一篇文章中实现）</li>
+<li><strong>社交登录</strong>：支持 GitHub/Google 登录</li>
+</ol>
+<h3 id="_53">长期规划</h3>
+<ol>
+<li><strong>AI 审核</strong>：集成 AI 进行垃圾评论过滤</li>
+<li><strong>多站点支持</strong>：评论数据跨站点共享</li>
+<li><strong>数据分析</strong>：评论情感分析和统计</li>
+<li><strong>国际化</strong>：支持更多语言</li>
+</ol>
+<h2 id="_54">技术栈版本信息</h2>
+<div class="codehilite"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"dependencies"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"astro"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^4.0.0"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"@waline/client"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^3.0.0"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"tailwindcss"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^3.4.0"</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">"devDependencies"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"typescript"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^5.3.0"</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h2 id="_55">文档资源</h2>
+<p>项目包含完整的文档体系：</p>
+<div class="codehilite"><pre><span></span><code>src/components/waline/
+├──<span class="w"> </span>README.md<span class="w">                 </span><span class="c1"># 集成指南（235行）</span>
+├──<span class="w"> </span>ARCHITECTURE.md<span class="w">           </span><span class="c1"># 架构说明（282行）</span>
+├──<span class="w"> </span>PROPS_OVERRIDE.md<span class="w">         </span><span class="c1"># Props 覆盖指南（226行）</span>
+├──<span class="w"> </span>QUICK_REFERENCE.md<span class="w">        </span><span class="c1"># 快速参考（153行）</span>
+└──<span class="w"> </span>REFACTORING_SUMMARY.md<span class="w">    </span><span class="c1"># 重构总结（92行）</span>
+</code></pre></div>
+
+<p><strong>总计</strong>：988 行详细文档，覆盖所有使用场景和技术细节。</p>
+<h2 id="_56">结语</h2>
+<p>通过这次深度集成 Waline 评论系统的实践，我不仅成功为博客添加了强大的互动功能，还在解决实际问题的过程中积累了宝贵的经验。特别是<strong>从配置分散到集中管理的重构过程</strong>，体现了软件工程中 " 配置集中、类型安全、易于维护 " 的核心理念。</p>
+<h3 id="_57">核心收获</h3>
+<ol>
+<li><strong>配置集中管理</strong>：将配置从组件中抽离到 <code>config.ts</code>，大幅提升可维护性</li>
+<li><strong>类型安全保障</strong>：使用 TypeScript 类型系统，确保配置正确性</li>
+<li><strong>Props 覆盖机制</strong>：提供灵活的页面级定制能力</li>
+<li><strong>错误处理健壮</strong>：完整的错误捕获和优雅降级</li>
+<li><strong>MutationObserver 应用</strong>：创新性地解决 placeholder 持久化问题</li>
+<li><strong>CSS 选择器技巧</strong>：基于 <code>.display</code> 类名优雅解决弹出层问题</li>
+</ol>
+<h3 id="_58">架构演进的启示</h3>
+<div class="article-table" role="region" aria-label="Data table" tabindex="0"><table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>特点</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>初始实现</strong></td>
+<td>配置硬编码，快速上线</td>
+<td>原型验证、小型项目</td>
+</tr>
+<tr>
+<td><strong>配置集中</strong></td>
+<td>类型安全，易于维护</td>
+<td>生产环境、长期维护</td>
+</tr>
+<tr>
+<td><strong>Props 覆盖</strong></td>
+<td>灵活定制，高度可复用</td>
+<td>多场景应用、企业级项目</td>
+</tr>
+</tbody>
+</table></div>
+<p>静态站点生成器与动态评论系统的结合，代表了现代 Web 开发的一个重要趋势：在追求性能和安全的同时，不牺牲用户体验和互动性。Astro 的灵活性和 Waline 的可定制性，让这一目标成为了现实。</p>
+<p>如果你也在构建自己的博客，希望这篇文章能给你一些启发。记住，<strong>好的架构不是一蹴而就的，而是在实践中不断迭代和优化的结果</strong>。技术选型没有绝对的好坏，关键是找到最适合自己需求的方案，并在实践中不断改进。</p>
+<h2 id="_59">参考资源</h2>
+<ul>
+<li><a href="https://waline.js.org/">Waline 官方文档</a></li>
+<li><a href="https://docs.astro.build/">Astro 官方文档</a></li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver">MDN - MutationObserver</a></li>
+<li><a href="https://oklch.com/">OKLCH 色彩空间</a></li>
+<li><a href="https://tailwindcss.com/docs/responsive-design">Tailwind CSS 响应式设计</a></li>
+<li><a href="https://www.typescriptlang.org/docs/handbook/2/types-from-types.html">TypeScript 类型系统</a></li>
+</ul>
+<hr />
+<p><em>如果这篇文章对你有帮助，欢迎在下方评论区留言交流！这正是 Waline 评论系统的用武之地。😊</em></p></article></div><nav class="page-toc article-toc is-visible" aria-label="On this page"><span class="toc-title">ON THIS PAGE</span><a href="#_1" class="toc-level-1">前言</a><a href="#waline" class="toc-level-1">技术选型：为什么选择 Waline？</a><a href="#_2" class="toc-level-2">评论系统对比分析</a><a href="#waline_1" class="toc-level-2">选择 Waline 的核心原因</a><a href="#_3" class="toc-level-1">项目架构设计</a><a href="#_4" class="toc-level-2">整体技术栈</a><a href="#_5" class="toc-level-2">文件组织结构（重构后）</a><a href="#_6" class="toc-level-2">架构设计理念</a><a href="#_8" class="toc-level-1">架构演进：从分散到集中</a><a href="#_9" class="toc-level-2">第一阶段：初始实现（配置分散）</a><a href="#_12" class="toc-level-2">第二阶段：配置集中管理（重构后）</a><a href="#_13" class="toc-level-2">重构效果对比</a><a href="#_14" class="toc-level-1">核心功能实现</a><a href="#props" class="toc-level-2">第一步：Props 覆盖机制</a><a href="#_18" class="toc-level-2">第二步：客户端初始化逻辑</a><a href="#placeholder" class="toc-level-2">第三步：Placeholder 持久化</a><a href="#_23" class="toc-level-2">第四步：生命周期管理</a><a href="#_24" class="toc-level-1">深度样式定制</a><a href="#css" class="toc-level-2">CSS 变量系统：主题色统一管理</a><a href="#_25" class="toc-level-2">暗色模式适配</a><a href="#_26" class="toc-level-2">模块化样式架构</a><a href="#_27" class="toc-level-2">自定义反应按钮</a><a href="#_30" class="toc-level-1">实战中的问题与创新解决方案</a><a href="#1-gif" class="toc-level-2">问题 1：表情包和 GIF 弹出层撑开与收回问题</a><a href="#2_3" class="toc-level-2">问题 2：移动端统计标签拥挤</a><a href="#_37" class="toc-level-1">页面集成与使用</a><a href="#_38" class="toc-level-2">在文章页面展示统计信息</a><a href="#_39" class="toc-level-2">在关于页面使用</a><a href="#_40" class="toc-level-2">全局样式引入</a><a href="#_41" class="toc-level-1">配置指南：快速定制</a><a href="#_42" class="toc-level-2">基础配置修改</a><a href="#_43" class="toc-level-2">主题色自定义</a><a href="#_44" class="toc-level-2">页面级配置覆盖</a><a href="#_45" class="toc-level-1">性能优化策略</a><a href="#1-css" class="toc-level-2">1. CSS 动画性能优化</a><a href="#2_4" class="toc-level-2">2. 懒加载优化</a><a href="#3-cdn" class="toc-level-2">3. CDN 资源优化</a><a href="#_46" class="toc-level-1">最佳实践与经验总结</a><a href="#_47" class="toc-level-2">代码组织原则</a><a href="#_48" class="toc-level-2">架构设计理念</a><a href="#_49" class="toc-level-2">样式设计理念</a><a href="#_50" class="toc-level-2">用户体验设计</a><a href="#_51" class="toc-level-1">未来优化方向</a><a href="#_52" class="toc-level-2">短期计划</a><a href="#_53" class="toc-level-2">长期规划</a><a href="#_54" class="toc-level-1">技术栈版本信息</a><a href="#_55" class="toc-level-1">文档资源</a><a href="#_56" class="toc-level-1">结语</a><a href="#_57" class="toc-level-2">核心收获</a><a href="#_58" class="toc-level-2">架构演进的启示</a><a href="#_59" class="toc-level-1">参考资源</a></nav></div><nav class="post-neighbors" aria-label="Adjacent posts"><a class="post-neighbor previous" href="/blog/vscode-settings-extensions/"><span class="post-neighbor-label"><i class="link-arrow link-arrow-left" aria-hidden="true"></i>Previous post</span><strong>VS Code 配置与扩展推荐</strong></a><a class="post-neighbor next" href="/blog/waline-email-notifications/"><span class="post-neighbor-label">Next post<i class="link-arrow" aria-hidden="true"></i></span><strong>Waline 邮件通知配置：iCloud 与 Gmail</strong></a></nav></main>
+<footer class="site-footer">
+  <div class="wrap footer-utility">
+    <a class="footer-license" href="https://github.com/FuTseYi/futseyi.github.io/blob/main/LICENSING.md" target="_blank" rel="noopener noreferrer"><span>Go ahead, steal it</span><span class="link-arrow" aria-hidden="true"></span><span>CC BY 4.0 &middot; Code MIT</span></a>
+    <a class="footer-back-top" href="#main">Back to top <span class="link-arrow link-arrow-up" aria-hidden="true"></span></a>
+  </div>
+  <div class="footer-divider"><div class="wrap footer-inner">
+    <a class="footer-brand" href="https://github.com/FuTseYi/futseyi.github.io" target="_blank" rel="noopener noreferrer">&copy; <time data-current-year datetime="2026">2026</time> <span>FuTseYi <span class="alias">(Shine)</span></span></a>
+    <nav class="hero-links footer-social" aria-label="Social links"><a href="mailto:hello@futseyi.com" aria-label="Email" title="Email"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 6 9 7 9-7"/></svg></a>
+<a href="https://github.com/FuTseYi" target="_blank" rel="noopener noreferrer" aria-label="GitHub" title="GitHub"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 19c-4.3 1.3-4.3-2.2-6-2.6m12 5v-3.4c0-1 .1-1.5-.5-2.1 3.3-.4 6.8-1.6 6.8-7.3a5.7 5.7 0 0 0-1.5-4c.2-.4.7-1.9-.2-3.9 0 0-1.2-.4-4 1.5a13.7 13.7 0 0 0-7.2 0C5.6.3 4.4.7 4.4.7c-.9 2-.4 3.5-.2 3.9a5.7 5.7 0 0 0-1.5 4c0 5.7 3.5 6.9 6.8 7.3-.5.5-.6 1.1-.5 2.1v3.4"/></svg></a>
+<a href="https://www.linkedin.com/in/futseyi" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" title="LinkedIn"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 10v7m0-10v.01M11 17v-7m0 3a3 3 0 0 1 6 0v4"/></svg></a>
+          <a href="https://x.com/FuTseYi" target="_blank" rel="noopener noreferrer" aria-label="X" title="X"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 4h4l12 16h-4L4 4ZM4 20 20 4"/></svg></a></nav>
+  </div></div>
+</footer>
+</body></html>

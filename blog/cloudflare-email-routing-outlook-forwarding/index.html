@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="一直想给自己的域名配一套邮箱地址：对外使用简洁的自定义地址，收到的邮件仍然由熟悉的 Outlook 统一管理。">
+<meta property="og:site_name" content="FuTseYi (Shine)">
+<meta property="og:title" content="Cloudflare Email Routing：自有域名邮件转发实践">
+<meta property="og:description" content="一直想给自己的域名配一套邮箱地址：对外使用简洁的自定义地址，收到的邮件仍然由熟悉的 Outlook 统一管理。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.futseyi.com/blog/cloudflare-email-routing-outlook-forwarding/">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.futseyi.com/assets/images/profile/me.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1378">
+<meta property="og:image:height" content="2065">
+<meta property="og:image:alt" content="FuTseYi&#x27;s profile photo">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:site" content="@FuTseYi">
+<meta name="twitter:title" content="Cloudflare Email Routing：自有域名邮件转发实践">
+<meta name="twitter:description" content="一直想给自己的域名配一套邮箱地址：对外使用简洁的自定义地址，收到的邮件仍然由熟悉的 Outlook 统一管理。">
+<meta name="twitter:image" content="https://www.futseyi.com/assets/images/profile/me.jpg">
+<meta name="twitter:image:alt" content="FuTseYi&#x27;s profile photo">
+<meta property="article:tag" content="Cloudflare">
+<meta property="article:tag" content="Email Routing">
+<meta property="article:tag" content="Email">
+<title>Cloudflare Email Routing：自有域名邮件转发实践 · FuTseYi</title><link rel="canonical" href="https://www.futseyi.com/blog/cloudflare-email-routing-outlook-forwarding/">
+<link rel="icon" href="/assets/icons/favicon.ico" sizes="any">
+<link rel="icon" href="/assets/icons/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="/assets/icons/site.webmanifest">
+<link rel="preload" href="/assets/fonts/caveat-handwriting.woff2" as="font" type="font/woff2" crossorigin>
+<script data-theme-init>
+    (() => {
+      document.documentElement.classList.add('js');
+      let theme = 'system';
+      try { theme = localStorage.getItem('site-theme') || 'system'; } catch {}
+      if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+    })();
+  </script>
+<link rel="stylesheet" href="/assets/css/style.css?v=525538209899"><script src="https://cdn.jsdelivr.net/npm/swup@4.10.0/dist/Swup.umd.js" defer></script>
+<script src="/assets/js/site.js?v=7c24c70d02eb" defer></script>
+<script src="/assets/js/atmosphere.js?v=a822ac798e30" defer></script>
+</head>
+<body class="blog-page article-page">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header" id="site-header">
+  <div class="header-inner">
+    <a class="brand" href="/" aria-label="FuTseYi (Shine) homepage"><img src="/assets/icons/favicon.svg" alt="" width="36" height="36"></a>
+    <button class="theme-control" type="button" aria-label="Color theme: System. Switch to Light" title="System theme. Click for Light" data-mode="system">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <g data-theme-icon="system"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></g>
+        <g data-theme-icon="light"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.4 1.4m11.2 11.2L19 19M5 19l1.4-1.4M17.6 6.4 19 5"/></g>
+        <g data-theme-icon="dark"><path d="M20.5 14A8.5 8.5 0 0 1 10 3.5 8.5 8.5 0 1 0 20.5 14Z"/></g>
+      </svg>
+    </button>
+    <button class="nav-toggle" type="button" aria-controls="primary-navigation" aria-expanded="false" aria-label="Open navigation menu">
+      <span class="menu-icon" aria-hidden="true"><span></span><span></span><span></span></span>
+    </button>
+    <nav class="nav-links" id="primary-navigation" aria-label="Main navigation">
+      <a href="/#about">About</a>
+      <a href="/#education">Education</a>
+
+      <a href="/#active-in">Active In</a>
+      <a href="/#contributions">Contributions</a>
+      <a href="/blog/" class="is-active" aria-current="page">Blog</a>
+
+    </nav>
+  </div>
+</header>
+<main class="blog-container wrap" id="main"><div class="article-layout"><div class="article-main"><a class="back-link" href="/blog/"><span class="link-arrow link-arrow-left" aria-hidden="true"></span>All posts</a><div class="article-head"><span class="blog-kicker">BLOG & NOTES</span><h1>Cloudflare Email Routing：自有域名邮件转发实践</h1><div class="article-meta"><time class="post-date" datetime="2026-10-14">Oct 14, 2026</time><a class="post-date" href="https://github.com/FuTseYi/futseyi.github.io/edit/main/posts/cloudflare-email-routing-outlook-forwarding/index.md" target="_blank" rel="noopener noreferrer"><em>Edit on GitHub</em></a></div><div class="post-tags"><a class="post-tag" href="/blog/tags/#tag-a5b966cdcb60"># Cloudflare</a><a class="post-tag" href="/blog/tags/#tag-6865f7006342"># Email Routing</a><a class="post-tag" href="/blog/tags/#tag-84add5b29527"># Email</a></div></div><div class="article-toc-inline"><button class="article-toc-toggle" type="button" aria-expanded="false" aria-controls="article-toc-links">On this page</button><div class="article-toc-panel"><div class="article-toc-clip"><nav id="article-toc-links" aria-label="Article contents"><a href="#1" class="toc-level-1">1 前言</a><a href="#2" class="toc-level-1">2 先理解：这是邮件转发，不是独立邮箱</a><a href="#3" class="toc-level-1">3 准备条件</a><a href="#4-cloudflare-email-routing" class="toc-level-1">4 Cloudflare Email Routing 配置过程</a><a href="#41" class="toc-level-2">4.1 启用邮件路由</a><a href="#42-dnsmxspfdkim" class="toc-level-2">4.2 检查 DNS：MX、SPF、DKIM</a><a href="#43-outlook" class="toc-level-2">4.3 添加并验证 Outlook 目标邮箱</a><a href="#44" class="toc-level-2">4.4 创建四个自定义邮箱地址</a><a href="#45-catch-all" class="toc-level-2">4.5 保持 Catch-all 关闭</a><a href="#5" class="toc-level-1">5 实际验证：确保邮件真的能收到</a><a href="#6" class="toc-level-1">6 几个值得记住的细节</a><a href="#61" class="toc-level-2">6.1 目标邮箱没验证，规则可能无法创建</a><a href="#62" class="toc-level-2">6.2 路由开启不等于地址已创建</a><a href="#63" class="toc-level-2">6.3 邮件认证与转发不是百分之百无损</a><a href="#64" class="toc-level-2">6.4 这套方案只解决“收”，不解决“发”</a><a href="#65" class="toc-level-2">6.5 不在公开教程里放真实邮箱和控制台截图</a><a href="#7" class="toc-level-1">7 总结</a><a href="#8" class="toc-level-1">8 参考资料</a></nav></div></div></div><article class="article" data-pagefind-body><h2 id="1">1 前言</h2>
+<p>一直想给自己的域名配一套邮箱地址：对外使用简洁的自定义地址，收到的邮件仍然由熟悉的 Outlook 统一管理。</p>
+<p>但仔细想想，我现阶段并不需要用域名<strong>发送</strong>邮件，也不需要为它单独开一个邮箱客户端、购买存储空间或维护邮件服务器。真正需要的只有一件事：</p>
+<p><strong>别人给自有域名发信，邮件可以自动转发到现有的 Outlook 收件箱。</strong></p>
+<p>最后选择了 <a href="https://developers.cloudflare.com/email-service/">Cloudflare Email Routing</a>。整个过程不需要部署服务器，也没有额外购买企业邮箱。配置完成后，我用其他邮箱实际测试过收信，转发链路正常。</p>
+<p>这篇文章把步骤和几个容易忽略的细节记录下来，以后换域名或调整转发规则时也能直接参考。</p>
+<blockquote>
+<p>文中邮箱与域名统一使用 <code>example.com</code> 等示例值；实际操作时替换为自己的域名和已验证的收件邮箱即可。</p>
+</blockquote>
+<h2 id="2">2 先理解：这是邮件转发，不是独立邮箱</h2>
+<p>这套方案的邮件路径很简单：</p>
+<div class="codehilite"><pre><span></span><code>发件人
+   ↓
+me@example.com / contact@example.com
+   ↓
+Cloudflare Email Routing（接收、匹配规则并转发）
+   ↓
+已验证的 Outlook 收件箱
+</code></pre></div>
+
+<p>Cloudflare 在这里承担的是<strong>邮件入口和转发规则</strong>，真正存储邮件、分类、搜索与管理的仍然是 Outlook。</p>
+<p>这意味着：</p>
+<ul>
+<li>我可以对外使用多个自有域名邮箱地址，但不必分别登录多个邮箱。</li>
+<li>更换日常收件邮箱时，只需要修改 Cloudflare 的转发目标，不必通知所有联系人修改地址。</li>
+<li>Email Routing 本身不提供传统邮箱的收件箱、IMAP/POP3 或独立邮件存储。</li>
+<li><strong>通过 Outlook 直接回复时，默认显示的仍是 Outlook 发件地址。</strong> 如果未来想以自有域名发信，需要另外配置合适的发信服务；这与本文的免费收信转发是两回事。</li>
+</ul>
+<p>对目前只需要收信的我来说，这样反而更轻量。</p>
+<h2 id="3">3 准备条件</h2>
+<p>我只准备了三样东西：</p>
+<ol>
+<li><strong>一个自己的域名</strong>：域名已经添加到 Cloudflare，并且 DNS 托管状态为 <code>Active</code>。</li>
+<li><strong>Cloudflare 账号</strong>：能够管理这个域名的 DNS 和 Email Routing。</li>
+<li><strong>一个长期使用的 Outlook 邮箱</strong>：作为最终的邮件接收地址。</li>
+</ol>
+<p>需要提前确认的一点是：<strong>同一个域名的 MX 记录决定入站邮件交给谁处理。</strong></p>
+<p>如果域名已经接入 Microsoft 365、Google Workspace 等邮箱服务，不要直接覆盖正在使用的 MX 记录。否则原本的收信系统可能受到影响。这次我的域名没有需要保留的其他收信服务，所以可以直接启用 Cloudflare 的邮件路由。</p>
+<h2 id="4-cloudflare-email-routing">4 Cloudflare Email Routing 配置过程</h2>
+<h3 id="41">4.1 启用邮件路由</h3>
+<p>进入 <a href="https://dash.cloudflare.com/">Cloudflare Dashboard</a>：</p>
+<div class="codehilite"><pre><span></span><code>Cloudflare Dashboard
+→ Email / 电子邮件服务
+→ Email Routing / 邮件路由
+→ 选择自己的域名
+→ 启用
+</code></pre></div>
+
+<p>不同版本的控制台可能在菜单命名上略有差异，核心是找到对应域名的 <strong>Email Routing</strong> 页面。</p>
+<p>启用后，我先检查域名状态是否为 <code>Enabled</code> / <code>Ready</code>，再查看 DNS 是否已经同步。<strong>仅显示“邮件路由已启用”，还不代表某个自定义邮箱地址已经可以收信</strong>，后面必须继续创建转发规则。</p>
+<h3 id="42-dnsmxspfdkim">4.2 检查 DNS：MX、SPF、DKIM</h3>
+<p>Cloudflare 会提示配置邮件路由所需的 DNS 记录。我的配置中，启用后相关记录已经自动同步，没有必要逐条手动复制。</p>
+<p>其中最重要的是：</p>
+<div class="article-table" role="region" aria-label="Data table" tabindex="0"><table>
+<thead>
+<tr>
+<th>记录类型</th>
+<th>用途</th>
+<th>配置建议</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>MX</code></td>
+<td>把入站邮件交给 Cloudflare 的邮件服务器</td>
+<td>使用 Cloudflare 自动创建的记录和优先级</td>
+</tr>
+<tr>
+<td><code>TXT (SPF)</code></td>
+<td>声明邮件转发相关的授权策略</td>
+<td>不要在同一域名下留下互相冲突的多条 SPF 记录</td>
+</tr>
+<tr>
+<td><code>TXT (DKIM)</code></td>
+<td>用于邮件认证相关配置</td>
+<td>按 Cloudflare 控制台的实际提示配置</td>
+</tr>
+</tbody>
+</table></div>
+<p>在 DNS 页面能看到 Cloudflare 对应的 MX 服务器记录，是检查是否接管收信入口的直观方式。<strong>MX 优先级以控制台生成的值为准</strong>，不要照搬其他人的数字。</p>
+<p>如果域名已经有 SPF 记录，也应当合并所需机制，而不是额外再创建一条独立的 <code>v=spf1</code> 记录。</p>
+<h3 id="43-outlook">4.3 添加并验证 Outlook 目标邮箱</h3>
+<p>这一步非常关键，也是我实际配置过程中碰到的一个限制。</p>
+<p>进入：</p>
+<div class="codehilite"><pre><span></span><code>Email Routing
+→ Destination Addresses / 目标地址
+→ Add destination address / 添加目标地址
+</code></pre></div>
+
+<p>填写自己真正使用的 Outlook 邮箱地址，提交后，Cloudflare 会向该邮箱发送验证邮件。</p>
+<p>回到 Outlook 收件箱，找到标题类似下面的邮件：</p>
+<div class="codehilite"><pre><span></span><code>[Action required] Verify your Email Routing address
+</code></pre></div>
+
+<p>点击邮件中的 <strong>Verify email address</strong>，再回 Cloudflare 检查状态是否已经变成 <code>Verified</code>。</p>
+<p><strong>要先验证目标地址，再创建转发规则。</strong> 未验证时直接创建规则，可能会收到 <code>Destination address is not verified</code> 这样的错误提示。</p>
+<h3 id="44">4.4 创建四个自定义邮箱地址</h3>
+<p>目标地址验证完成后，进入域名的 <strong>Routing Rules / 路由规则</strong> 页面，点击 <strong>Create routing rule / 创建路由规则</strong>。</p>
+<p>在我的中文控制台里，创建规则时主要填写三项：</p>
+<div class="article-table" role="region" aria-label="Data table" tabindex="0"><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>我的选择</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>电子邮件匹配模式</td>
+<td>只输入 <code>@</code> 前面的地址前缀，例如 <code>me</code></td>
+</tr>
+<tr>
+<td>域名</td>
+<td>选择正在配置的自有域名</td>
+</tr>
+<tr>
+<td>操作</td>
+<td><strong>发送到电子邮件</strong>，然后选择已验证的 Outlook 目标地址</td>
+</tr>
+</tbody>
+</table></div>
+<p>这里不需要选择 <code>发送到 Worker</code>。只有简单转发需求时，用控制台内置规则就足够了。</p>
+<p>为了兼顾个人身份、正式联系和研究交流，我最终采用四个地址。下表全部以示例域名演示：</p>
+<div class="article-table" role="region" aria-label="Data table" tabindex="0"><table>
+<thead>
+<tr>
+<th>示例地址</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>me@example.com</code></td>
+<td>个人数字身份与名片</td>
+</tr>
+<tr>
+<td><code>contact@example.com</code></td>
+<td>正式联系、简历与求职</td>
+</tr>
+<tr>
+<td><code>hello@example.com</code></td>
+<td>个人网站、日常交流</td>
+</tr>
+<tr>
+<td><code>research@example.com</code></td>
+<td>学术与科研合作</td>
+</tr>
+</tbody>
+</table></div>
+<p>这四条规则的操作都相同：<strong>转发至同一个已验证的 Outlook 收件箱</strong>。创建完成后，确认每条规则的状态均为 <code>Active</code> / <code>已启用</code>。</p>
+<p>我没有继续增加更多用途相近的别名。对个人使用来说，能覆盖真实场景、又不会增加额外管理负担，比追求地址数量更重要。</p>
+<h3 id="45-catch-all">4.5 保持 Catch-all 关闭</h3>
+<p><code>Catch-all</code> 是通配符收件规则，可以处理那些没有被明确创建的地址，例如有人发信到 <code>random@example.com</code>。</p>
+<p>这个功能听上去很方便，但也可能扩大垃圾邮件的入口。</p>
+<p>我更倾向于<strong>只启用明确创建的四条规则，Catch-all 保持关闭</strong>。这样每一个对外地址都有清晰用途，也方便以后按需调整。</p>
+<h2 id="5">5 实际验证：确保邮件真的能收到</h2>
+<p>规则显示为 <code>Active</code> 后，我没有直接把它当成配置完成，而是从其他邮箱向自定义地址发送测试信，再到 Outlook 检查收件结果。</p>
+<p>我的检查顺序是：</p>
+<ol>
+<li>先向其中一个自定义地址发送邮件，确认 Outlook 正常收到。</li>
+<li>再向另一个自定义地址发送邮件，排除只有单条规则有效的情况。</li>
+<li>核对发件人、主题和正文，确认内容没有明显异常。</li>
+<li>如果收件箱未显示，就检查垃圾邮件文件夹，以及 Cloudflare 的邮件活动日志。</li>
+</ol>
+<p>实际收信测试成功后，这套方案才算真正可用。它不需要 Outlook 做任何特殊的收件服务器配置，仍然按原来的方式使用 Outlook 即可。</p>
+<h2 id="6">6 几个值得记住的细节</h2>
+<h3 id="61">6.1 目标邮箱没验证，规则可能无法创建</h3>
+<p>这是最容易漏掉的一步。Cloudflare 发出的验证邮件需要在<strong>最终收件邮箱</strong>里点击确认，仅仅添加目标地址还不够。</p>
+<h3 id="62">6.2 路由开启不等于地址已创建</h3>
+<p>DNS 正常、Email Routing 显示已启用，只说明域名层面的邮件入口已经准备好。只有添加匹配特定地址的转发规则，邮件才能按预期转发到目标邮箱。</p>
+<h3 id="63">6.3 邮件认证与转发不是百分之百无损</h3>
+<p>Cloudflare 会对来信进行身份认证和反滥用检查。少数发送方的 SPF、DKIM、DMARC 配置不规范时，邮件可能被拒收；部分邮件也可能被 Outlook 归类为垃圾邮件。</p>
+<p>因此，准备将域名邮箱用于申请通知、账户验证或其他重要事务前，最好用不同发件方实际测试，并保留一个可用的备用联系方式。</p>
+<h3 id="64">6.4 这套方案只解决“收”，不解决“发”</h3>
+<p>例如别人发邮件给 <code>contact@example.com</code>，我能在 Outlook 收到；但直接点击回复，默认发件地址依然是原来的 Outlook 邮箱。</p>
+<p>如果以后需要以 <code>contact@example.com</code> 的身份发送或回复邮件，就要另外研究域名发信的 SMTP 或邮件服务配置。本文并没有配置这部分，也不建议仅为了收信需求而增加不必要的复杂度。</p>
+<h3 id="65">6.5 不在公开教程里放真实邮箱和控制台截图</h3>
+<p>邮箱地址、账户标识及 DNS 之外的后台信息，没必要为了写教程完整公开。使用 <code>example.com</code> 这样的示例域名，既能把步骤讲明白，也更利于读者直接迁移到自己的配置中。</p>
+<h2 id="7">7 总结</h2>
+<p>这次折腾下来，我觉得 Cloudflare Email Routing 非常适合已经拥有域名、同时又习惯使用 Outlook 或其他成熟邮箱服务的人。</p>
+<p>整个思路其实只有四步：</p>
+<div class="codehilite"><pre><span></span><code>域名接入 Cloudflare
+→ 启用 Email Routing 并确认 DNS
+→ 验证 Outlook 目标邮箱
+→ 创建自定义地址转发规则并测试收信
+</code></pre></div>
+
+<p>我最终保留了四个用途清晰的域名邮箱地址，所有来信统一由一个 Outlook 收件箱管理，Catch-all 关闭，也没有为了“看起来更专业”去购买暂时用不到的企业邮箱。</p>
+<p><strong>用自己的域名作为稳定的对外入口，用成熟的邮箱服务负责日常收件。</strong> 对现阶段的我来说，这已经是简洁、可维护且足够实用的方案。</p>
+<h2 id="8">8 参考资料</h2>
+<ul>
+<li><a href="https://developers.cloudflare.com/email-service/">Cloudflare Email Service 文档</a></li>
+<li><a href="https://developers.cloudflare.com/email-service/get-started/route-emails/">Cloudflare：开始配置邮件路由</a></li>
+<li><a href="https://developers.cloudflare.com/email-service/configuration/email-routing-addresses/">Cloudflare：邮箱地址与转发规则</a></li>
+<li><a href="https://developers.cloudflare.com/email-service/configuration/domains/">Cloudflare：邮件路由 DNS 配置</a></li>
+<li><a href="https://developers.cloudflare.com/email-service/concepts/email-lifecycle/">Cloudflare：邮件处理流程</a></li>
+</ul></article></div><nav class="page-toc article-toc is-visible" aria-label="On this page"><span class="toc-title">ON THIS PAGE</span><a href="#1" class="toc-level-1">1 前言</a><a href="#2" class="toc-level-1">2 先理解：这是邮件转发，不是独立邮箱</a><a href="#3" class="toc-level-1">3 准备条件</a><a href="#4-cloudflare-email-routing" class="toc-level-1">4 Cloudflare Email Routing 配置过程</a><a href="#41" class="toc-level-2">4.1 启用邮件路由</a><a href="#42-dnsmxspfdkim" class="toc-level-2">4.2 检查 DNS：MX、SPF、DKIM</a><a href="#43-outlook" class="toc-level-2">4.3 添加并验证 Outlook 目标邮箱</a><a href="#44" class="toc-level-2">4.4 创建四个自定义邮箱地址</a><a href="#45-catch-all" class="toc-level-2">4.5 保持 Catch-all 关闭</a><a href="#5" class="toc-level-1">5 实际验证：确保邮件真的能收到</a><a href="#6" class="toc-level-1">6 几个值得记住的细节</a><a href="#61" class="toc-level-2">6.1 目标邮箱没验证，规则可能无法创建</a><a href="#62" class="toc-level-2">6.2 路由开启不等于地址已创建</a><a href="#63" class="toc-level-2">6.3 邮件认证与转发不是百分之百无损</a><a href="#64" class="toc-level-2">6.4 这套方案只解决“收”，不解决“发”</a><a href="#65" class="toc-level-2">6.5 不在公开教程里放真实邮箱和控制台截图</a><a href="#7" class="toc-level-1">7 总结</a><a href="#8" class="toc-level-1">8 参考资料</a></nav></div><nav class="post-neighbors" aria-label="Adjacent posts"><a class="post-neighbor previous" href="/blog/git-baidu-netdisk-sync-conflict/"><span class="post-neighbor-label"><i class="link-arrow link-arrow-left" aria-hidden="true"></i>Previous post</span><strong>Git 仓库与百度网盘同步冲突排查</strong></a><a class="post-neighbor next" href="/blog/hkust-elpa-serverless-github-native-cms/"><span class="post-neighbor-label">Next post<i class="link-arrow" aria-hidden="true"></i></span><strong>把 GitHub 变成内容后台：HKUST-ELPA 的 Serverless 实践</strong></a></nav></main>
+<footer class="site-footer">
+  <div class="wrap footer-utility">
+    <a class="footer-license" href="https://github.com/FuTseYi/futseyi.github.io/blob/main/LICENSING.md" target="_blank" rel="noopener noreferrer"><span>Go ahead, steal it</span><span class="link-arrow" aria-hidden="true"></span><span>CC BY 4.0 &middot; Code MIT</span></a>
+    <a class="footer-back-top" href="#main">Back to top <span class="link-arrow link-arrow-up" aria-hidden="true"></span></a>
+  </div>
+  <div class="footer-divider"><div class="wrap footer-inner">
+    <a class="footer-brand" href="https://github.com/FuTseYi/futseyi.github.io" target="_blank" rel="noopener noreferrer">&copy; <time data-current-year datetime="2026">2026</time> <span>FuTseYi <span class="alias">(Shine)</span></span></a>
+    <nav class="hero-links footer-social" aria-label="Social links"><a href="mailto:hello@futseyi.com" aria-label="Email" title="Email"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 6 9 7 9-7"/></svg></a>
+<a href="https://github.com/FuTseYi" target="_blank" rel="noopener noreferrer" aria-label="GitHub" title="GitHub"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 19c-4.3 1.3-4.3-2.2-6-2.6m12 5v-3.4c0-1 .1-1.5-.5-2.1 3.3-.4 6.8-1.6 6.8-7.3a5.7 5.7 0 0 0-1.5-4c.2-.4.7-1.9-.2-3.9 0 0-1.2-.4-4 1.5a13.7 13.7 0 0 0-7.2 0C5.6.3 4.4.7 4.4.7c-.9 2-.4 3.5-.2 3.9a5.7 5.7 0 0 0-1.5 4c0 5.7 3.5 6.9 6.8 7.3-.5.5-.6 1.1-.5 2.1v3.4"/></svg></a>
+<a href="https://www.linkedin.com/in/futseyi" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" title="LinkedIn"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 10v7m0-10v.01M11 17v-7m0 3a3 3 0 0 1 6 0v4"/></svg></a>
+          <a href="https://x.com/FuTseYi" target="_blank" rel="noopener noreferrer" aria-label="X" title="X"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 4h4l12 16h-4L4 4ZM4 20 20 4"/></svg></a></nav>
+  </div></div>
+</footer>
+</body></html>

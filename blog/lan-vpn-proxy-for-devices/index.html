@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Jetson 等设备不会自动继承主机的代理规则">
+<meta property="og:site_name" content="FuTseYi (Shine)">
+<meta property="og:title" content="通过局域网主机共享代理：以 Jetson 为例">
+<meta property="og:description" content="Jetson 等设备不会自动继承主机的代理规则">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.futseyi.com/blog/lan-vpn-proxy-for-devices/">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.futseyi.com/assets/images/profile/me.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1378">
+<meta property="og:image:height" content="2065">
+<meta property="og:image:alt" content="FuTseYi&#x27;s profile photo">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:site" content="@FuTseYi">
+<meta name="twitter:title" content="通过局域网主机共享代理：以 Jetson 为例">
+<meta name="twitter:description" content="Jetson 等设备不会自动继承主机的代理规则">
+<meta name="twitter:image" content="https://www.futseyi.com/assets/images/profile/me.jpg">
+<meta name="twitter:image:alt" content="FuTseYi&#x27;s profile photo">
+<meta property="article:tag" content="Network">
+<meta property="article:tag" content="Proxy">
+<meta property="article:tag" content="Jetson">
+<title>通过局域网主机共享代理：以 Jetson 为例 · FuTseYi</title><link rel="canonical" href="https://www.futseyi.com/blog/lan-vpn-proxy-for-devices/">
+<link rel="icon" href="/assets/icons/favicon.ico" sizes="any">
+<link rel="icon" href="/assets/icons/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="/assets/icons/site.webmanifest">
+<link rel="preload" href="/assets/fonts/caveat-handwriting.woff2" as="font" type="font/woff2" crossorigin>
+<script data-theme-init>
+    (() => {
+      document.documentElement.classList.add('js');
+      let theme = 'system';
+      try { theme = localStorage.getItem('site-theme') || 'system'; } catch {}
+      if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+    })();
+  </script>
+<link rel="stylesheet" href="/assets/css/style.css?v=525538209899"><script src="https://cdn.jsdelivr.net/npm/swup@4.10.0/dist/Swup.umd.js" defer></script>
+<script src="/assets/js/site.js?v=7c24c70d02eb" defer></script>
+<script src="/assets/js/atmosphere.js?v=a822ac798e30" defer></script>
+</head>
+<body class="blog-page article-page">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header" id="site-header">
+  <div class="header-inner">
+    <a class="brand" href="/" aria-label="FuTseYi (Shine) homepage"><img src="/assets/icons/favicon.svg" alt="" width="36" height="36"></a>
+    <button class="theme-control" type="button" aria-label="Color theme: System. Switch to Light" title="System theme. Click for Light" data-mode="system">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <g data-theme-icon="system"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></g>
+        <g data-theme-icon="light"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.4 1.4m11.2 11.2L19 19M5 19l1.4-1.4M17.6 6.4 19 5"/></g>
+        <g data-theme-icon="dark"><path d="M20.5 14A8.5 8.5 0 0 1 10 3.5 8.5 8.5 0 1 0 20.5 14Z"/></g>
+      </svg>
+    </button>
+    <button class="nav-toggle" type="button" aria-controls="primary-navigation" aria-expanded="false" aria-label="Open navigation menu">
+      <span class="menu-icon" aria-hidden="true"><span></span><span></span><span></span></span>
+    </button>
+    <nav class="nav-links" id="primary-navigation" aria-label="Main navigation">
+      <a href="/#about">About</a>
+      <a href="/#education">Education</a>
+
+      <a href="/#active-in">Active In</a>
+      <a href="/#contributions">Contributions</a>
+      <a href="/blog/" class="is-active" aria-current="page">Blog</a>
+
+    </nav>
+  </div>
+</header>
+<main class="blog-container wrap" id="main"><div class="article-layout"><div class="article-main"><a class="back-link" href="/blog/"><span class="link-arrow link-arrow-left" aria-hidden="true"></span>All posts</a><div class="article-head"><span class="blog-kicker">BLOG & NOTES</span><h1>通过局域网主机共享代理：以 Jetson 为例</h1><div class="article-meta"><time class="post-date" datetime="2025-07-10">Jul 10, 2025</time><a class="post-date" href="https://github.com/FuTseYi/futseyi.github.io/edit/main/posts/lan-vpn-proxy-for-devices/index.md" target="_blank" rel="noopener noreferrer"><em>Edit on GitHub</em></a></div><div class="post-tags"><a class="post-tag" href="/blog/tags/#tag-53ebc572b4a4"># Network</a><a class="post-tag" href="/blog/tags/#tag-d1cea344353e"># Proxy</a><a class="post-tag" href="/blog/tags/#tag-6a7f188c8adb"># Jetson</a></div></div><div class="article-toc-inline"><button class="article-toc-toggle" type="button" aria-expanded="false" aria-controls="article-toc-links">On this page</button><div class="article-toc-panel"><div class="article-toc-clip"><nav id="article-toc-links" aria-label="Article contents"><a href="#1" class="toc-level-1">1 ​​主机端代理设置​​</a><a href="#11-windows" class="toc-level-2">1.1 检查代理端口是否监听（Windows 主机）​​</a><a href="#12" class="toc-level-2">1.2 ​​ 修改代理配置以允许局域网访问​​</a><a href="#13" class="toc-level-2">1.3 安全设置</a><a href="#2-jetson" class="toc-level-1">2 ​Jetson 端设备配置​​</a><a href="#21" class="toc-level-2">2.1 ​​系统级代理设置​​</a><a href="#22" class="toc-level-2">2.2 ​​终端临时代理（仅当前会话有效）​​</a><a href="#3" class="toc-level-1">3 测试代理效果</a></nav></div></div></div><article class="article" data-pagefind-body><blockquote>
+<p><strong>Jetson 等设备不会自动继承主机的代理规则</strong></p>
+</blockquote>
+<h2 id="1">1 ​<strong>​主机端代理设置​</strong>​</h2>
+<p>首先确保主机已搭建代理服务（如 v2ray 等），并记录代理服务器的 IP 地址和端口号。例如：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1">#查看本地主机ip(不是固定的)</span>
+ipconfig
+<span class="c1">#IPv4 地址 </span>
+</code></pre></div>
+
+<ul>
+<li>主机 IP：`192.168.3.68</li>
+<li>代理端口：<code>10809</code>（HTTP）或 <code>10808</code>（SOCKS5）</li>
+</ul>
+<h3 id="11-windows">1.1 <strong>检查代理端口是否监听（Windows 主机）​</strong>​</h3>
+<p>在 ​<strong>​Windows PowerShell​</strong>​ 中运行以下命令：</p>
+<div class="codehilite"><pre><span></span><code>netstat<span class="w"> </span>-ano<span class="w"> </span><span class="p">|</span><span class="w"> </span>findstr<span class="w"> </span><span class="s2">"10809"</span>
+</code></pre></div>
+
+<ul>
+<li>如果输出中包含 <code>0.0.0.0:10809</code> 或 <code>192.168.3.68:10809</code>，说明代理服务正在运行并监听局域网。</li>
+<li>如果只有 <code>127.0.0.1:10809</code>，说明代理仅限本地访问，需修改代理配置。</li>
+</ul>
+<h3 id="12">1.2 ​<strong>​ 修改代理配置以允许局域网访问​</strong>​</h3>
+<p>根据你的代理软件（如 Clash、Shadowsocks、v2ray 等）：</p>
+<ol>
+<li>​<strong>​打开代理软件的配置文件​</strong>​（通常是 <code>.yaml</code> 或 <code>.json</code> 文件）。</li>
+<li>找到监听地址（<code>bind-address</code> 或 <code>listen</code>），将其改为：</li>
+</ol>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 允许所有 IP 访问</span>
+listen:<span class="w"> </span><span class="m">0</span>.0.0.0:10809<span class="w"> </span>
+</code></pre></div>
+
+<p>或者</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 仅允许局域网访问</span>
+listen:<span class="w"> </span><span class="m">192</span>.168.3.68:10809
+</code></pre></div>
+
+<p>这里我使用的 v2ray 代理,可以直接在设置中参数设置中允许局域网连接</p>
+<p><img alt="2025-07-08_20-29-09.png" src="assets/20250708202937664.png" loading="lazy" decoding="async"  width="852" height="541" /></p>
+<ol start="3">
+<li>重启代理服务。</li>
+</ol>
+<h3 id="13">1.3 安全设置</h3>
+<ul>
+<li>​<strong>​限制访问 IP​</strong>​：
+        在路由器或主机防火墙中，仅允许 Jetson 的 IP（如 <code>192.168.3.170）访问</code>10808/10809` 端口。</li>
+<li>在管理员终端输入</li>
+</ul>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 允许 Jetson (192.168.3.170) 访问 HTTP 代理端口 10809 </span>
+New-NetFirewallRule<span class="w"> </span>-DisplayName<span class="w"> </span><span class="s2">"Allow_Jetson_HTTP"</span><span class="w"> </span>-Direction<span class="w"> </span>Inbound<span class="w"> </span>-LocalPort<span class="w"> </span><span class="m">10809</span><span class="w"> </span>-Protocol<span class="w"> </span>TCP<span class="w"> </span>-RemoteAddress<span class="w"> </span><span class="m">192</span>.168.3.170<span class="w"> </span>-Action<span class="w"> </span>Allow<span class="w"> </span>
+<span class="c1"># 允许 Jetson 访问 SOCKS5 代理端口 10808 </span>
+New-NetFirewallRule<span class="w"> </span>-DisplayName<span class="w"> </span><span class="s2">"Allow_Jetson_SOCKS5"</span><span class="w"> </span>-Direction<span class="w"> </span>Inbound<span class="w"> </span>-LocalPort<span class="w"> </span><span class="m">10808</span><span class="w"> </span>-Protocol<span class="w"> </span>TCP<span class="w"> </span>-RemoteAddress<span class="w"> </span><span class="m">192</span>.168.3.170<span class="w"> </span>-Action<span class="w"> </span>Allow
+</code></pre></div>
+
+<ul>
+<li>验证规则</li>
+</ul>
+<div class="codehilite"><pre><span></span><code><span class="sb">`</span><span class="c1"># 查看已创建的规则 </span>
+Get-NetFirewallRule<span class="w"> </span>-DisplayName<span class="w"> </span><span class="s2">"Allow_Jetson_*"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>Format-Table<span class="w"> </span>DisplayName,Enabled,Action,Direction,RemoteAddress<span class="sb">`</span>
+</code></pre></div>
+
+<ul>
+<li>应输出</li>
+</ul>
+<div class="codehilite"><pre><span></span><code>DisplayName<span class="w">        </span>Enabled<span class="w"> </span>Action<span class="w"> </span>Direction<span class="w"> </span>RemoteAddress
+-----------<span class="w">        </span>-------<span class="w"> </span>------<span class="w"> </span>---------<span class="w"> </span>-------------
+Allow_Jetson_SOCKS5<span class="w">   </span>True<span class="w"> </span>Allow<span class="w">  </span>Inbound<span class="w">   </span><span class="m">192</span>.168.3.170
+Allow_Jetson_HTTP<span class="w">     </span>True<span class="w"> </span>Allow<span class="w">  </span>Inbound<span class="w">   </span><span class="m">192</span>.168.3.170
+</code></pre></div>
+
+<ul>
+<li>完成设置后，只有 Jetson 设备能使用你的代理，其他 IP 访问会被拒绝，安全性大幅提升！</li>
+</ul>
+<hr />
+<h2 id="2-jetson">2 <strong>​Jetson 端设备配置​</strong>​</h2>
+<h3 id="21">2.1 ​<strong>​系统级代理设置​</strong>​</h3>
+<ol>
+<li>​<strong>​图形界面设置​</strong>​<div class="codehilite"><pre><span></span><code>- 进入 Ubuntu 的“设置” → “网络” → “网络代理”，选择“手动”模式。
+- 填写主机的代理 IP 和端口（如 HTTP/HTTPS 代理均设为 `192.168.3.68:10809`），保存并应用。
+- *注意*：此方法仅影响图形界面应用（如浏览器），终端仍需单独配置。
+</code></pre></div>
+
+<ol start="2">
+<li>
+<p>​<strong>​全局环境变量配置​</strong>​</p>
+<ul>
+<li>编辑 <code>/etc/environment</code> 文件，添加以下内容（需管理员权限）：</li>
+</ul>
+</li>
+</ol>
+</li>
+</ol>
+<div class="codehilite"><pre><span></span><code><span class="nv">http_proxy</span><span class="o">=</span><span class="s2">"http://192.168.3.68:10809"</span><span class="w"> </span>
+<span class="nv">https_proxy</span><span class="o">=</span><span class="s2">"http://192.168.3.68:10809"</span><span class="w"> </span>
+<span class="nv">no_proxy</span><span class="o">=</span><span class="s2">"localhost,127.0.0.1"</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code><span class="nb">source</span><span class="w"> </span>/etc/environment
+<span class="c1"># 执行或重启生效。</span>
+</code></pre></div>
+
+<p><em>适用场景</em>：所有用户和终端命令（如 <code>apt</code>、<code>curl</code>）均通过代理。</p>
+<blockquote>
+<p><strong>代理环境变量虽然已写入 <code>/etc/environment</code>，但并未被当前 Shell 会话加载</strong>
+所以建议重启 Jetson 设备,这会强制重新加载所有系统环境变量（包括 <code>/etc/environment</code> 中的代理配置）</p>
+</blockquote>
+<h3 id="22">2.2 ​<strong>​终端临时代理（仅当前会话有效）​</strong>​</h3>
+<p>在终端中临时设置代理:</p>
+<div class="codehilite"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">http_proxy</span><span class="o">=</span>http://192.168.3.68:10809<span class="w"> </span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">https_proxy</span><span class="o">=</span>http://192.168.3.68:10809
+</code></pre></div>
+
+<p>配置 HTTP 代理:</p>
+<div class="codehilite"><pre><span></span><code>git<span class="w"> </span>config<span class="w"> </span>--global<span class="w"> </span>http.proxy<span class="w"> </span>http://192.168.3.68:10809
+git<span class="w"> </span>config<span class="w"> </span>--global<span class="w"> </span>https.proxy<span class="w"> </span>http://192.168.3.68:10809
+</code></pre></div>
+
+<p>取消代理配置:</p>
+<div class="codehilite"><pre><span></span><code>git<span class="w"> </span>config<span class="w"> </span>--global<span class="w"> </span>--unset<span class="w"> </span>http.proxy
+git<span class="w"> </span>config<span class="w"> </span>--global<span class="w"> </span>--unset<span class="w"> </span>https.proxy
+</code></pre></div>
+
+<h2 id="3">3 测试代理效果</h2>
+<ul>
+<li>在 Jetson 终端上测试输入</li>
+</ul>
+<div class="codehilite"><pre><span></span><code>curl<span class="w"> </span>-x<span class="w"> </span>http://192.168.3.68:10809<span class="w"> </span>-I<span class="w"> </span>https://www.google.com
+</code></pre></div>
+
+<p>如果返回 <code>HTTP/2 200</code>，说明代理已生效</p>
+<ul>
+<li>测试无显示代理的 curl</li>
+</ul>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span>curl<span class="w"> </span>-v<span class="w"> </span>http://www.google.com
+</code></pre></div>
+
+<p>​<strong>​预期结果​</strong>​：</p>
+<p>显示代理连接日志（如 <code>Connecting to 192.168.3.68:10809…</code>）</p></article></div><nav class="page-toc article-toc is-visible" aria-label="On this page"><span class="toc-title">ON THIS PAGE</span><a href="#1" class="toc-level-1">1 ​​主机端代理设置​​</a><a href="#11-windows" class="toc-level-2">1.1 检查代理端口是否监听（Windows 主机）​​</a><a href="#12" class="toc-level-2">1.2 ​​ 修改代理配置以允许局域网访问​​</a><a href="#13" class="toc-level-2">1.3 安全设置</a><a href="#2-jetson" class="toc-level-1">2 ​Jetson 端设备配置​​</a><a href="#21" class="toc-level-2">2.1 ​​系统级代理设置​​</a><a href="#22" class="toc-level-2">2.2 ​​终端临时代理（仅当前会话有效）​​</a><a href="#3" class="toc-level-1">3 测试代理效果</a></nav></div><nav class="post-neighbors" aria-label="Adjacent posts"><a class="post-neighbor previous" href="/blog/jetson-orin-nano-flashing/"><span class="post-neighbor-label"><i class="link-arrow link-arrow-left" aria-hidden="true"></i>Previous post</span><strong>Jetson Orin Nano 系统烧录指南</strong></a><a class="post-neighbor next" href="/blog/pytorch-quickstart-configuration/"><span class="post-neighbor-label">Next post<i class="link-arrow" aria-hidden="true"></i></span><strong>PyTorch 入门 01：环境配置</strong></a></nav></main>
+<footer class="site-footer">
+  <div class="wrap footer-utility">
+    <a class="footer-license" href="https://github.com/FuTseYi/futseyi.github.io/blob/main/LICENSING.md" target="_blank" rel="noopener noreferrer"><span>Go ahead, steal it</span><span class="link-arrow" aria-hidden="true"></span><span>CC BY 4.0 &middot; Code MIT</span></a>
+    <a class="footer-back-top" href="#main">Back to top <span class="link-arrow link-arrow-up" aria-hidden="true"></span></a>
+  </div>
+  <div class="footer-divider"><div class="wrap footer-inner">
+    <a class="footer-brand" href="https://github.com/FuTseYi/futseyi.github.io" target="_blank" rel="noopener noreferrer">&copy; <time data-current-year datetime="2026">2026</time> <span>FuTseYi <span class="alias">(Shine)</span></span></a>
+    <nav class="hero-links footer-social" aria-label="Social links"><a href="mailto:hello@futseyi.com" aria-label="Email" title="Email"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 6 9 7 9-7"/></svg></a>
+<a href="https://github.com/FuTseYi" target="_blank" rel="noopener noreferrer" aria-label="GitHub" title="GitHub"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 19c-4.3 1.3-4.3-2.2-6-2.6m12 5v-3.4c0-1 .1-1.5-.5-2.1 3.3-.4 6.8-1.6 6.8-7.3a5.7 5.7 0 0 0-1.5-4c.2-.4.7-1.9-.2-3.9 0 0-1.2-.4-4 1.5a13.7 13.7 0 0 0-7.2 0C5.6.3 4.4.7 4.4.7c-.9 2-.4 3.5-.2 3.9a5.7 5.7 0 0 0-1.5 4c0 5.7 3.5 6.9 6.8 7.3-.5.5-.6 1.1-.5 2.1v3.4"/></svg></a>
+<a href="https://www.linkedin.com/in/futseyi" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" title="LinkedIn"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 10v7m0-10v.01M11 17v-7m0 3a3 3 0 0 1 6 0v4"/></svg></a>
+          <a href="https://x.com/FuTseYi" target="_blank" rel="noopener noreferrer" aria-label="X" title="X"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 4h4l12 16h-4L4 4ZM4 20 20 4"/></svg></a></nav>
+  </div></div>
+</footer>
+</body></html>

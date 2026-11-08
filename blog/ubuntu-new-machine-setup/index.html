@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Ubuntu 新机初始化与开发环境配置">
+<meta property="og:site_name" content="FuTseYi (Shine)">
+<meta property="og:title" content="Ubuntu 新机初始化与开发环境配置">
+<meta property="og:description" content="Ubuntu 新机初始化与开发环境配置">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.futseyi.com/blog/ubuntu-new-machine-setup/">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.futseyi.com/assets/images/profile/me.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1378">
+<meta property="og:image:height" content="2065">
+<meta property="og:image:alt" content="FuTseYi&#x27;s profile photo">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:site" content="@FuTseYi">
+<meta name="twitter:title" content="Ubuntu 新机初始化与开发环境配置">
+<meta name="twitter:description" content="Ubuntu 新机初始化与开发环境配置">
+<meta name="twitter:image" content="https://www.futseyi.com/assets/images/profile/me.jpg">
+<meta name="twitter:image:alt" content="FuTseYi&#x27;s profile photo">
+<meta property="article:tag" content="Ubuntu">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="Development">
+<title>Ubuntu 新机初始化与开发环境配置 · FuTseYi</title><link rel="canonical" href="https://www.futseyi.com/blog/ubuntu-new-machine-setup/">
+<link rel="icon" href="/assets/icons/favicon.ico" sizes="any">
+<link rel="icon" href="/assets/icons/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="/assets/icons/site.webmanifest">
+<link rel="preload" href="/assets/fonts/caveat-handwriting.woff2" as="font" type="font/woff2" crossorigin>
+<script data-theme-init>
+    (() => {
+      document.documentElement.classList.add('js');
+      let theme = 'system';
+      try { theme = localStorage.getItem('site-theme') || 'system'; } catch {}
+      if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+    })();
+  </script>
+<link rel="stylesheet" href="/assets/css/style.css?v=525538209899"><script src="https://cdn.jsdelivr.net/npm/swup@4.10.0/dist/Swup.umd.js" defer></script>
+<script src="/assets/js/site.js?v=7c24c70d02eb" defer></script>
+<script src="/assets/js/atmosphere.js?v=a822ac798e30" defer></script>
+</head>
+<body class="blog-page article-page">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header" id="site-header">
+  <div class="header-inner">
+    <a class="brand" href="/" aria-label="FuTseYi (Shine) homepage"><img src="/assets/icons/favicon.svg" alt="" width="36" height="36"></a>
+    <button class="theme-control" type="button" aria-label="Color theme: System. Switch to Light" title="System theme. Click for Light" data-mode="system">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <g data-theme-icon="system"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></g>
+        <g data-theme-icon="light"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.4 1.4m11.2 11.2L19 19M5 19l1.4-1.4M17.6 6.4 19 5"/></g>
+        <g data-theme-icon="dark"><path d="M20.5 14A8.5 8.5 0 0 1 10 3.5 8.5 8.5 0 1 0 20.5 14Z"/></g>
+      </svg>
+    </button>
+    <button class="nav-toggle" type="button" aria-controls="primary-navigation" aria-expanded="false" aria-label="Open navigation menu">
+      <span class="menu-icon" aria-hidden="true"><span></span><span></span><span></span></span>
+    </button>
+    <nav class="nav-links" id="primary-navigation" aria-label="Main navigation">
+      <a href="/#about">About</a>
+      <a href="/#education">Education</a>
+
+      <a href="/#active-in">Active In</a>
+      <a href="/#contributions">Contributions</a>
+      <a href="/blog/" class="is-active" aria-current="page">Blog</a>
+
+    </nav>
+  </div>
+</header>
+<main class="blog-container wrap" id="main"><div class="article-layout"><div class="article-main"><a class="back-link" href="/blog/"><span class="link-arrow link-arrow-left" aria-hidden="true"></span>All posts</a><div class="article-head"><span class="blog-kicker">BLOG & NOTES</span><h1>Ubuntu 新机初始化与开发环境配置</h1><div class="article-meta"><time class="post-date" datetime="2025-07-17">Jul 17, 2025</time><a class="post-date" href="https://github.com/FuTseYi/futseyi.github.io/edit/main/posts/ubuntu-new-machine-setup/index.md" target="_blank" rel="noopener noreferrer"><em>Edit on GitHub</em></a></div><div class="post-tags"><a class="post-tag" href="/blog/tags/#tag-a1c366cacdc2"># Ubuntu</a><a class="post-tag" href="/blog/tags/#tag-83ad8510bbd3"># Linux</a><a class="post-tag" href="/blog/tags/#tag-4c17aadf5117"># Development</a></div></div><div class="article-toc-inline"><button class="article-toc-toggle" type="button" aria-expanded="false" aria-controls="article-toc-links">On this page</button><div class="article-toc-panel"><div class="article-toc-clip"><nav id="article-toc-links" aria-label="Article contents"><a href="#_1" class="toc-level-1">我新机到手一般都会做如下配置</a><a href="#1" class="toc-level-1">1：更改主机名</a><a href="#2" class="toc-level-1">2：换国内系统源（开源脚本）</a><a href="#3" class="toc-level-1">3：更新系统常用包</a><a href="#4-bbr" class="toc-level-1">4：启用 BBR</a><a href="#5" class="toc-level-1">5：启用虚拟内存</a><a href="#6-docker" class="toc-level-1">6：使用国内镜像安装 docker（开源脚本）</a><a href="#7-ssh" class="toc-level-1">7：加强 SSH 防护</a><a href="#8-web-caddy" class="toc-level-1">8：安装 web 服务（caddy）</a><a href="#9" class="toc-level-1">9：更改系统语言为中文</a><a href="#10" class="toc-level-1">10：配置系统时区为上海</a><a href="#11-docker-caddy" class="toc-level-1">11：然后就可以使用 docker 愉快的部署各种服务了（脚本已自动配置国内镜像源），然后配合 caddy 反代各种服务</a><a href="#_2" class="toc-level-1">其他参考</a><a href="#_3" class="toc-level-1">实验室备份</a></nav></div></div></div><article class="article" data-pagefind-body><p><img alt="" src="assets/linux.gif" loading="lazy" decoding="async"  width="1920" height="1080" /></p>
+<h2 id="_1">我新机到手一般都会做如下配置</h2>
+<blockquote>
+<p>按顺序执行</p>
+</blockquote>
+<h2 id="1">1：更改主机名</h2>
+<div class="codehilite"><pre><span></span><code>hostnamectl<span class="w"> </span>set-hostname<span class="w"> </span>localhost
+</code></pre></div>
+
+<h2 id="2">2：换国内系统源（开源脚本）</h2>
+<div class="codehilite"><pre><span></span><code>bash<span class="w"> </span>&lt;<span class="o">(</span>curl<span class="w"> </span>-sSL<span class="w"> </span>https://gitee.com/SuperManito/LinuxMirrors/raw/main/ChangeMirrors.sh<span class="o">)</span>
+</code></pre></div>
+
+<h2 id="3">3：更新系统常用包</h2>
+<div class="codehilite"><pre><span></span><code>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>curl<span class="w"> </span>wget<span class="w"> </span>git<span class="w"> </span>zip<span class="w"> </span>tar<span class="w"> </span>lsof<span class="w"> </span>vim<span class="w"> </span>sudo
+</code></pre></div>
+
+<h2 id="4-bbr">4：启用 BBR</h2>
+<div class="codehilite"><pre><span></span><code>sudo<span class="w"> </span>modprobe<span class="w"> </span>tcp_bbr<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">"net.ipv4.tcp_congestion_control = bbr"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>-a<span class="w"> </span>/etc/sysctl.conf<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sudo<span class="w"> </span>sysctl<span class="w"> </span>-p
+</code></pre></div>
+
+<h2 id="5">5：启用虚拟内存</h2>
+<div class="codehilite"><pre><span></span><code>sudo<span class="w"> </span>fallocate<span class="w"> </span>-l<span class="w"> </span>2G<span class="w"> </span>/swapfile<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">700</span><span class="w"> </span>/swapfile<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sudo<span class="w"> </span>mkswap<span class="w"> </span>/swapfile<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sudo<span class="w"> </span>swapon<span class="w"> </span>/swapfile<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s1">'/swapfile none swap sw 0 0'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>-a<span class="w"> </span>/etc/fstab
+</code></pre></div>
+
+<h2 id="6-docker">6：使用国内镜像安装 docker（开源脚本）</h2>
+<div class="codehilite"><pre><span></span><code>bash<span class="w"> </span>&lt;<span class="o">(</span>curl<span class="w"> </span>-sSL<span class="w"> </span>https://gitee.com/SuperManito/LinuxMirrors/raw/main/DockerInstallation.sh<span class="o">)</span>
+</code></pre></div>
+
+<h2 id="7-ssh">7：加强 SSH 防护</h2>
+<p>修改 SSH 配置文件</p>
+<div class="codehilite"><pre><span></span><code>sudo<span class="w"> </span>vim<span class="w"> </span>/etc/ssh/sshd_config
+</code></pre></div>
+
+<p>找到对应的配置然后修改</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 修改SSH服务端口</span>
+Port<span class="w"> </span><span class="m">2222</span>
+
+<span class="c1"># 禁止使用空密码登录</span>
+PermitEmptyPasswords<span class="w"> </span>no
+</code></pre></div>
+
+<p>重启 SSH 服务</p>
+<div class="codehilite"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>ssh
+</code></pre></div>
+
+<h2 id="8-web-caddy">8：安装 web 服务（caddy）</h2>
+<div class="codehilite"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-yq<span class="w"> </span>debian-keyring<span class="w"> </span>debian-archive-keyring<span class="w"> </span>apt-transport-https<span class="w"> </span>curl<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>curl<span class="w"> </span>-1sLf<span class="w"> </span><span class="s1">'https://dl.cloudsmith.io/public/caddy/stable/gpg.key'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>gpg<span class="w"> </span>--dearmor<span class="w"> </span>-o<span class="w"> </span>/usr/share/keyrings/caddy-stable-archive-keyring.gpg<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>curl<span class="w"> </span>-1sLf<span class="w"> </span><span class="s1">'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/apt/sources.list.d/caddy-stable.list<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span>-q<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-yq<span class="w"> </span>caddy
+</code></pre></div>
+
+<h2 id="9">9：更改系统语言为中文</h2>
+<div class="codehilite"><pre><span></span><code>sudo<span class="w"> </span>nano<span class="w"> </span>/etc/locale.gen
+<span class="c1"># zh_CN.UTF-8 UTF-8       // 取消这行注释</span>
+
+sudo<span class="w"> </span>locale-gen
+sudo<span class="w"> </span>update-locale<span class="w"> </span><span class="nv">LANG</span><span class="o">=</span>zh_CN.UTF-8
+sudo<span class="w"> </span>localectl<span class="w"> </span>set-locale<span class="w"> </span><span class="nv">LANG</span><span class="o">=</span>zh_CN.UTF-8
+</code></pre></div>
+
+<h2 id="10">10：配置系统时区为上海</h2>
+<div class="codehilite"><pre><span></span><code>sudo<span class="w"> </span>ln<span class="w"> </span>-sf<span class="w"> </span>/usr/share/zoneinfo/Asia/Shanghai<span class="w"> </span>/etc/localtime
+</code></pre></div>
+
+<h2 id="11-docker-caddy">11：然后就可以使用 docker 愉快的部署各种服务了（脚本已自动配置国内镜像源），然后配合 caddy 反代各种服务</h2>
+<h2 id="_2">其他参考</h2>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 鱼香 ros 一键安装</span>
+wget<span class="w"> </span>http://fishros.com/install<span class="w"> </span>-O<span class="w"> </span>fishros<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>.<span class="w"> </span>fishros
+</code></pre></div>
+
+<p><a href="https://bgithub.xyz">GitHub · Build and ship software on a single, collaborative platform · GitHub</a></p>
+<p><a href="https://help.kkgithub.com/">KGitHub Help</a></p>
+<p><a href="https://gitclone.com/">方达极客社区</a></p>
+<p><a href="https://github.hscsec.cn">Title Unavailable | Site Unreachable</a></p>
+<p><a href="https://git.homegu.com">Title Unavailable | Site Unreachable</a></p>
+<p><a href="https://github.ur1.fun/">GitHub 加速下载 - 在线工具</a></p>
+<p><a href="https://github.com/233boy/v2ray">GitHub - 233boy/v2ray: 最好用的 V2Ray 一键安装脚本 &amp; 管理脚本</a></p>
+<p><a href="https://linux.do/t/topic/789917">Docker镜像加速服务整理</a></p>
+<blockquote>
+<p>docker 国内代理看这个帖子：<a href="https://linux.do/t/topic/789917">https://linux.do/t/topic/789917</a>
+科学上完用 clash verge + 机场订阅链接
+系统 apt 源换国内的（Google 搜一些帖子非常多）</p>
+<p>命令行走代理修改~/.bashrc 文件, 12334 端口修改为实际的代理端口。
+注意对于 ping 这类 icmp 协议工具，是没办法走代理的。</p>
+<ul>
+<li>HTTP / HTTPS 代理 export HTTP_PROXY="http://127.0.0.1:12334" export HTTPS_PROXY="http://127.0.0.1:12334"</li>
+<li>如果你需要走 SOCKS5（某些工具优先用 ALL_PROXY） export ALL_PROXY="socks5:&lt;//127.0.0.1:12334&gt;"
+修改后 <code>source ~/.bashrc</code> 保存生效</li>
+</ul>
+<p>配置 apt 镜像源；
+BBR 优化；
+优化 SSH 配置（改端口、配置密钥对、心跳维持连接等）；
+配置 fail2ban、UFW 等；
+配置 .zshrc、.vimrc 等，添加常用的几个 alias；
+配置 proxychains；
+~~安装 neofetch、cowsay 等强大的 CLI 工具；~~
+~~每天来一把 sudo apt upgrade -y。~~</p>
+</blockquote>
+<h2 id="_3">实验室备份</h2>
+<div class="codehilite"><pre><span></span><code>apt
+<span class="nb">cd</span><span class="w"> </span>/etc/apt
+cp<span class="w"> </span>/etc/apt/sources.list<span class="w"> </span>/etc/apt/sources.list.bak
+gedit<span class="w"> </span>sources.list
+
+deb<span class="w"> </span>http://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/<span class="w"> </span>bionic<span class="w"> </span>main<span class="w"> </span>multiverse<span class="w"> </span>restricted<span class="w"> </span>universe
+deb<span class="w"> </span>http://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/<span class="w"> </span>bionic-security<span class="w"> </span>main<span class="w"> </span>multiverse<span class="w"> </span>restricted<span class="w"> </span>universe
+deb<span class="w"> </span>http://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/<span class="w"> </span>bionic-updates<span class="w"> </span>main<span class="w"> </span>multiverse<span class="w"> </span>restricted<span class="w"> </span>universe
+deb<span class="w"> </span>http://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/<span class="w"> </span>bionic-backports<span class="w"> </span>main<span class="w"> </span>multiverse<span class="w"> </span>restricted<span class="w"> </span>universe
+deb-src<span class="w"> </span>http://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/<span class="w"> </span>bionic<span class="w"> </span>main<span class="w"> </span>multiverse<span class="w"> </span>restricted<span class="w"> </span>universe
+deb-src<span class="w"> </span>http://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/<span class="w"> </span>bionic-security<span class="w"> </span>main<span class="w"> </span>multiverse<span class="w"> </span>restricted<span class="w"> </span>universe
+deb-src<span class="w"> </span>http://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/<span class="w"> </span>bionic-updates<span class="w"> </span>main<span class="w"> </span>multiverse<span class="w"> </span>restricted<span class="w"> </span>universe
+deb-src<span class="w"> </span>http://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/<span class="w"> </span>bionic-backports<span class="w"> </span>main<span class="w"> </span>multiverse<span class="w"> </span>restricted<span class="w"> </span>universe
+
+sudo<span class="w"> </span>apt-get<span class="w"> </span>update
+
+pip
+pip3<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>pip
+mkdir<span class="w"> </span>~/.pip
+gedit<span class="w"> </span>~/.pip/pip.conf
+<span class="o">[</span>global<span class="o">]</span>
+index-url<span class="w"> </span><span class="o">=</span><span class="w">  </span>https://pypi.mirrors.ustc.edu.cn/simple
+<span class="o">[</span>install<span class="o">]</span>
+trusted-host<span class="w"> </span><span class="o">=</span><span class="w">  </span>https://pypi.mirrors.ustc.edu.cn
+
+torch
+sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>python3-pip<span class="w"> </span>libopenblas-base<span class="w"> </span>libopenmpi-dev<span class="w"> </span>libomp-dev
+pip3<span class="w"> </span>install<span class="w"> </span>Cython
+pip3<span class="w"> </span>install<span class="w"> </span>numpy<span class="w"> </span>torch-1.8.0-cp36-cp36m-linux_aarch64.whl
+
+import<span class="w"> </span>torch
+import<span class="w"> </span>torchvision
+print<span class="o">(</span>torch.__version__<span class="o">)</span>
+print<span class="o">(</span>torchvision.__version__<span class="o">)</span>
+
+torchvison
+sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>libjpeg-dev<span class="w"> </span>zlib1g-dev<span class="w"> </span>libpython3-dev<span class="w"> </span>libavcodec-dev<span class="w"> </span>libavformat-dev<span class="w"> </span>libswscale-dev
+<span class="nb">cd</span><span class="w"> </span>torchvision
+$<span class="w"> </span><span class="nb">export</span><span class="w"> </span><span class="nv">BUILD_VERSION</span><span class="o">=</span><span class="m">0</span>.x.0<span class="w">  </span><span class="c1"># where 0.x.0 is the torchvision version  </span>
+$<span class="w"> </span>python3<span class="w"> </span>setup.py<span class="w"> </span>install<span class="w"> </span>--user
+$<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>../<span class="w">  </span><span class="c1"># attempting to load torchvision from build dir will result in import error</span>
+$<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span><span class="s1">'pillow&lt;7'</span><span class="w"> </span><span class="c1"># always needed for Python 2.7, not needed torchvision v0.5.0+ with Python 3.6</span>
+</code></pre></div></article></div><nav class="page-toc article-toc is-visible" aria-label="On this page"><span class="toc-title">ON THIS PAGE</span><a href="#_1" class="toc-level-1">我新机到手一般都会做如下配置</a><a href="#1" class="toc-level-1">1：更改主机名</a><a href="#2" class="toc-level-1">2：换国内系统源（开源脚本）</a><a href="#3" class="toc-level-1">3：更新系统常用包</a><a href="#4-bbr" class="toc-level-1">4：启用 BBR</a><a href="#5" class="toc-level-1">5：启用虚拟内存</a><a href="#6-docker" class="toc-level-1">6：使用国内镜像安装 docker（开源脚本）</a><a href="#7-ssh" class="toc-level-1">7：加强 SSH 防护</a><a href="#8-web-caddy" class="toc-level-1">8：安装 web 服务（caddy）</a><a href="#9" class="toc-level-1">9：更改系统语言为中文</a><a href="#10" class="toc-level-1">10：配置系统时区为上海</a><a href="#11-docker-caddy" class="toc-level-1">11：然后就可以使用 docker 愉快的部署各种服务了（脚本已自动配置国内镜像源），然后配合 caddy 反代各种服务</a><a href="#_2" class="toc-level-1">其他参考</a><a href="#_3" class="toc-level-1">实验室备份</a></nav></div><nav class="post-neighbors" aria-label="Adjacent posts"><a class="post-neighbor previous" href="/blog/pytorch-quickstart-training-workflow/"><span class="post-neighbor-label"><i class="link-arrow link-arrow-left" aria-hidden="true"></i>Previous post</span><strong>PyTorch 入门 04：模型训练流程</strong></a><a class="post-neighbor next" href="/blog/obsidian-syncthing-sync/"><span class="post-neighbor-label">Next post<i class="link-arrow" aria-hidden="true"></i></span><strong>Obsidian 跨设备同步：Syncthing 实践</strong></a></nav></main>
+<footer class="site-footer">
+  <div class="wrap footer-utility">
+    <a class="footer-license" href="https://github.com/FuTseYi/futseyi.github.io/blob/main/LICENSING.md" target="_blank" rel="noopener noreferrer"><span>Go ahead, steal it</span><span class="link-arrow" aria-hidden="true"></span><span>CC BY 4.0 &middot; Code MIT</span></a>
+    <a class="footer-back-top" href="#main">Back to top <span class="link-arrow link-arrow-up" aria-hidden="true"></span></a>
+  </div>
+  <div class="footer-divider"><div class="wrap footer-inner">
+    <a class="footer-brand" href="https://github.com/FuTseYi/futseyi.github.io" target="_blank" rel="noopener noreferrer">&copy; <time data-current-year datetime="2026">2026</time> <span>FuTseYi <span class="alias">(Shine)</span></span></a>
+    <nav class="hero-links footer-social" aria-label="Social links"><a href="mailto:hello@futseyi.com" aria-label="Email" title="Email"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 6 9 7 9-7"/></svg></a>
+<a href="https://github.com/FuTseYi" target="_blank" rel="noopener noreferrer" aria-label="GitHub" title="GitHub"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 19c-4.3 1.3-4.3-2.2-6-2.6m12 5v-3.4c0-1 .1-1.5-.5-2.1 3.3-.4 6.8-1.6 6.8-7.3a5.7 5.7 0 0 0-1.5-4c.2-.4.7-1.9-.2-3.9 0 0-1.2-.4-4 1.5a13.7 13.7 0 0 0-7.2 0C5.6.3 4.4.7 4.4.7c-.9 2-.4 3.5-.2 3.9a5.7 5.7 0 0 0-1.5 4c0 5.7 3.5 6.9 6.8 7.3-.5.5-.6 1.1-.5 2.1v3.4"/></svg></a>
+<a href="https://www.linkedin.com/in/futseyi" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" title="LinkedIn"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 10v7m0-10v.01M11 17v-7m0 3a3 3 0 0 1 6 0v4"/></svg></a>
+          <a href="https://x.com/FuTseYi" target="_blank" rel="noopener noreferrer" aria-label="X" title="X"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 4h4l12 16h-4L4 4ZM4 20 20 4"/></svg></a></nav>
+  </div></div>
+</footer>
+</body></html>

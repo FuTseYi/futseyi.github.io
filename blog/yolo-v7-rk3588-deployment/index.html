@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="YOLOv7 在 RK3588 上的部署与多线程优化">
+<meta property="og:site_name" content="FuTseYi (Shine)">
+<meta property="og:title" content="YOLOv7 在 RK3588 上的部署与多线程优化">
+<meta property="og:description" content="YOLOv7 在 RK3588 上的部署与多线程优化">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.futseyi.com/blog/yolo-v7-rk3588-deployment/">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.futseyi.com/assets/images/profile/me.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1378">
+<meta property="og:image:height" content="2065">
+<meta property="og:image:alt" content="FuTseYi&#x27;s profile photo">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:site" content="@FuTseYi">
+<meta name="twitter:title" content="YOLOv7 在 RK3588 上的部署与多线程优化">
+<meta name="twitter:description" content="YOLOv7 在 RK3588 上的部署与多线程优化">
+<meta name="twitter:image" content="https://www.futseyi.com/assets/images/profile/me.jpg">
+<meta name="twitter:image:alt" content="FuTseYi&#x27;s profile photo">
+<meta property="article:tag" content="YOLOv7">
+<meta property="article:tag" content="RK3588">
+<meta property="article:tag" content="RKNN">
+<meta property="article:tag" content="Edge AI">
+<title>YOLOv7 在 RK3588 上的部署与多线程优化 · FuTseYi</title><link rel="canonical" href="https://www.futseyi.com/blog/yolo-v7-rk3588-deployment/">
+<link rel="icon" href="/assets/icons/favicon.ico" sizes="any">
+<link rel="icon" href="/assets/icons/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="/assets/icons/site.webmanifest">
+<link rel="preload" href="/assets/fonts/caveat-handwriting.woff2" as="font" type="font/woff2" crossorigin>
+<script data-theme-init>
+    (() => {
+      document.documentElement.classList.add('js');
+      let theme = 'system';
+      try { theme = localStorage.getItem('site-theme') || 'system'; } catch {}
+      if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+    })();
+  </script>
+<link rel="stylesheet" href="/assets/css/style.css?v=525538209899"><script src="https://cdn.jsdelivr.net/npm/swup@4.10.0/dist/Swup.umd.js" defer></script>
+<script src="/assets/js/site.js?v=7c24c70d02eb" defer></script>
+<script src="/assets/js/atmosphere.js?v=a822ac798e30" defer></script>
+</head>
+<body class="blog-page article-page">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header" id="site-header">
+  <div class="header-inner">
+    <a class="brand" href="/" aria-label="FuTseYi (Shine) homepage"><img src="/assets/icons/favicon.svg" alt="" width="36" height="36"></a>
+    <button class="theme-control" type="button" aria-label="Color theme: System. Switch to Light" title="System theme. Click for Light" data-mode="system">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <g data-theme-icon="system"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></g>
+        <g data-theme-icon="light"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.4 1.4m11.2 11.2L19 19M5 19l1.4-1.4M17.6 6.4 19 5"/></g>
+        <g data-theme-icon="dark"><path d="M20.5 14A8.5 8.5 0 0 1 10 3.5 8.5 8.5 0 1 0 20.5 14Z"/></g>
+      </svg>
+    </button>
+    <button class="nav-toggle" type="button" aria-controls="primary-navigation" aria-expanded="false" aria-label="Open navigation menu">
+      <span class="menu-icon" aria-hidden="true"><span></span><span></span><span></span></span>
+    </button>
+    <nav class="nav-links" id="primary-navigation" aria-label="Main navigation">
+      <a href="/#about">About</a>
+      <a href="/#education">Education</a>
+
+      <a href="/#active-in">Active In</a>
+      <a href="/#contributions">Contributions</a>
+      <a href="/blog/" class="is-active" aria-current="page">Blog</a>
+
+    </nav>
+  </div>
+</header>
+<main class="blog-container wrap" id="main"><div class="article-layout"><div class="article-main"><a class="back-link" href="/blog/"><span class="link-arrow link-arrow-left" aria-hidden="true"></span>All posts</a><div class="article-head"><span class="blog-kicker">BLOG & NOTES</span><h1>YOLOv7 在 RK3588 上的部署与多线程优化</h1><div class="article-meta"><time class="post-date" datetime="2025-07-27">Jul 27, 2025</time><a class="post-date" href="https://github.com/FuTseYi/futseyi.github.io/edit/main/posts/yolo-v7-rk3588-deployment/index.md" target="_blank" rel="noopener noreferrer"><em>Edit on GitHub</em></a></div><div class="post-tags"><a class="post-tag" href="/blog/tags/#tag-fe11b4834883"># YOLOv7</a><a class="post-tag" href="/blog/tags/#tag-b3fe09a1fa53"># RK3588</a><a class="post-tag" href="/blog/tags/#tag-9b2febbfdec7"># RKNN</a><a class="post-tag" href="/blog/tags/#tag-342c2eeba912"># Edge AI</a></div></div><div class="article-toc-inline"><button class="article-toc-toggle" type="button" aria-expanded="false" aria-controls="article-toc-links">On this page</button><div class="article-toc-panel"><div class="article-toc-clip"><nav id="article-toc-links" aria-label="Article contents"><a href="#yolo7" class="toc-level-2">多线程 YOLO7</a><a href="#_1" class="toc-level-1">局域网内调试</a><a href="#_2" class="toc-level-1">主机端操作</a><a href="#_3" class="toc-level-2">模型训练</a><a href="#bestpt-onnx" class="toc-level-2">best.pt 转换为 onnx 模型</a><a href="#onnx-rknn-rknn-toolkit" class="toc-level-2">onnx 转 rknn 模型 (安装 rknn-toolkit 工具)</a><a href="#_4" class="toc-level-1">板端操作</a><a href="#_5" class="toc-level-2">修改模型后需要的步骤</a><a href="#_6" class="toc-level-1">手动启动</a></nav></div></div></div><article class="article" data-pagefind-body><p><img alt="" src="assets/rk3588s.jpg" loading="lazy" decoding="async"  width="4024" height="3018" /></p>
+<h3 id="yolo7">多线程 YOLO7</h3>
+<ul>
+<li>8 个并行线程</li>
+<li>8 个模型实例并行</li>
+<li>同时处理 8 帧</li>
+<li>实时视频流</li>
+<li>摄像头/视频文件</li>
+<li>RTMP/RTSP 推流</li>
+<li>GPIO + 串口</li>
+<li>高帧率实时处理</li>
+</ul>
+<blockquote>
+<p>在此方案上修改 <a href="https://github.com/leafqycc/rknn-cpp-Multithreading">GitHub - leafqycc/rknn-cpp-Multithreading</a></p>
+</blockquote>
+<h2 id="_1">局域网内调试</h2>
+<blockquote>
+<p>用网线直连笔记本的以太网口与 RK3588 的以太网口</p>
+<p>在 Windows 开启“Internet 连接共享”(ICS)，把 Wi‑Fi 共享到以太网</p>
+<ul>
+<li>右键 Wi‑Fi → 属性 → 切换到“共享”选项卡</li>
+<li>勾选“允许其他网络用户通过此计算机的 Internet 连接来连接</li>
+<li>完成以上设置后，VS Code 可通过 Remote‑SSH 连接 RK3588：在 VS Code/终端使用 ssh 用户名@192.168.137.x 进行连接。RK3588 端只要 sshd 运行、网线直连、且已拿到 192.168.137.x 地址即可</li>
+</ul>
+</blockquote>
+<hr />
+<blockquote>
+<p>或者可以添加网段
+sudo ip addr add 192.168.137.3/24 dev eth0</p>
+</blockquote>
+<h2 id="_2">主机端操作</h2>
+<h3 id="_3">模型训练</h3>
+<blockquote>
+<p>我使用 docker 挂载 file 文件夹中的 code、data、rknn</p>
+</blockquote>
+<div class="codehilite"><pre><span></span><code><span class="n">docker</span> <span class="n">attach</span> <span class="n">yolov7</span>
+</code></pre></div>
+
+<blockquote>
+<p>训练</p>
+</blockquote>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 开始</span>
+<span class="n">python</span> <span class="n">train</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">data</span> <span class="n">data</span><span class="o">/</span><span class="n">VisDrone</span><span class="o">.</span><span class="n">yaml</span> <span class="o">--</span><span class="n">name</span> <span class="n">yolov7</span><span class="o">-</span><span class="n">vis2019</span>
+
+<span class="c1"># 恢复</span>
+<span class="n">python</span> <span class="n">train</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">resume</span>
+<span class="c1">#or 指定恢复</span>
+<span class="n">python</span> <span class="n">train</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">resume</span> <span class="n">runs</span><span class="o">/</span><span class="n">train</span><span class="o">/</span><span class="n">yolov7</span><span class="o">-</span><span class="n">vis2019</span><span class="o">/</span><span class="n">weights</span><span class="o">/</span><span class="n">last</span><span class="o">.</span><span class="n">pt</span>
+</code></pre></div>
+
+<h3 id="bestpt-onnx">best.pt 转换为 onnx 模型</h3>
+<div class="codehilite"><pre><span></span><code><span class="n">python</span> <span class="n">export</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">rknpu</span> <span class="n">rk3588</span> <span class="o">--</span><span class="n">weight</span> <span class="o">./</span><span class="n">runs</span><span class="o">/</span><span class="n">train</span><span class="o">/</span><span class="n">yolov7</span><span class="o">-</span><span class="n">vis2019</span><span class="o">/</span><span class="n">weights</span><span class="o">/</span><span class="n">best</span><span class="o">.</span><span class="n">pt</span> <span class="c1"># ./当前目录</span>
+</code></pre></div>
+
+<h3 id="onnx-rknn-rknn-toolkit">onnx 转 rknn 模型 (安装 rknn-toolkit 工具)</h3>
+<blockquote>
+<p>请注意,要在此项目上运行新的 onnx 转 rknn 的模型,需要特定的 toolkit 版本 -&gt;1.5.2
+<a href="https://github.com/airockchip/rknn-toolkit2/tree/v1.5.2">GitHub - airockchip/rknn-toolkit2 at v1.5.2</a></p>
+</blockquote>
+<div class="codehilite"><pre><span></span><code><span class="c1"># python</span>
+<span class="n">conda</span> <span class="n">activate</span> <span class="n">rknntoolkit</span>
+
+<span class="n">pip</span> <span class="n">install</span> <span class="n">rknn_toolkit2</span><span class="o">-</span><span class="mf">1.5.2</span><span class="o">+</span><span class="n">b642f30c</span><span class="o">-</span><span class="n">cp36</span><span class="o">-</span><span class="n">cp36m</span><span class="o">-</span><span class="n">linux_x86_64</span><span class="o">.</span><span class="n">whl</span>
+</code></pre></div>
+
+<blockquote>
+<p>在 file/rknn/rknn_model_zoo/examples/yolov7/python 中运行代码进行 onnx -&gt; rknn</p>
+</blockquote>
+<div class="codehilite"><pre><span></span><code><span class="n">python</span> <span class="n">convert</span><span class="o">.</span><span class="n">py</span> <span class="o">../</span><span class="n">model</span><span class="o">/</span><span class="n">best</span><span class="o">.</span><span class="n">onnx</span> <span class="n">rk3588</span>
+</code></pre></div>
+
+<h2 id="_4">板端操作</h2>
+<div class="codehilite"><pre><span></span><code><span class="c1">#烧入镜像后修改 orangepi 初始密码并通过 orange-config 设置串口 0/1</span>
+
+sudo<span class="w"> </span>passwd<span class="w"> </span>orangepi<span class="w">  </span>改成<span class="w"> </span><span class="m">423</span><span class="w">  </span><span class="c1">#修改的是orangepi这个账户密码</span>
+
+<span class="c1">#赋予整个文件夹执行权限</span>
+
+sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </span>+x<span class="w"> </span>/home/orangepi/rknn-cpp-Multithreading-yolov7-1.5.2
+
+<span class="c1">#安装依赖</span>
+sudo<span class="w"> </span>apt-get<span class="w"> </span>update
+
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>cmake<span class="w"> </span>gstreamer1.0-rtsp<span class="w"> </span>libopencv-dev
+
+<span class="c1">#增强性能</span>
+
+sudo<span class="w"> </span>./performance.sh
+
+<span class="c1">#自启动</span>
+
+mv<span class="w"> </span>detect.desktop<span class="w"> </span>../.config/autostart/
+
+
+
+<span class="c1">##说明</span>
+
+postprocess.h<span class="w"> </span>文件定义了解析和翻译神经网络原始输出的规则和工具，是连接“AI<span class="w"> </span>模型推理”和“最终可用结果”之间的桥梁。
+
+postprocess.cc<span class="w"> </span>是<span class="w"> </span>postprocess.h<span class="w"> </span>的具体实现。
+</code></pre></div>
+
+<h3 id="_5">修改模型后需要的步骤</h3>
+<blockquote>
+<p>基础修改</p>
+</blockquote>
+<div class="codehilite"><pre><span></span><code>将转换好的模型拷贝至部署代码的model/RK3588的文件夹中，同时参照model文件夹中的文本编写类别信息
+
+修改include/postprocess.h中OBJ_CLASS_NUM（类别数）<span class="w"> </span>
+
+和src/postprocess.cc的LABEL_NALE_TXT_PATH（类别信息文本的地址）
+</code></pre></div>
+
+<blockquote>
+<p>记得修改锚点数组数据</p>
+</blockquote>
+<ul>
+<li>通常换新的模型,输出的锚点会不同 RK_anchors
+<img alt="2025-08-05_14-58-59.png" src="assets/20250805145902420.png" loading="lazy" decoding="async"  width="1605" height="466" /></li>
+</ul>
+<blockquote>
+<p>修改模型后记得重新编译</p>
+</blockquote>
+<div class="codehilite"><pre><span></span><code>./build-linux_RK3588.sh
+</code></pre></div>
+
+<h2 id="_6">手动启动</h2>
+<div class="codehilite"><pre><span></span><code>./start.sh
+</code></pre></div></article></div><nav class="page-toc article-toc is-visible" aria-label="On this page"><span class="toc-title">ON THIS PAGE</span><a href="#yolo7" class="toc-level-2">多线程 YOLO7</a><a href="#_1" class="toc-level-1">局域网内调试</a><a href="#_2" class="toc-level-1">主机端操作</a><a href="#_3" class="toc-level-2">模型训练</a><a href="#bestpt-onnx" class="toc-level-2">best.pt 转换为 onnx 模型</a><a href="#onnx-rknn-rknn-toolkit" class="toc-level-2">onnx 转 rknn 模型 (安装 rknn-toolkit 工具)</a><a href="#_4" class="toc-level-1">板端操作</a><a href="#_5" class="toc-level-2">修改模型后需要的步骤</a><a href="#_6" class="toc-level-1">手动启动</a></nav></div><nav class="post-neighbors" aria-label="Adjacent posts"><a class="post-neighbor previous" href="/blog/yolo-v11-rk3588-deployment/"><span class="post-neighbor-label"><i class="link-arrow link-arrow-left" aria-hidden="true"></i>Previous post</span><strong>YOLO11 在 RK3588 上的部署与多线程优化</strong></a><a class="post-neighbor next" href="/blog/vscode-settings-extensions/"><span class="post-neighbor-label">Next post<i class="link-arrow" aria-hidden="true"></i></span><strong>VS Code 配置与扩展推荐</strong></a></nav></main>
+<footer class="site-footer">
+  <div class="wrap footer-utility">
+    <a class="footer-license" href="https://github.com/FuTseYi/futseyi.github.io/blob/main/LICENSING.md" target="_blank" rel="noopener noreferrer"><span>Go ahead, steal it</span><span class="link-arrow" aria-hidden="true"></span><span>CC BY 4.0 &middot; Code MIT</span></a>
+    <a class="footer-back-top" href="#main">Back to top <span class="link-arrow link-arrow-up" aria-hidden="true"></span></a>
+  </div>
+  <div class="footer-divider"><div class="wrap footer-inner">
+    <a class="footer-brand" href="https://github.com/FuTseYi/futseyi.github.io" target="_blank" rel="noopener noreferrer">&copy; <time data-current-year datetime="2026">2026</time> <span>FuTseYi <span class="alias">(Shine)</span></span></a>
+    <nav class="hero-links footer-social" aria-label="Social links"><a href="mailto:hello@futseyi.com" aria-label="Email" title="Email"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 6 9 7 9-7"/></svg></a>
+<a href="https://github.com/FuTseYi" target="_blank" rel="noopener noreferrer" aria-label="GitHub" title="GitHub"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 19c-4.3 1.3-4.3-2.2-6-2.6m12 5v-3.4c0-1 .1-1.5-.5-2.1 3.3-.4 6.8-1.6 6.8-7.3a5.7 5.7 0 0 0-1.5-4c.2-.4.7-1.9-.2-3.9 0 0-1.2-.4-4 1.5a13.7 13.7 0 0 0-7.2 0C5.6.3 4.4.7 4.4.7c-.9 2-.4 3.5-.2 3.9a5.7 5.7 0 0 0-1.5 4c0 5.7 3.5 6.9 6.8 7.3-.5.5-.6 1.1-.5 2.1v3.4"/></svg></a>
+<a href="https://www.linkedin.com/in/futseyi" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" title="LinkedIn"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 10v7m0-10v.01M11 17v-7m0 3a3 3 0 0 1 6 0v4"/></svg></a>
+          <a href="https://x.com/FuTseYi" target="_blank" rel="noopener noreferrer" aria-label="X" title="X"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 4h4l12 16h-4L4 4ZM4 20 20 4"/></svg></a></nav>
+  </div></div>
+</footer>
+</body></html>

@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="教程视频见 B 站 up 主 小土堆">
+<meta property="og:site_name" content="FuTseYi (Shine)">
+<meta property="og:title" content="PyTorch 入门 01：环境配置">
+<meta property="og:description" content="教程视频见 B 站 up 主 小土堆">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.futseyi.com/blog/pytorch-quickstart-configuration/">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.futseyi.com/assets/images/profile/me.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1378">
+<meta property="og:image:height" content="2065">
+<meta property="og:image:alt" content="FuTseYi&#x27;s profile photo">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:site" content="@FuTseYi">
+<meta name="twitter:title" content="PyTorch 入门 01：环境配置">
+<meta name="twitter:description" content="教程视频见 B 站 up 主 小土堆">
+<meta name="twitter:image" content="https://www.futseyi.com/assets/images/profile/me.jpg">
+<meta name="twitter:image:alt" content="FuTseYi&#x27;s profile photo">
+<meta property="article:tag" content="PyTorch">
+<meta property="article:tag" content="Deep Learning">
+<meta property="article:tag" content="Tutorial">
+<title>PyTorch 入门 01：环境配置 · FuTseYi</title><link rel="canonical" href="https://www.futseyi.com/blog/pytorch-quickstart-configuration/">
+<link rel="icon" href="/assets/icons/favicon.ico" sizes="any">
+<link rel="icon" href="/assets/icons/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="/assets/icons/site.webmanifest">
+<link rel="preload" href="/assets/fonts/caveat-handwriting.woff2" as="font" type="font/woff2" crossorigin>
+<script data-theme-init>
+    (() => {
+      document.documentElement.classList.add('js');
+      let theme = 'system';
+      try { theme = localStorage.getItem('site-theme') || 'system'; } catch {}
+      if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+    })();
+  </script>
+<link rel="stylesheet" href="/assets/css/style.css?v=525538209899"><script src="https://cdn.jsdelivr.net/npm/swup@4.10.0/dist/Swup.umd.js" defer></script>
+<script src="/assets/js/site.js?v=7c24c70d02eb" defer></script>
+<script src="/assets/js/atmosphere.js?v=a822ac798e30" defer></script>
+</head>
+<body class="blog-page article-page">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header" id="site-header">
+  <div class="header-inner">
+    <a class="brand" href="/" aria-label="FuTseYi (Shine) homepage"><img src="/assets/icons/favicon.svg" alt="" width="36" height="36"></a>
+    <button class="theme-control" type="button" aria-label="Color theme: System. Switch to Light" title="System theme. Click for Light" data-mode="system">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <g data-theme-icon="system"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></g>
+        <g data-theme-icon="light"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.4 1.4m11.2 11.2L19 19M5 19l1.4-1.4M17.6 6.4 19 5"/></g>
+        <g data-theme-icon="dark"><path d="M20.5 14A8.5 8.5 0 0 1 10 3.5 8.5 8.5 0 1 0 20.5 14Z"/></g>
+      </svg>
+    </button>
+    <button class="nav-toggle" type="button" aria-controls="primary-navigation" aria-expanded="false" aria-label="Open navigation menu">
+      <span class="menu-icon" aria-hidden="true"><span></span><span></span><span></span></span>
+    </button>
+    <nav class="nav-links" id="primary-navigation" aria-label="Main navigation">
+      <a href="/#about">About</a>
+      <a href="/#education">Education</a>
+
+      <a href="/#active-in">Active In</a>
+      <a href="/#contributions">Contributions</a>
+      <a href="/blog/" class="is-active" aria-current="page">Blog</a>
+
+    </nav>
+  </div>
+</header>
+<main class="blog-container wrap" id="main"><div class="article-layout"><div class="article-main"><a class="back-link" href="/blog/"><span class="link-arrow link-arrow-left" aria-hidden="true"></span>All posts</a><div class="article-head"><span class="blog-kicker">BLOG & NOTES</span><h1>PyTorch 入门 01：环境配置</h1><div class="article-meta"><time class="post-date" datetime="2025-07-13">Jul 13, 2025</time><a class="post-date" href="https://github.com/FuTseYi/futseyi.github.io/edit/main/posts/pytorch-quickstart-configuration/index.md" target="_blank" rel="noopener noreferrer"><em>Edit on GitHub</em></a></div><div class="post-tags"><a class="post-tag" href="/blog/tags/#tag-98a2e30eeb85"># PyTorch</a><a class="post-tag" href="/blog/tags/#tag-5b8059958504"># Deep Learning</a><a class="post-tag" href="/blog/tags/#tag-2701a94c0eb5"># Tutorial</a></div></div><div class="article-toc-inline"><button class="article-toc-toggle" type="button" aria-expanded="false" aria-controls="article-toc-links">On this page</button><div class="article-toc-panel"><div class="article-toc-clip"><nav id="article-toc-links" aria-label="Article contents"><a href="#01" class="toc-level-1">第 01 讲 配置📝</a><a href="#11" class="toc-level-1">1.1 基本环境</a><a href="#111-anaconda" class="toc-level-2">1.1.1 Anaconda</a><a href="#112-pytorch" class="toc-level-2">1.1.2 PyTorch</a><a href="#12" class="toc-level-1">1.2 基本工具</a><a href="#121-pycharm" class="toc-level-2">1.2.1 PyCharm</a><a href="#122-jupyter" class="toc-level-2">1.2.2 Jupyter</a><a href="#123" class="toc-level-2">1.2.3 两个函数</a><a href="#124" class="toc-level-2">1.2.4 工具对比</a></nav></div></div></div><article class="article" data-pagefind-body><blockquote>
+<p>教程视频见 B 站 up 主 <a href="https://www.bilibili.com/video/BV1hE411t7RN?p=9&amp;vd_source=db1ba321ac57d0740e3f5bc3b365ddff">小土堆</a></p>
+</blockquote>
+<h2 id="01">第 01 讲 配置📝</h2>
+<h2 id="11">1.1 基本环境</h2>
+<h3 id="111-anaconda">1.1.1 Anaconda</h3>
+<blockquote>
+<p>安装当前最新版 Anaconda，安装时记好自己的 安装路径</p>
+</blockquote>
+<div class="article-table" role="region" aria-label="Data table" tabindex="0"><table>
+<thead>
+<tr>
+<th>Anaconda</th>
+<th>链接</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>当前</td>
+<td><a href="https://www.anaconda.com/download/success">https://www.anaconda.com/download/success</a></td>
+</tr>
+<tr>
+<td>其他</td>
+<td><a href="https://repo.anaconda.com/">https://repo.anaconda.com</a></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>也许，你之后会遇到不同的项目，需要使用到不同版本的环境</p>
+<p>比如这个项目要用到 pytorch 0.4，另一个项目要用到 pytorch 1.0</p>
+<p>Anaconda 集成的 conda 就能够解决这个问题</p>
+<p>它可以创造出两个屋子相互隔离，一个屋子放 0.4 版本，一个屋子放 1.0 版本。</p>
+</blockquote>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 启动Anaconda Prompt后，我们首先使用conda指令创建一个屋子，叫做pytorch</span>
+
+conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>pytorch<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.6
+
+<span class="c1"># conda      指调用conda包</span>
+
+<span class="c1"># create     创建的意思              </span>
+
+<span class="c1"># -n         指后面的名字            </span>
+
+<span class="c1"># pytorch    即名字(可以更改成自己喜欢的)   </span>
+
+<span class="c1"># python=3.6 指创建的屋子为python3.6版本 </span>
+
+<span class="c1"># 激活「pytorch」这个屋子</span>
+
+conda<span class="w"> </span>activate<span class="w"> </span>pytorch
+
+<span class="c1"># 查看「pytorch」中的包列表，目前还无pytorch包，需要安装</span>
+
+pip<span class="w"> </span>list
+</code></pre></div>
+
+<h3 id="112-pytorch">1.1.2 PyTorch</h3>
+<blockquote>
+<p>有显卡参考 cuda 版本选择 (无显卡选择 CPU 版本)，选择后复制相应指令</p>
+</blockquote>
+<div class="article-table" role="region" aria-label="Data table" tabindex="0"><table>
+<thead>
+<tr>
+<th>PyTorch</th>
+<th>链接</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>当前</td>
+<td><a href="https://pytorch.org/">https://pytorch.org/</a></td>
+</tr>
+<tr>
+<td>文档</td>
+<td><a href="https://pytorch.org/docs/stable/index.html">https://pytorch.org/docs/stable/index.html</a></td>
+</tr>
+</tbody>
+</table></div>
+<div class="codehilite"><pre><span></span><code><span class="c1"># GPU版</span>
+
+pip3<span class="w"> </span>install<span class="w"> </span>torch<span class="w"> </span>torchvision<span class="w"> </span>torchaudio<span class="w"> </span>--index-url<span class="w"> </span>https://download.pytorch.org/whl/cu118
+
+<span class="c1"># CPU版</span>
+pip3<span class="w"> </span>install<span class="w"> </span>torch<span class="w"> </span>torchvision<span class="w"> </span>torchaudio
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code><span class="c1"># 测试PyTorch</span>
+
+<span class="c1">#1(pytorch) C:\Users\user</span>
+pip<span class="w"> </span>list
+
+<span class="c1">#2(pytorch) C:\Users\user</span>
+python
+
+···
+
+&gt;&gt;&gt;<span class="w"> </span>import<span class="w"> </span>torch
+
+&gt;&gt;&gt;<span class="w"> </span>torch.cuda.is_available<span class="o">()</span><span class="w"> </span><span class="c1">#检查GPU是否可以被Pytorch使用</span>
+
+True
+</code></pre></div>
+
+<h2 id="12">1.2 基本工具</h2>
+<h3 id="121-pycharm">1.2.1 PyCharm</h3>
+<blockquote>
+<p>安装当前最新版 PyCharm 专业版 <a href="https://www.jetbrains.com/pycharm/download">https://www.jetbrains.com/pycharm/download</a></p>
+</blockquote>
+<p>新建项目 ： <strong>「自定义环境」</strong> -&gt; <strong>「选择现有」</strong> -&gt; <strong>「Conda」</strong> -&gt; <strong>「conda.exe 路径」</strong> -&gt; 选择创建的 pytorch <img alt="" src="assets/ec4f70a98895d5f0642cc2fae8daa4d8-b9qski00-zi9v6n.webp" loading="lazy" decoding="async"  width="970" height="341" /></p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Python 控制台 可以输入指令检测是否成功导入Conda的环境</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+
+<span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code><span class="c1"># PyCharm 终端 不显示当前环境「pytorch」</span>
+
+解决办法：「设置」-&gt;「工具<span class="w"> </span>-<span class="w"> </span>终端」-&gt;<span class="w"> </span>把<span class="w"> </span>「Shell<span class="w"> </span>路径」<span class="w"> </span>修改为<span class="w"> </span>「cmd.exe」
+</code></pre></div>
+
+<h3 id="122-jupyter">1.2.2 Jupyter</h3>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 进入「pytorch」环境</span>
+
+conda<span class="w"> </span>activate<span class="w"> </span>pytorch
+
+<span class="c1"># 通过这个指令就可以安装好Jupyter</span>
+
+conda<span class="w"> </span>install<span class="w"> </span>nb_conda
+
+<span class="c1"># 在pytorch中启动Jupyter</span>
+
+jupyter<span class="w"> </span>notebook
+</code></pre></div>
+
+<p>新建项目： <strong>「New」</strong> -&gt; <strong>「conda 的 pytorch 环境」</strong> <img alt="" src="assets/9bf24f5476c31d440f2eba6062a0a6a7-cfdzniky-zkwoyu.webp" loading="lazy" decoding="async"  width="709" height="230" /></p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Jupyter Notebook 测试</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+
+<span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span>
+</code></pre></div>
+
+<blockquote>
+<p>针对于 ssh 服务器的情况下</p>
+</blockquote>
+<div class="codehilite"><pre><span></span><code><span class="c1">#服务器上启动 Jupyter Notebook(指定了端口)</span>
+<span class="c1">##--no-browser是 Jupyter Notebook 等命令行工具的一个启动参数，含义是启动服务器时不自动在本地主机打开浏览器</span>
+jupyter<span class="w"> </span>notebook<span class="w"> </span>--no-browser<span class="w"> </span>--port<span class="o">=</span><span class="m">8888</span>
+
+<span class="c1">#在你的本地电脑上做 SSH 端口转发</span>
+ssh<span class="w"> </span>-L<span class="w"> </span><span class="m">8888</span>:localhost:8888<span class="w"> </span>cnb@10.1.0.100<span class="w"> </span><span class="c1">#cnb@10.1.0.100是服务器的地址加用户名</span>
+
+<span class="c1">#本地浏览器访问</span>
+http://localhost:8888/?token<span class="o">=</span>xxxxxx
+</code></pre></div>
+
+<h3 id="123">1.2.3 两个函数</h3>
+<blockquote>
+<p>TIP
+- 查看帮助：PyCharm 中使用 <strong>「ctrl+ 鼠标移动」</strong> Jupyter 中使用 <strong>「Name+??」</strong>
+- 查看参数：PyCharm 中使用 <strong>「ctrl+P」</strong></p>
+</blockquote>
+<div class="article-table" role="region" aria-label="Data table" tabindex="0"><table>
+<thead>
+<tr>
+<th>函数</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>dir( )</td>
+<td>能让我们知道工具箱、工具箱中的分隔区有什么东西</td>
+</tr>
+<tr>
+<td>help( )</td>
+<td>能让我们知道每个工具是如何使用</td>
+</tr>
+</tbody>
+</table></div>
+<p><img alt="" src="assets/cc733d193c182b310918d7b3efcf799f-m-3ok7u1-idkmk.webp" loading="lazy" decoding="async"  width="1775" height="780" /></p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 导入 torch</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+
+<span class="c1"># dir()</span>
+
+<span class="nb">dir</span><span class="p">(</span><span class="n">torch</span><span class="p">)</span>
+
+<span class="nb">dir</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="p">)</span>
+
+<span class="nb">dir</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">)</span> 
+
+<span class="c1"># help()</span>
+
+<span class="n">help</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">)</span>
+</code></pre></div>
+
+<h3 id="124">1.2.4 工具对比</h3>
+<p><img alt="" src="assets/f6242db10c858c9372e22ca9a5add226-wcu7-iz8-1mzkrf.webp" loading="lazy" decoding="async"  width="1605" height="749" /></p></article></div><nav class="page-toc article-toc is-visible" aria-label="On this page"><span class="toc-title">ON THIS PAGE</span><a href="#01" class="toc-level-1">第 01 讲 配置📝</a><a href="#11" class="toc-level-1">1.1 基本环境</a><a href="#111-anaconda" class="toc-level-2">1.1.1 Anaconda</a><a href="#112-pytorch" class="toc-level-2">1.1.2 PyTorch</a><a href="#12" class="toc-level-1">1.2 基本工具</a><a href="#121-pycharm" class="toc-level-2">1.2.1 PyCharm</a><a href="#122-jupyter" class="toc-level-2">1.2.2 Jupyter</a><a href="#123" class="toc-level-2">1.2.3 两个函数</a><a href="#124" class="toc-level-2">1.2.4 工具对比</a></nav></div><nav class="post-neighbors" aria-label="Adjacent posts"><a class="post-neighbor previous" href="/blog/lan-vpn-proxy-for-devices/"><span class="post-neighbor-label"><i class="link-arrow link-arrow-left" aria-hidden="true"></i>Previous post</span><strong>通过局域网主机共享代理：以 Jetson 为例</strong></a><a class="post-neighbor next" href="/blog/pytorch-quickstart-data/"><span class="post-neighbor-label">Next post<i class="link-arrow" aria-hidden="true"></i></span><strong>PyTorch 入门 02：数据处理</strong></a></nav></main>
+<footer class="site-footer">
+  <div class="wrap footer-utility">
+    <a class="footer-license" href="https://github.com/FuTseYi/futseyi.github.io/blob/main/LICENSING.md" target="_blank" rel="noopener noreferrer"><span>Go ahead, steal it</span><span class="link-arrow" aria-hidden="true"></span><span>CC BY 4.0 &middot; Code MIT</span></a>
+    <a class="footer-back-top" href="#main">Back to top <span class="link-arrow link-arrow-up" aria-hidden="true"></span></a>
+  </div>
+  <div class="footer-divider"><div class="wrap footer-inner">
+    <a class="footer-brand" href="https://github.com/FuTseYi/futseyi.github.io" target="_blank" rel="noopener noreferrer">&copy; <time data-current-year datetime="2026">2026</time> <span>FuTseYi <span class="alias">(Shine)</span></span></a>
+    <nav class="hero-links footer-social" aria-label="Social links"><a href="mailto:hello@futseyi.com" aria-label="Email" title="Email"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 6 9 7 9-7"/></svg></a>
+<a href="https://github.com/FuTseYi" target="_blank" rel="noopener noreferrer" aria-label="GitHub" title="GitHub"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 19c-4.3 1.3-4.3-2.2-6-2.6m12 5v-3.4c0-1 .1-1.5-.5-2.1 3.3-.4 6.8-1.6 6.8-7.3a5.7 5.7 0 0 0-1.5-4c.2-.4.7-1.9-.2-3.9 0 0-1.2-.4-4 1.5a13.7 13.7 0 0 0-7.2 0C5.6.3 4.4.7 4.4.7c-.9 2-.4 3.5-.2 3.9a5.7 5.7 0 0 0-1.5 4c0 5.7 3.5 6.9 6.8 7.3-.5.5-.6 1.1-.5 2.1v3.4"/></svg></a>
+<a href="https://www.linkedin.com/in/futseyi" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" title="LinkedIn"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 10v7m0-10v.01M11 17v-7m0 3a3 3 0 0 1 6 0v4"/></svg></a>
+          <a href="https://x.com/FuTseYi" target="_blank" rel="noopener noreferrer" aria-label="X" title="X"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 4h4l12 16h-4L4 4ZM4 20 20 4"/></svg></a></nav>
+  </div></div>
+</footer>
+</body></html>

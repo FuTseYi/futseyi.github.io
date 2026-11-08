@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="R2 实际上是一个对象存储。Cloudflare 提供 10G 的免费存储和每月 1000 万次的免费访问">
+<meta property="og:site_name" content="FuTseYi (Shine)">
+<meta property="og:title" content="使用 Cloudflare 与 PicList 搭建图床">
+<meta property="og:description" content="R2 实际上是一个对象存储。Cloudflare 提供 10G 的免费存储和每月 1000 万次的免费访问">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.futseyi.com/blog/cloudflare-piclist-image-hosting/">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.futseyi.com/assets/images/profile/me.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1378">
+<meta property="og:image:height" content="2065">
+<meta property="og:image:alt" content="FuTseYi&#x27;s profile photo">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:site" content="@FuTseYi">
+<meta name="twitter:title" content="使用 Cloudflare 与 PicList 搭建图床">
+<meta name="twitter:description" content="R2 实际上是一个对象存储。Cloudflare 提供 10G 的免费存储和每月 1000 万次的免费访问">
+<meta name="twitter:image" content="https://www.futseyi.com/assets/images/profile/me.jpg">
+<meta name="twitter:image:alt" content="FuTseYi&#x27;s profile photo">
+<meta property="article:tag" content="Cloudflare">
+<meta property="article:tag" content="PicList">
+<meta property="article:tag" content="Image Hosting">
+<title>使用 Cloudflare 与 PicList 搭建图床 · FuTseYi</title><link rel="canonical" href="https://www.futseyi.com/blog/cloudflare-piclist-image-hosting/">
+<link rel="icon" href="/assets/icons/favicon.ico" sizes="any">
+<link rel="icon" href="/assets/icons/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="/assets/icons/site.webmanifest">
+<link rel="preload" href="/assets/fonts/caveat-handwriting.woff2" as="font" type="font/woff2" crossorigin>
+<script data-theme-init>
+    (() => {
+      document.documentElement.classList.add('js');
+      let theme = 'system';
+      try { theme = localStorage.getItem('site-theme') || 'system'; } catch {}
+      if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+    })();
+  </script>
+<link rel="stylesheet" href="/assets/css/style.css?v=525538209899"><script src="https://cdn.jsdelivr.net/npm/swup@4.10.0/dist/Swup.umd.js" defer></script>
+<script src="/assets/js/site.js?v=7c24c70d02eb" defer></script>
+<script src="/assets/js/atmosphere.js?v=a822ac798e30" defer></script>
+</head>
+<body class="blog-page article-page">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header" id="site-header">
+  <div class="header-inner">
+    <a class="brand" href="/" aria-label="FuTseYi (Shine) homepage"><img src="/assets/icons/favicon.svg" alt="" width="36" height="36"></a>
+    <button class="theme-control" type="button" aria-label="Color theme: System. Switch to Light" title="System theme. Click for Light" data-mode="system">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <g data-theme-icon="system"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></g>
+        <g data-theme-icon="light"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.4 1.4m11.2 11.2L19 19M5 19l1.4-1.4M17.6 6.4 19 5"/></g>
+        <g data-theme-icon="dark"><path d="M20.5 14A8.5 8.5 0 0 1 10 3.5 8.5 8.5 0 1 0 20.5 14Z"/></g>
+      </svg>
+    </button>
+    <button class="nav-toggle" type="button" aria-controls="primary-navigation" aria-expanded="false" aria-label="Open navigation menu">
+      <span class="menu-icon" aria-hidden="true"><span></span><span></span><span></span></span>
+    </button>
+    <nav class="nav-links" id="primary-navigation" aria-label="Main navigation">
+      <a href="/#about">About</a>
+      <a href="/#education">Education</a>
+
+      <a href="/#active-in">Active In</a>
+      <a href="/#contributions">Contributions</a>
+      <a href="/blog/" class="is-active" aria-current="page">Blog</a>
+
+    </nav>
+  </div>
+</header>
+<main class="blog-container wrap" id="main"><div class="article-layout"><div class="article-main"><a class="back-link" href="/blog/"><span class="link-arrow link-arrow-left" aria-hidden="true"></span>All posts</a><div class="article-head"><span class="blog-kicker">BLOG & NOTES</span><h1>使用 Cloudflare 与 PicList 搭建图床</h1><div class="article-meta"><time class="post-date" datetime="2025-05-12">May 12, 2025</time><a class="post-date" href="https://github.com/FuTseYi/futseyi.github.io/edit/main/posts/cloudflare-piclist-image-hosting/index.md" target="_blank" rel="noopener noreferrer"><em>Edit on GitHub</em></a></div><div class="post-tags"><a class="post-tag" href="/blog/tags/#tag-a5b966cdcb60"># Cloudflare</a><a class="post-tag" href="/blog/tags/#tag-cb39efd49fba"># PicList</a><a class="post-tag" href="/blog/tags/#tag-dc9147337472"># Image Hosting</a></div></div><div class="article-toc-inline"><button class="article-toc-toggle" type="button" aria-expanded="false" aria-controls="article-toc-links">On this page</button><div class="article-toc-panel"><div class="article-toc-clip"><nav id="article-toc-links" aria-label="Article contents"><a href="#1" class="toc-level-1">1 提前准备</a><a href="#2-cloudflare-r2" class="toc-level-1">2 创建 Cloudflare R2 存储桶</a><a href="#3-s3-api" class="toc-level-1">3 S3 API 配置</a><a href="#4-piclist" class="toc-level-1">4 Piclist 图床配置</a><a href="#5-piclist" class="toc-level-1">5 Piclist 的管理功能 (可以直接管理你的云端图床)</a><a href="#6-github" class="toc-level-1">6 关于配置的同步备份 (使用 Github 仓库备份)</a><a href="#7" class="toc-level-1">7 相关参考链接</a></nav></div></div></div><article class="article" data-pagefind-body><h2 id="1">1 提前准备</h2>
+<ol>
+<li>一个提前注册好的 Cloudflare 账号，并添加一个付费计划,不必担心扣费，可以选择 0 元免费计划</li>
+<li>一个提前注册好的域名，可以选便宜一些的,域名后缀无所谓，只是作为图片网址使用如果不想花一年十几块的域名费，也可以去网上找免费的域名使用</li>
+<li><a href="https://github.com/Kuingsmile/PicList">Piclist软件</a></li>
+</ol>
+<h2 id="2-cloudflare-r2">2 创建 Cloudflare R2 存储桶</h2>
+<p><strong>R2 实际上是一个对象存储。Cloudflare 提供 10G 的免费存储和每月 1000 万次的免费访问</strong></p>
+<ol>
+<li>进入 <a href="https://dash.cloudflare.com/">Cloudflare 仪表盘</a>，进入 R2 页面，为你的存储桶起一个名字，然后单击创建</li>
+</ol>
+<p><img alt="202408281607397" src="assets/202408281607397.png" loading="lazy" decoding="async"  width="1997" height="1368" /></p>
+<ol start="2">
+<li><strong>配置访问链接</strong><ul>
+<li>不要忘记，我们要搭的毕竟是个图床，不是网盘，接下来，我们要让其中的文件能够方便地通过链接从公网直接访问，让它变成真正意义上的图床</li>
+<li>Cloudflare 提供自己的子域域名，只不过功能受限，速度受限</li>
+<li>所以建议自定义域访问 <a href="">域名的购买配置</a></li>
+</ul>
+</li>
+</ol>
+<h2 id="3-s3-api">3 S3 API 配置</h2>
+<blockquote>
+<p><strong>接下来，我们看看如何通过调用 S3 API 进行上传下载，并通过 PicList 接入该 API 实现一站式、本地化的图床图片管理</strong></p>
+</blockquote>
+<ol>
+<li>要使用 S3 API，要获取 访问秘钥 ID（对应 AccessKeyId）、机密访问秘钥（对应 SecretAccessKey），以及终结点 /endpoint（后面用到）</li>
+</ol>
+<ul>
+<li>回到 R2 页面,点击 API- 管理 API 令牌,输入令牌名称,指定相关权限</li>
+</ul>
+<p><img alt="PixPin_2025-05-29_21-41-06" src="assets/pixpin-2025-05-29-21-41-06.png" loading="lazy" decoding="async"  width="1883" height="1133" /></p>
+<ul>
+<li>令牌创建成功后，下方即有 S3 API 需要的信息：</li>
+</ul>
+<p><img alt="202408281710556" src="assets/202408281710556.png" loading="lazy" decoding="async"  width="1609" height="986" /></p>
+<blockquote>
+<p>根据 Cloudflare 的安全策略，令牌信息页面一旦关闭，便永远不再展现，如果忘记了相应的信息，只能重新生成新令牌，所以请将令牌信息记录于可信的位置，妥善保管。</p>
+</blockquote>
+<h2 id="4-piclist">4 Piclist 图床配置</h2>
+<blockquote>
+<p>现在，事情来到了最后一步 —— 我们需要一个工具软件来接入我们配置好的 S3 API，方便我们从本地上传和管理图片，而不必每次都打开 cloudflare 面板，而 PicList 就是这方面的不二之选。</p>
+</blockquote>
+<ol>
+<li>打开 <a href="https://piclist.cn/">PicList 官方网站</a>，下载安装软件</li>
+<li>载安装软件，打开后，可以看到，其已经内置支持了不少图床,但是…… 好像就是没有我们用的 cloudflare R2？别急，移步左侧的 “插件” 选项,搜索 s3</li>
+<li>~~插件有 s3 和 s3-lls,不知道是是不是 BUG,使用两者插件输出图片链接格式不同,对于 CF 图床生成的链接格式 (自定义域名 / 设定的文件路径 / 文件名),s3-lls 插件输出才符合~~</li>
+</ol>
+<blockquote>
+<p>以上第 3 点的问题:
+1. 不要勾选 ForcePathStyle
+2. 不要勾选 Bucket 前缀
+<img alt="PixPin_2025-06-18_18-45-45.png" src="assets/20250618184603075.png" loading="lazy" decoding="async"  width="1920" height="1032" /></p>
+</blockquote>
+<p>各项配置说明如下：</p>
+<ul>
+<li>图床配置名：自定义。</li>
+<li>应用秘钥 ID：对应 AccessKeyId / 访问秘钥 ID。</li>
+<li>应用秘钥：对应 SecretAccessKey / 机密访问秘钥。</li>
+<li>桶名：对应你在 Cloudflare 上创建的桶名称。</li>
+<li>文件路径：定义桶内文件的上传存储路径,在这里我配置的是 content/{year}/{month}/{fileName}.{extName},这样其实很方便我后期管理。</li>
+<li>地区：可以 AUTO 也可以 APAC(亚太地区,可能对访问速度有帮助吧)</li>
+<li>自定义节点：对应 endpoint / 终结点。</li>
+<li>自定义域名：对应 Cloudflare 自定义域或公共 R2.dev 存储桶 URL。</li>
+</ul>
+<ol start="5">
+<li><strong>下面详细说明 “文件路径” 选项</strong></li>
+</ol>
+<ul>
+<li>该设置支持几个有固定含义的 payload 选项（如下所列），这些选项用于规定文件的上传路径和命名规则，而我们需要做的，就是根据需要进行恰当组合。</li>
+</ul>
+<p><img alt="202408281844639" src="assets/202408281844639.png" loading="lazy" decoding="async"  width="1208" height="1038" /></p>
+<ul>
+<li>根据上图所列，文件路径可以写成这样：</li>
+</ul>
+<div class="codehilite"><pre><span></span><code><span class="o">{</span>year<span class="o">}</span>/<span class="o">{</span>month<span class="o">}</span>/<span class="o">{</span>fileName<span class="o">}</span>.<span class="o">{</span>extName<span class="o">}</span>
+</code></pre></div>
+
+<p>这样一个文件路径代表什么意思呢？举例来说，我在 2024 年 8 月上传了一张名为 “xxx.jpg” 的图片，按照如上的路径设置，它将会存储在如下位置：“桶名称 / 2024/08/”，而它的文件名就是 “xxx.jpg”，即：原文件名 + 原拓展名。</p>
+<ul>
+<li>同理，我也可以换一种写法：</li>
+</ul>
+<div class="codehilite"><pre><span></span><code><span class="o">{</span>year<span class="o">}</span>/<span class="o">{</span>month<span class="o">}</span>/<span class="o">{</span>fileName<span class="o">}</span>/<span class="o">{</span>md5<span class="o">}</span>.<span class="o">{</span>extName<span class="o">}</span>
+</code></pre></div>
+
+<p>同样一张图片，在这样的文件路径下，会被上传到 “桶名称 / 2024/08/xxx/” 中，而图片本身会被重命名成 “该图片对应的 md5 字符串.jpg” 的形式。</p>
+<h2 id="5-piclist">5 Piclist 的管理功能 (可以直接管理你的云端图床)</h2>
+<blockquote>
+<p>云存储平台/云服务器和图床平台的管理是 PicList 新增的功能，在这里你可以：</p>
+<ul>
+<li>新建存储桶</li>
+<li>新建/重命名和删除文件夹</li>
+<li>重命名和批量删除文件</li>
+<li>快速批量复制文件公开链接</li>
+<li>批量获取私有文件的临时分享链接</li>
+<li>批量上传和下载各种格式的文件</li>
+<li>预览图片</li>
+</ul>
+</blockquote>
+<ol>
+<li>上面我们用的是 Cloudflare 的 r2 对象存储,所以我们就在 Piclist 配置管理</li>
+<li>点击管理选择 S3 兼容云,进行与上面相似的配置填写</li>
+</ol>
+<p><img alt="PixPin_2025-05-29_22-32-59" src="assets/pixpin-2025-05-29-22-32-59.png" loading="lazy" decoding="async"  width="1920" height="1032" /></p>
+<ol start="3">
+<li>这样配置完成后，就可以直接在 Piclist 查看咱们云端的图床啦</li>
+</ol>
+<h2 id="6-github">6 关于配置的同步备份 (使用 Github 仓库备份)</h2>
+<p><img alt="PixPin_2025-05-30_13-26-30" src="assets/pixpin-2025-05-30-13-26-30.png" loading="lazy" decoding="async"  width="1402" height="790" /></p>
+<blockquote>
+<p>这里我使用 Github 自建私有仓库 (Piclist_Backup ) 进行配置文件的保存</p>
+</blockquote>
+<h2 id="7">7 相关参考链接</h2>
+<blockquote>
+<p><a href="https://www.zbf1009.top/archives/28">https://www.zbf1009.top/archives/28</a></p>
+<p><a href="https://tyxiaoming.xin/2025/01/12/%E6%90%AD%E5%BB%BA%E5%9B%BE%E5%BA%8A/">https://tyxiaoming.xin/2025/01/12/%E6%90%AD%E5%BB%BA%E5%9B%BE%E5%BA%8A/</a></p>
+</blockquote></article></div><nav class="page-toc article-toc is-visible" aria-label="On this page"><span class="toc-title">ON THIS PAGE</span><a href="#1" class="toc-level-1">1 提前准备</a><a href="#2-cloudflare-r2" class="toc-level-1">2 创建 Cloudflare R2 存储桶</a><a href="#3-s3-api" class="toc-level-1">3 S3 API 配置</a><a href="#4-piclist" class="toc-level-1">4 Piclist 图床配置</a><a href="#5-piclist" class="toc-level-1">5 Piclist 的管理功能 (可以直接管理你的云端图床)</a><a href="#6-github" class="toc-level-1">6 关于配置的同步备份 (使用 Github 仓库备份)</a><a href="#7" class="toc-level-1">7 相关参考链接</a></nav></div><nav class="post-neighbors" aria-label="Adjacent posts"><a class="post-neighbor previous" href="/blog/code-as-poetry-article-as-song/"><span class="post-neighbor-label"><i class="link-arrow link-arrow-left" aria-hidden="true"></i>Previous post</span><strong>代码如诗，文章如歌</strong></a><a class="post-neighbor next" href="/blog/biome-code-review/"><span class="post-neighbor-label">Next post<i class="link-arrow" aria-hidden="true"></i></span><strong>使用 Biome 进行代码检查</strong></a></nav></main>
+<footer class="site-footer">
+  <div class="wrap footer-utility">
+    <a class="footer-license" href="https://github.com/FuTseYi/futseyi.github.io/blob/main/LICENSING.md" target="_blank" rel="noopener noreferrer"><span>Go ahead, steal it</span><span class="link-arrow" aria-hidden="true"></span><span>CC BY 4.0 &middot; Code MIT</span></a>
+    <a class="footer-back-top" href="#main">Back to top <span class="link-arrow link-arrow-up" aria-hidden="true"></span></a>
+  </div>
+  <div class="footer-divider"><div class="wrap footer-inner">
+    <a class="footer-brand" href="https://github.com/FuTseYi/futseyi.github.io" target="_blank" rel="noopener noreferrer">&copy; <time data-current-year datetime="2026">2026</time> <span>FuTseYi <span class="alias">(Shine)</span></span></a>
+    <nav class="hero-links footer-social" aria-label="Social links"><a href="mailto:hello@futseyi.com" aria-label="Email" title="Email"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 6 9 7 9-7"/></svg></a>
+<a href="https://github.com/FuTseYi" target="_blank" rel="noopener noreferrer" aria-label="GitHub" title="GitHub"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 19c-4.3 1.3-4.3-2.2-6-2.6m12 5v-3.4c0-1 .1-1.5-.5-2.1 3.3-.4 6.8-1.6 6.8-7.3a5.7 5.7 0 0 0-1.5-4c.2-.4.7-1.9-.2-3.9 0 0-1.2-.4-4 1.5a13.7 13.7 0 0 0-7.2 0C5.6.3 4.4.7 4.4.7c-.9 2-.4 3.5-.2 3.9a5.7 5.7 0 0 0-1.5 4c0 5.7 3.5 6.9 6.8 7.3-.5.5-.6 1.1-.5 2.1v3.4"/></svg></a>
+<a href="https://www.linkedin.com/in/futseyi" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" title="LinkedIn"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 10v7m0-10v.01M11 17v-7m0 3a3 3 0 0 1 6 0v4"/></svg></a>
+          <a href="https://x.com/FuTseYi" target="_blank" rel="noopener noreferrer" aria-label="X" title="X"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 4h4l12 16h-4L4 4ZM4 20 20 4"/></svg></a></nav>
+  </div></div>
+</footer>
+</body></html>

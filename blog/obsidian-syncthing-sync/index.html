@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="或许这就是最好的 Obsidian 全平台同步方案，甚至在国内可能优于官方的同步，因为它的同步速度取决于你内网带宽！并且它不局限于同步 Obsidian，也可以同步其他基于文件的的资料或者照片以及视频。">
+<meta property="og:site_name" content="FuTseYi (Shine)">
+<meta property="og:title" content="Obsidian 跨设备同步：Syncthing 实践">
+<meta property="og:description" content="或许这就是最好的 Obsidian 全平台同步方案，甚至在国内可能优于官方的同步，因为它的同步速度取决于你内网带宽！并且它不局限于同步 Obsidian，也可以同步其他基于文件的的资料或者照片以及视频。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.futseyi.com/blog/obsidian-syncthing-sync/">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.futseyi.com/assets/images/profile/me.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1378">
+<meta property="og:image:height" content="2065">
+<meta property="og:image:alt" content="FuTseYi&#x27;s profile photo">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:site" content="@FuTseYi">
+<meta name="twitter:title" content="Obsidian 跨设备同步：Syncthing 实践">
+<meta name="twitter:description" content="或许这就是最好的 Obsidian 全平台同步方案，甚至在国内可能优于官方的同步，因为它的同步速度取决于你内网带宽！并且它不局限于同步 Obsidian，也可以同步其他基于文件的的资料或者照片以及视频。">
+<meta name="twitter:image" content="https://www.futseyi.com/assets/images/profile/me.jpg">
+<meta name="twitter:image:alt" content="FuTseYi&#x27;s profile photo">
+<meta property="article:tag" content="Obsidian">
+<meta property="article:tag" content="Syncthing">
+<meta property="article:tag" content="Synchronization">
+<title>Obsidian 跨设备同步：Syncthing 实践 · FuTseYi</title><link rel="canonical" href="https://www.futseyi.com/blog/obsidian-syncthing-sync/">
+<link rel="icon" href="/assets/icons/favicon.ico" sizes="any">
+<link rel="icon" href="/assets/icons/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="/assets/icons/site.webmanifest">
+<link rel="preload" href="/assets/fonts/caveat-handwriting.woff2" as="font" type="font/woff2" crossorigin>
+<script data-theme-init>
+    (() => {
+      document.documentElement.classList.add('js');
+      let theme = 'system';
+      try { theme = localStorage.getItem('site-theme') || 'system'; } catch {}
+      if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+    })();
+  </script>
+<link rel="stylesheet" href="/assets/css/style.css?v=525538209899"><script src="https://cdn.jsdelivr.net/npm/swup@4.10.0/dist/Swup.umd.js" defer></script>
+<script src="/assets/js/site.js?v=7c24c70d02eb" defer></script>
+<script src="/assets/js/atmosphere.js?v=a822ac798e30" defer></script>
+</head>
+<body class="blog-page article-page">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header" id="site-header">
+  <div class="header-inner">
+    <a class="brand" href="/" aria-label="FuTseYi (Shine) homepage"><img src="/assets/icons/favicon.svg" alt="" width="36" height="36"></a>
+    <button class="theme-control" type="button" aria-label="Color theme: System. Switch to Light" title="System theme. Click for Light" data-mode="system">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <g data-theme-icon="system"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></g>
+        <g data-theme-icon="light"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.4 1.4m11.2 11.2L19 19M5 19l1.4-1.4M17.6 6.4 19 5"/></g>
+        <g data-theme-icon="dark"><path d="M20.5 14A8.5 8.5 0 0 1 10 3.5 8.5 8.5 0 1 0 20.5 14Z"/></g>
+      </svg>
+    </button>
+    <button class="nav-toggle" type="button" aria-controls="primary-navigation" aria-expanded="false" aria-label="Open navigation menu">
+      <span class="menu-icon" aria-hidden="true"><span></span><span></span><span></span></span>
+    </button>
+    <nav class="nav-links" id="primary-navigation" aria-label="Main navigation">
+      <a href="/#about">About</a>
+      <a href="/#education">Education</a>
+
+      <a href="/#active-in">Active In</a>
+      <a href="/#contributions">Contributions</a>
+      <a href="/blog/" class="is-active" aria-current="page">Blog</a>
+
+    </nav>
+  </div>
+</header>
+<main class="blog-container wrap" id="main"><div class="article-layout"><div class="article-main"><a class="back-link" href="/blog/"><span class="link-arrow link-arrow-left" aria-hidden="true"></span>All posts</a><div class="article-head"><span class="blog-kicker">BLOG & NOTES</span><h1>Obsidian 跨设备同步：Syncthing 实践</h1><div class="article-meta"><time class="post-date" datetime="2025-07-20">Jul 20, 2025</time><a class="post-date" href="https://github.com/FuTseYi/futseyi.github.io/edit/main/posts/obsidian-syncthing-sync/index.md" target="_blank" rel="noopener noreferrer"><em>Edit on GitHub</em></a></div><div class="post-tags"><a class="post-tag" href="/blog/tags/#tag-24c869802c3e"># Obsidian</a><a class="post-tag" href="/blog/tags/#tag-a008d57e7e55"># Syncthing</a><a class="post-tag" href="/blog/tags/#tag-cbcf7ae51d21"># Synchronization</a></div></div><div class="article-toc-inline"><button class="article-toc-toggle" type="button" aria-expanded="false" aria-controls="article-toc-links">On this page</button><div class="article-toc-panel"><div class="article-toc-clip"><nav id="article-toc-links" aria-label="Article contents"><a href="#1" class="toc-level-1">1 前言</a><a href="#2-syncthing" class="toc-level-1">2 Syncthing 的介绍</a><a href="#3-syncthing" class="toc-level-1">3 Syncthing 的安装</a><a href="#31-windows" class="toc-level-2">3.1 Windows 端</a><a href="#32-iphone-ipad" class="toc-level-2">3.2 iPhone 和 iPad 端</a><a href="#4-syncthing" class="toc-level-1">4 Syncthing 配置（演示局域网下的同步）</a><a href="#5-syncthing" class="toc-level-1">5 Syncthing 并非仅能同步局域网内的电脑，广域网内电脑照样好同步 (后续更新)</a><a href="#6" class="toc-level-1">6 参考链接</a></nav></div></div></div><article class="article" data-pagefind-body><blockquote>
+<p>或许这就是最好的 Obsidian 全平台同步方案，甚至在国内可能优于官方的同步，因为它的同步速度取决于你内网带宽！并且它不局限于同步 Obsidian，也可以同步其他基于文件的的资料或者照片以及视频。</p>
+</blockquote>
+<h2 id="1">1 前言</h2>
+<p>Obsidian 的同步最大的问题是 IOS 端，在桌面端我们可以利用 OneDrive，Dropbox 等工具来同步，但是在 IOS 端我们无法使用这些工具来同步其他 app 的数据，所以如果不使用官方的同步，我们只能依赖插件，例如 <code>remotely-save</code> 和 <code>live-sync</code> 或者基于 <code>git</code> 的 http 插件以及 <code>working copy</code> 来同步文件，这些插件的最大问题就是性能和对冲突的处理策略不友好，那么 <code>syncthing</code> 便是终极的同步方案！</p>
+<p><code>Syncthing</code> 一个几乎实时的 Obsidian 同步方案，某些方面，它甚至优于官方同步。</p>
+<h2 id="2-syncthing">2 Syncthing 的介绍</h2>
+<p>以下来自 <a href="https://syncthing.net/">官网</a></p>
+<blockquote>
+<p>Syncthing is a <strong>continuous file synchronization</strong> program. It synchronizes files between two or more computers in real time, safely protected from prying eyes. Your data is your data alone and you deserve to choose where it is stored, whether it is shared with some third party, and how it’s transmitted over the internet.</p>
+</blockquote>
+<p>总结来说：syncthing 是一个开源的多端 p2p 同步工具。</p>
+<h2 id="3-syncthing">3 Syncthing 的安装</h2>
+<p>桌面端的下载地址：<a href="https://syncthing.net/downloads/">官网下载</a></p>
+<h3 id="31-windows">3.1 Windows 端</h3>
+<p>windows 端有 2 类客户端，一类是基于命令行 +web 端 ui 的客户端，一类是集成 ui 客户端，两种都是一样的。</p>
+<h4 id="311-ui-ui">3.1.1 集成 UI 客户端 (有本地 UI 界面)</h4>
+<p><a href="https://github.com/canton7/SyncTrayzor">SyncTrayzor 下载地址</a></p>
+<h4 id="312-webui-base">3.1.2 基于 WebUI 的 Base 客户端</h4>
+<p>建议下载安装版 <a href="https://github.com/Bill-Stewart/SyncthingWindowsSetup/">Windows 安装版</a></p>
+<p>运行：开启菜单中搜索 <code>syncthing</code>，找到 <code>Start Syncthing</code> 打开即运行，没有窗口，没有托盘，这时我们打开浏览器，输入 <code>http://127.0.0.1:8384</code> 即可管理 <a href="https://syncthing.net/">Syncthing</a>。</p>
+<p>注意：安装版无法开机自启动，你可以安装以下步骤设置自启动。</p>
+<ol>
+<li>资源管理器打开 <code>%APPDATA%\Microsoft\Windows\Start Menu\Programs\Syncthing</code> 复制 <code>Start Syncthing</code> 这个快捷方式</li>
+<li><code>win+R</code> 输入 <code>shell:startup</code> 打开自启动文件夹</li>
+<li>把快捷方式粘贴到自启动文件夹中，下次开机会自动启动 syncthing
+    你也可以记住这个文件夹的位置，或者把 <code>Start Syncthing</code> 和 <code>Stop Syncthing</code> 快捷方式复制到桌面用于手动启动和关闭，也可以从开始菜单启停。</li>
+</ol>
+<h3 id="32-iphone-ipad">3.2 iPhone 和 iPad 端</h3>
+<blockquote>
+<p>iPhone 上一直没有一个友好的 syncthing 客户端，主要是无法跨沙箱，也就无法同步文件夹，这确实非常的难受，使用起来很受限，之前一直使用 <code>mobius sync</code> 这个收费的客户端，它能跨沙箱，但是如果体验后就必须保持后台，使用体验不算很好。直到开源的 <code>Synctrain</code> 的出现让 IOS 上的同步体验达到几乎无感。</p>
+</blockquote>
+<h4 id="321-synctrain">3.2.1 Synctrain(免费开源,建议使用这个)</h4>
+<p><a href="https://github.com/pixelspark/sushitrain">Github 项目</a></p>
+<p>App Store：<a href="https://apps.apple.com/nl/app/synctrain/id6553985316">Download on the App Store</a>(非国区哦)</p>
+<p>TF：<a href="https://testflight.apple.com/join/2f54I4CM">Test beta versions through TestFlight</a></p>
+<h4 id="322-mobius-sync">3.2.2 Mobius Sync</h4>
+<p>App Store 下载，国区 38 元买断，也很不错的 app。</p>
+<p><strong>两个 app 最大的区别在于能否用快捷方式！</strong></p>
+<h2 id="4-syncthing">4 Syncthing 配置（演示局域网下的同步）</h2>
+<p>以 Windows 端和 iPhone 同步为例，其他设备加入大同小异，但 syncthing 的中继和发现以及 stun 服务不友好，谨慎使用！</p>
+<p>PC 端点击图标 or 自动启动</p>
+<p><img alt="" src="assets/20250720163344543.png" loading="lazy" decoding="async"  width="1039" height="162" /></p>
+<p>浏览器打开默认地址 <code>http://127.0.0.1:8384</code></p>
+<p>进入界面，设置 GUI 用户名和密码，避免同局域网中的隐私泄露</p>
+<p><img alt="2025-07-20_16-35-45.png" src="assets/20250720163612626.png" loading="lazy" decoding="async"  width="1920" height="911" /></p>
+<ol>
+<li>
+<p>在 2 端添加远程设备</p>
+<ol>
+<li>
+<p>右上角 <code>操作</code>&gt;<code>显示ID</code> 会显示出来二维码。
+<img alt="2025-07-20_16-37-07.png" src="assets/20250720163710521.png" loading="lazy" decoding="async"  width="447" height="642" /></p>
+</li>
+<li>
+<p>IOS 端打开 Synctrain-&gt; <code>Devices</code>&gt;<code>Add device</code> &gt; <code>Scan using camera</code> 扫描二维码，右上角 <code>Add</code> 添加设备</p>
+</li>
+<li>如果正常，浏览器会收到一条添加设备的通知，点击 <code>添加设备</code> 即可连接设备</li>
+<li>添加共享文件夹 <code>Obsidian</code></li>
+<li>浏览器 <code>+添加文件夹</code>
+    <img alt="2025-07-20_16-43-03.png" src="assets/20250720164308909.png" loading="lazy" decoding="async"  width="2560" height="1305" /></li>
+<li>
+<p>Obsidian 文件夹点击，然后 <code>编辑</code>,选择共享文件夹。
+    <img alt="2025-07-20_16-14-27.png" src="assets/20250720161434226.png" loading="lazy" decoding="async"  width="2560" height="1305" /></p>
+</li>
+<li>
+<p>iPhone 打开 <code>文件</code>app，在 <code>我的iPhone</code>&gt;<code>Obsidian</code> 中新建一个 <code>Obsidian</code> 的文件夹用于保存 obsidian 的数据</p>
+</li>
+<li>iPhone 端 <code>Folders</code> 中会显示发现了共享的 <code>Obsidian</code>，选择 <code>Select existing filder</code> &gt; 第 3 步中新建的 Obsidian 文件夹，显示警告选择继续即可，<code>Synchronize</code> 选择 <code>All files</code>，点击右上角 <code>Add folder</code></li>
+<li><img alt="bb144b792c3fae2154cf3925b41f0476.png" src="assets/20250720164523014.png" loading="lazy" decoding="async"  width="1206" height="2622" /></li>
+<li>配置 Over，你可以在同步的文件任意的添加一些文件看看同步的情况如何</li>
+<li>配置自动化流程（灵魂）</li>
+<li>新建一个快捷指令添加以下 2 个 <code>Synctrain</code> 动作即可<ul>
+<li><code>Rescan folder</code>: <code>Folder</code> 选择上面的 <code>Obsidian</code> 文件夹，<code>Subdirectory</code> 留空</li>
+<li><code>Synchronize for a while</code>：<code>Time</code> 填写 <code>15</code></li>
+<li><img alt="" src="assets/vly5ycrzblu8zia.png" loading="lazy" decoding="async"  width="1179" height="2556" /></li>
+</ul>
+</li>
+<li>打开自动化，新建一个自动化流程<ul>
+<li><code>App</code> 选择 Obsidian，<code>已打开</code> 和 <code>已关闭</code> 全部勾选，点击立即运行</li>
+<li>下一步选择刚才创建的快捷指令</li>
+<li>完美自动化！</li>
+<li><img alt="" src="assets/fxhlr9bgnvhjb7j.png" loading="lazy" decoding="async"  width="1179" height="2556" /></li>
+</ul>
+</li>
+</ol>
+</li>
+</ol>
+<h2 id="5-syncthing">5 Syncthing 并非仅能同步局域网内的电脑，广域网内电脑照样好同步 (后续更新)</h2>
+<h2 id="6">6 参考链接</h2>
+<blockquote>
+<p><a href="https://laozhang.org/archives/3506.html">Obsidian多端同步终极大法Syncthing、备份终极大法Kopia | 老张博客</a></p>
+<p><a href="https://blog.zdawn.net/archives/obisidian-sync-to-syncthing">Obsidian利用Syncthing全平台同步终极方案 - Janz Blog</a></p>
+</blockquote></article></div><nav class="page-toc article-toc is-visible" aria-label="On this page"><span class="toc-title">ON THIS PAGE</span><a href="#1" class="toc-level-1">1 前言</a><a href="#2-syncthing" class="toc-level-1">2 Syncthing 的介绍</a><a href="#3-syncthing" class="toc-level-1">3 Syncthing 的安装</a><a href="#31-windows" class="toc-level-2">3.1 Windows 端</a><a href="#32-iphone-ipad" class="toc-level-2">3.2 iPhone 和 iPad 端</a><a href="#4-syncthing" class="toc-level-1">4 Syncthing 配置（演示局域网下的同步）</a><a href="#5-syncthing" class="toc-level-1">5 Syncthing 并非仅能同步局域网内的电脑，广域网内电脑照样好同步 (后续更新)</a><a href="#6" class="toc-level-1">6 参考链接</a></nav></div><nav class="post-neighbors" aria-label="Adjacent posts"><a class="post-neighbor previous" href="/blog/ubuntu-new-machine-setup/"><span class="post-neighbor-label"><i class="link-arrow link-arrow-left" aria-hidden="true"></i>Previous post</span><strong>Ubuntu 新机初始化与开发环境配置</strong></a><a class="post-neighbor next" href="/blog/zotero-tara-backup-restore/"><span class="post-neighbor-label">Next post<i class="link-arrow" aria-hidden="true"></i></span><strong>Zotero 配置备份与恢复：Tara 插件</strong></a></nav></main>
+<footer class="site-footer">
+  <div class="wrap footer-utility">
+    <a class="footer-license" href="https://github.com/FuTseYi/futseyi.github.io/blob/main/LICENSING.md" target="_blank" rel="noopener noreferrer"><span>Go ahead, steal it</span><span class="link-arrow" aria-hidden="true"></span><span>CC BY 4.0 &middot; Code MIT</span></a>
+    <a class="footer-back-top" href="#main">Back to top <span class="link-arrow link-arrow-up" aria-hidden="true"></span></a>
+  </div>
+  <div class="footer-divider"><div class="wrap footer-inner">
+    <a class="footer-brand" href="https://github.com/FuTseYi/futseyi.github.io" target="_blank" rel="noopener noreferrer">&copy; <time data-current-year datetime="2026">2026</time> <span>FuTseYi <span class="alias">(Shine)</span></span></a>
+    <nav class="hero-links footer-social" aria-label="Social links"><a href="mailto:hello@futseyi.com" aria-label="Email" title="Email"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 6 9 7 9-7"/></svg></a>
+<a href="https://github.com/FuTseYi" target="_blank" rel="noopener noreferrer" aria-label="GitHub" title="GitHub"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 19c-4.3 1.3-4.3-2.2-6-2.6m12 5v-3.4c0-1 .1-1.5-.5-2.1 3.3-.4 6.8-1.6 6.8-7.3a5.7 5.7 0 0 0-1.5-4c.2-.4.7-1.9-.2-3.9 0 0-1.2-.4-4 1.5a13.7 13.7 0 0 0-7.2 0C5.6.3 4.4.7 4.4.7c-.9 2-.4 3.5-.2 3.9a5.7 5.7 0 0 0-1.5 4c0 5.7 3.5 6.9 6.8 7.3-.5.5-.6 1.1-.5 2.1v3.4"/></svg></a>
+<a href="https://www.linkedin.com/in/futseyi" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" title="LinkedIn"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 10v7m0-10v.01M11 17v-7m0 3a3 3 0 0 1 6 0v4"/></svg></a>
+          <a href="https://x.com/FuTseYi" target="_blank" rel="noopener noreferrer" aria-label="X" title="X"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 4h4l12 16h-4L4 4ZM4 20 20 4"/></svg></a></nav>
+  </div></div>
+</footer>
+</body></html>

@@ -1,0 +1,576 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="最近重新折腾了一遍土耳其区 Apple ID，并成功完成：">
+<meta property="og:site_name" content="FuTseYi (Shine)">
+<meta property="og:title" content="土耳其 Apple ID 注册与跨区家庭共享实践">
+<meta property="og:description" content="最近重新折腾了一遍土耳其区 Apple ID，并成功完成：">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.futseyi.com/blog/turkey-foreign-apple-id-chatgpt-plus-cross-region-family-sharing/">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.futseyi.com/assets/images/profile/me.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1378">
+<meta property="og:image:height" content="2065">
+<meta property="og:image:alt" content="FuTseYi&#x27;s profile photo">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:site" content="@FuTseYi">
+<meta name="twitter:title" content="土耳其 Apple ID 注册与跨区家庭共享实践">
+<meta name="twitter:description" content="最近重新折腾了一遍土耳其区 Apple ID，并成功完成：">
+<meta name="twitter:image" content="https://www.futseyi.com/assets/images/profile/me.jpg">
+<meta name="twitter:image:alt" content="FuTseYi&#x27;s profile photo">
+<meta property="article:tag" content="Apple ID">
+<meta property="article:tag" content="ChatGPT">
+<meta property="article:tag" content="iCloud">
+<meta property="article:tag" content="Cross-Region">
+<title>土耳其 Apple ID 注册与跨区家庭共享实践 · FuTseYi</title><link rel="canonical" href="https://www.futseyi.com/blog/turkey-foreign-apple-id-chatgpt-plus-cross-region-family-sharing/">
+<link rel="icon" href="/assets/icons/favicon.ico" sizes="any">
+<link rel="icon" href="/assets/icons/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="/assets/icons/site.webmanifest">
+<link rel="preload" href="/assets/fonts/caveat-handwriting.woff2" as="font" type="font/woff2" crossorigin>
+<script data-theme-init>
+    (() => {
+      document.documentElement.classList.add('js');
+      let theme = 'system';
+      try { theme = localStorage.getItem('site-theme') || 'system'; } catch {}
+      if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+    })();
+  </script>
+<link rel="stylesheet" href="/assets/css/style.css?v=525538209899"><script src="https://cdn.jsdelivr.net/npm/swup@4.10.0/dist/Swup.umd.js" defer></script>
+<script src="/assets/js/site.js?v=7c24c70d02eb" defer></script>
+<script src="/assets/js/atmosphere.js?v=a822ac798e30" defer></script>
+</head>
+<body class="blog-page article-page">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header" id="site-header">
+  <div class="header-inner">
+    <a class="brand" href="/" aria-label="FuTseYi (Shine) homepage"><img src="/assets/icons/favicon.svg" alt="" width="36" height="36"></a>
+    <button class="theme-control" type="button" aria-label="Color theme: System. Switch to Light" title="System theme. Click for Light" data-mode="system">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <g data-theme-icon="system"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></g>
+        <g data-theme-icon="light"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.4 1.4m11.2 11.2L19 19M5 19l1.4-1.4M17.6 6.4 19 5"/></g>
+        <g data-theme-icon="dark"><path d="M20.5 14A8.5 8.5 0 0 1 10 3.5 8.5 8.5 0 1 0 20.5 14Z"/></g>
+      </svg>
+    </button>
+    <button class="nav-toggle" type="button" aria-controls="primary-navigation" aria-expanded="false" aria-label="Open navigation menu">
+      <span class="menu-icon" aria-hidden="true"><span></span><span></span><span></span></span>
+    </button>
+    <nav class="nav-links" id="primary-navigation" aria-label="Main navigation">
+      <a href="/#about">About</a>
+      <a href="/#education">Education</a>
+
+      <a href="/#active-in">Active In</a>
+      <a href="/#contributions">Contributions</a>
+      <a href="/blog/" class="is-active" aria-current="page">Blog</a>
+
+    </nav>
+  </div>
+</header>
+<main class="blog-container wrap" id="main"><div class="article-layout"><div class="article-main"><a class="back-link" href="/blog/"><span class="link-arrow link-arrow-left" aria-hidden="true"></span>All posts</a><div class="article-head"><span class="blog-kicker">BLOG & NOTES</span><h1>土耳其 Apple ID 注册与跨区家庭共享实践</h1><div class="article-meta"><time class="post-date" datetime="2026-05-16">May 16, 2026</time><a class="post-date" href="https://github.com/FuTseYi/futseyi.github.io/edit/main/posts/turkey-foreign-apple-id-chatgpt-plus-cross-region-family-sharing/index.md" target="_blank" rel="noopener noreferrer"><em>Edit on GitHub</em></a></div><div class="post-tags"><a class="post-tag" href="/blog/tags/#tag-3ba6edb37109"># Apple ID</a><a class="post-tag" href="/blog/tags/#tag-495265260f5b"># ChatGPT</a><a class="post-tag" href="/blog/tags/#tag-6ca46df113ad"># iCloud</a><a class="post-tag" href="/blog/tags/#tag-3a05cfd1c77d"># Cross-Region</a></div></div><div class="article-toc-inline"><button class="article-toc-toggle" type="button" aria-expanded="false" aria-controls="article-toc-links">On this page</button><div class="article-toc-panel"><div class="article-toc-clip"><nav id="article-toc-links" aria-label="Article contents"><a href="#_1" class="toc-level-1">为什么选择土耳其区？</a><a href="#_2" class="toc-level-1">前期准备</a><a href="#1" class="toc-level-2">1. 一个全新的邮箱</a><a href="#2" class="toc-level-2">2. 一个手机号</a><a href="#3" class="toc-level-2">3. 一份土耳其地址信息</a><a href="#4-apple" class="toc-level-2">4. 一台 Apple 设备</a><a href="#apple-id" class="toc-level-1">一、注册土耳其 Apple ID</a><a href="#1-apple" class="toc-level-2">1. 打开 Apple 官网</a><a href="#2-apple" class="toc-level-2">2. 创建 Apple 账户</a><a href="#3_1" class="toc-level-2">3. 验证信息</a><a href="#app-store" class="toc-level-1">二、真正切换 App Store 到土耳其区（关键步骤）</a><a href="#app-store_1" class="toc-level-2">使用 App Store 地区跳转链接（强烈推荐）</a><a href="#1-app-store" class="toc-level-2">1. 退出当前 App Store 账号</a><a href="#2-safari" class="toc-level-2">2. 使用 Safari 打开土区跳转链接</a><a href="#3_2" class="toc-level-2">3. 直接登录刚注册的土区账号</a><a href="#apple" class="toc-level-1">三、购买土耳其 Apple 礼品卡</a><a href="#_3" class="toc-level-2">方案一：正规虚拟卡平台（推荐）</a><a href="#_4" class="toc-level-2">方案二：国内二手平台</a><a href="#_5" class="toc-level-1">四、购买礼品卡并充值</a><a href="#1-seagm" class="toc-level-2">1. 使用支持支付宝的 SEAGM 购买礼品卡</a><a href="#2_1" class="toc-level-2">2. 获取礼品卡代码</a><a href="#3-app-store" class="toc-level-2">3. App Store 兑换礼品卡</a><a href="#none" class="toc-level-1">五、关于付款信息：不需要提前选择 None</a><a href="#chatgpt-plus" class="toc-level-1">六、订阅 ChatGPT Plus</a><a href="#apple_1" class="toc-level-1">七、将土区账号加入中国区 Apple 家庭（附加功能）</a><a href="#gpt-plus" class="toc-level-2">和 GPT Plus 共享无关</a><a href="#apple_2" class="toc-level-2">方案：将土区账号加入中国区 Apple 家庭</a><a href="#_6" class="toc-level-2">方法一：隔空投送邀请</a><a href="#imessage" class="toc-level-2">方法二：iMessage 邀请（更稳定）</a><a href="#_7" class="toc-level-1">最后总结</a><a href="#faq" class="toc-level-1">常见问题 FAQ</a><a href="#q1" class="toc-level-2">Q1：必须使用代理吗？</a><a href="#q2-mac" class="toc-level-2">Q2：为什么 Mac 无法支付？</a><a href="#q3gpt" class="toc-level-2">Q3：GPT 账号必须是土区吗？</a><a href="#q4-apple-id-none" class="toc-level-2">Q4：注册完土区 Apple ID 后，必须先添加付款方式并选择 None 吗？</a><a href="#q5-gpt-plus" class="toc-level-2">Q5：家庭共享是共享 GPT Plus 吗？</a><a href="#q6-apple-id" class="toc-level-2">Q6：土区 Apple ID 会封号吗？</a></nav></div></div></div><article class="article" data-pagefind-body><p>最近重新折腾了一遍土耳其区 Apple ID，并成功完成：</p>
+<ul>
+<li>注册土耳其 Apple ID</li>
+<li>购买土区苹果礼品卡</li>
+<li>充值 Apple 余额</li>
+<li>通过 iPhone 成功订阅 ChatGPT Plus</li>
+<li><strong>附：</strong> 将土区账号加入中国区 Apple 家庭（以备后续共享土区的 iCloud 订阅）</li>
+</ul>
+<p>整个流程比想象中稳定很多，所以这里把完整过程整理成一篇教程。</p>
+<p>这篇文章主要适用于：</p>
+<ul>
+<li>想低价订阅 GPT Plus 的用户</li>
+<li>想长期维护土区 Apple 生态的用户</li>
+<li>后期可能需要土区 iCloud / Apple One / Arcade 等订阅的用户</li>
+</ul>
+<blockquote>
+<p>注意：本文仅记录个人实操过程与经验。</p>
+</blockquote>
+<hr />
+<h2 id="_1">为什么选择土耳其区？</h2>
+<p>相比国区、美区等地区：</p>
+<ul>
+<li>土耳其区订阅价格长期偏低</li>
+<li>Apple 礼品卡获取方便</li>
+<li>GPT Plus 可直接通过 App Store 内购</li>
+<li>后期还能扩展更多 Apple 服务</li>
+</ul>
+<p>而且：</p>
+<blockquote>
+<p>GPT 登录账号不需要是土区账号。</p>
+</blockquote>
+<p>真正需要土区的，其实只是：</p>
+<ul>
+<li>用于支付的 Apple ID</li>
+</ul>
+<p>所以实际使用体验几乎没有影响。你可以继续保留注册好的 GPT 账号。</p>
+<hr />
+<h2 id="_2">前期准备</h2>
+<p>开始之前，需要准备以下内容。</p>
+<h3 id="1">1. 一个全新的邮箱</h3>
+<p>要求：</p>
+<ul>
+<li>没注册过 Apple ID</li>
+<li>推荐 Gmail / Outlook</li>
+</ul>
+<hr />
+<h3 id="2">2. 一个手机号</h3>
+<p>最好：</p>
+<ul>
+<li>没绑定过 Apple ID</li>
+</ul>
+<p>但实际上：</p>
+<ul>
+<li>国内手机号也能正常注册</li>
+<li>即便绑定过 Apple ID，大多数情况下也能用</li>
+</ul>
+<p>属于“看运气”的部分。</p>
+<hr />
+<h3 id="3">3. 一份土耳其地址信息</h3>
+<p>这里推荐直接使用在线生成器：</p>
+<p><a href="https://1ktools.com/zh-cn/tools/developer/turkey-address-generator">https://1ktools.com/zh-cn/tools/developer/turkey-address-generator</a></p>
+<p>随机生成一份即可。</p>
+<p>后续：</p>
+<ul>
+<li>礼品卡购买</li>
+<li>Apple 付款信息</li>
+</ul>
+<p>都可能会用到。</p>
+<hr />
+<h3 id="4-apple">4. 一台 Apple 设备</h3>
+<p>支持：</p>
+<ul>
+<li>iPhone</li>
+<li>iPad</li>
+<li>Mac</li>
+</ul>
+<p>但这里有一个重点：</p>
+<blockquote>
+<p>GPT 订阅的最终支付必须使用移动设备完成。</p>
+</blockquote>
+<p>也就是说：</p>
+<ul>
+<li>Mac 可以注册</li>
+<li>Mac 可以登录</li>
+<li>但不能完成 App Store 内购支付</li>
+</ul>
+<p>所以最终还是需要：</p>
+<ul>
+<li>iPhone</li>
+<li>或 iPad</li>
+</ul>
+<hr />
+<h2 id="apple-id">一、注册土耳其 Apple ID</h2>
+<h3 id="1-apple">1. 打开 Apple 官网</h3>
+<p>进入：</p>
+<p><a href="https://account.apple.com/">https://account.apple.com/</a></p>
+<p>建议：</p>
+<ul>
+<li>使用浏览器无痕模式</li>
+<li>是否开启代理无所谓</li>
+</ul>
+<p>我测试：</p>
+<ul>
+<li>挂代理可以</li>
+<li>不挂也可以</li>
+</ul>
+<hr />
+<h3 id="2-apple">2. 创建 Apple 账户</h3>
+<p>进入后点击：</p>
+<blockquote>
+<p>创建你的 Apple 账户</p>
+</blockquote>
+<p>填写时注意：</p>
+<ul>
+<li>国家选择：土耳其</li>
+<li>姓名：可使用土耳其地址生成器里的名字</li>
+<li>出生日期：大于 18 岁即可</li>
+<li>邮箱：新邮箱</li>
+<li>手机号：国内手机号即可</li>
+</ul>
+<hr />
+<h3 id="3_1">3. 验证信息</h3>
+<p>填写验证码后，正常情况下就能完成注册。</p>
+<p>这里会看到：</p>
+<ul>
+<li>国家和地区已经显示为土耳其</li>
+</ul>
+<p>但：</p>
+<blockquote>
+<p>这并不意味着 App Store 已经真正切换到土区。</p>
+</blockquote>
+<p>这是很多人容易踩坑的地方。</p>
+<hr />
+<p><img alt="" src="assets/pasted-image-20260516114141.png" loading="lazy" decoding="async"  width="2254" height="1404" /></p>
+<hr />
+<h2 id="app-store">二、真正切换 App Store 到土耳其区（关键步骤）</h2>
+<p>很多人：</p>
+<ul>
+<li>明明注册的是土区账号</li>
+<li>结果登录 App Store 后又跳回中国区</li>
+</ul>
+<p>原因是：</p>
+<blockquote>
+<p>App Store 地区并没有真正重置。</p>
+</blockquote>
+<p>这里推荐使用：</p>
+<h3 id="app-store_1">使用 App Store 地区跳转链接（强烈推荐）</h3>
+<div class="article-table" role="region" aria-label="Data table" tabindex="0"><table>
+<thead>
+<tr>
+<th>地区</th>
+<th>快捷跳转链接</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>美国</td>
+<td><code>itms-apps://itunes.apple.com/WebObjects/MZStore.woa/wa/resetAndRedirect?dsf=143441&amp;cc=us</code></td>
+</tr>
+<tr>
+<td>日本</td>
+<td><code>itms-apps://itunes.apple.com/WebObjects/MZStore.woa/wa/resetAndRedirect?dsf=143462&amp;cc=jp</code></td>
+</tr>
+<tr>
+<td>韩国</td>
+<td><code>itms-apps://itunes.apple.com/WebObjects/MZStore.woa/wa/resetAndRedirect?dsf=143466&amp;cc=kr</code></td>
+</tr>
+<tr>
+<td>香港</td>
+<td><code>itms-apps://itunes.apple.com/WebObjects/MZStore.woa/wa/resetAndRedirect?dsf=143463&amp;cc=hk</code></td>
+</tr>
+<tr>
+<td>尼日利亚</td>
+<td><code>itms-apps://itunes.apple.com/WebObjects/MZStore.woa/wa/resetAndRedirect?dsf=143561&amp;cc=ng</code></td>
+</tr>
+<tr>
+<td>土耳其</td>
+<td><code>itms-apps://itunes.apple.com/WebObjects/MZStore.woa/wa/resetAndRedirect?dsf=143480&amp;cc=tr</code></td>
+</tr>
+<tr>
+<td>埃及</td>
+<td><code>itms-apps://itunes.apple.com/WebObjects/MZStore.woa/wa/resetAndRedirect?dsf=143516&amp;cc=eg</code></td>
+</tr>
+<tr>
+<td>印度</td>
+<td><code>itms-apps://itunes.apple.com/WebObjects/MZStore.woa/wa/resetAndRedirect?dsf=143467&amp;cc=in</code></td>
+</tr>
+<tr>
+<td>阿根廷</td>
+<td><code>itms-apps://itunes.apple.com/WebObjects/MZStore.woa/wa/resetAndRedirect?dsf=143505&amp;cc=ar</code></td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h3 id="1-app-store">1. 退出当前 App Store 账号</h3>
+<p>路径：</p>
+<blockquote>
+<p>App Store → 头像 → 退出登录</p>
+</blockquote>
+<p>注意：</p>
+<ul>
+<li>这里只退出 App Store</li>
+<li>不需要退出 iCloud</li>
+</ul>
+<hr />
+<h3 id="2-safari">2. 使用 Safari 打开土区跳转链接</h3>
+<p>直接复制到 Safari：</p>
+<div class="codehilite"><pre><span></span><code>itms-apps://itunes.apple.com/WebObjects/MZStore.woa/wa/resetAndRedirect?dsf=143480&amp;cc=tr
+</code></pre></div>
+
+<p>Safari 会自动跳转到：</p>
+<ul>
+<li>土耳其区 App Store</li>
+</ul>
+<hr />
+<h3 id="3_2">3. 直接登录刚注册的土区账号</h3>
+<p>登录后检查：</p>
+<ul>
+<li>App Store 地区是否为 Turkey（土耳其）</li>
+</ul>
+<p>确认无误后：</p>
+<blockquote>
+<p>说明土区 Apple ID 已真正注册成功。</p>
+</blockquote>
+<hr />
+<p><img alt="" src="assets/img_1646.png" loading="lazy" decoding="async"  width="2388" height="1668" /></p>
+<hr />
+<h2 id="apple">三、购买土耳其 Apple 礼品卡</h2>
+<p>接下来需要给账号充值。</p>
+<p>这里推荐两种方式：</p>
+<h3 id="_3">方案一：正规虚拟卡平台（推荐）</h3>
+<p>推荐：</p>
+<ul>
+<li><a href="https://www.oyunfor.com/">https://www.oyunfor.com/</a></li>
+<li><a href="https://www.seagm.com/">https://www.seagm.com/</a></li>
+</ul>
+<p>其中：</p>
+<ul>
+<li>SEAGM 支持支付宝</li>
+<li>对国内用户更方便</li>
+</ul>
+<p>所以我这里直接使用 SEAGM。</p>
+<hr />
+<h3 id="_4">方案二：国内二手平台</h3>
+<p>比如：</p>
+<ul>
+<li>小黄鱼</li>
+<li>其他电商平台</li>
+</ul>
+<p>不太推荐。</p>
+<p>原因：</p>
+<ul>
+<li>来源不稳定</li>
+<li>容易涉及灰产卡</li>
+<li>有一定封号风险</li>
+</ul>
+<hr />
+<h2 id="_5">四、购买礼品卡并充值</h2>
+<h3 id="1-seagm">1. 使用支持支付宝的 SEAGM 购买礼品卡</h3>
+<p>建议：</p>
+<ul>
+<li>网站语言切换中文</li>
+<li>货币切换人民币</li>
+</ul>
+<p>这样可以直接：</p>
+<ul>
+<li>支付宝扫码付款</li>
+</ul>
+<hr />
+<p><img alt="" src="assets/pasted-image-20260516141519.png" loading="lazy" decoding="async"  width="1716" height="949" /></p>
+<hr />
+<h3 id="2_1">2. 获取礼品卡代码</h3>
+<p>付款完成后：</p>
+<blockquote>
+<p>我的卡密 → 显示卡片</p>
+</blockquote>
+<p>即可看到兑换码。</p>
+<hr />
+<p><img alt="" src="assets/pasted-image-20260516141701.png" loading="lazy" decoding="async"  width="1716" height="949" /></p>
+<hr />
+<h3 id="3-app-store">3. App Store 兑换礼品卡</h3>
+<p>路径：</p>
+<blockquote>
+<p>App Store → 头像 → 最底部 → 兑换礼品卡或代码</p>
+</blockquote>
+<p>输入礼品卡代码即可。</p>
+<p>充值成功后：</p>
+<ul>
+<li>Apple 余额会显示对应里拉金额</li>
+</ul>
+<hr />
+<p><img alt="" src="assets/pasted-image-20260516142528.png" loading="lazy" decoding="async"  width="617" height="710" /></p>
+<hr />
+<h2 id="none">五、关于付款信息：不需要提前选择 None</h2>
+<p>这里需要特别说明一个很多教程都会提到的问题。</p>
+<p>网上不少教程会说：</p>
+<blockquote>
+<p>注册完土区 Apple ID 后，需要先去添加付款信息，并且付款方式选择 None。</p>
+</blockquote>
+<p>但实际操作中，经常会遇到：</p>
+<ul>
+<li>找不到 None 选项</li>
+<li>无法选择 None</li>
+<li>页面要求补充付款信息</li>
+<li>填完后仍然无法保存</li>
+</ul>
+<p>其实这一步完全可以不用提前处理。</p>
+<p>我的实际流程是：</p>
+<blockquote>
+<p>不需要注册完 Apple ID 后马上去设置付款方式，也不需要纠结有没有 None。</p>
+</blockquote>
+<p>只需要先完成：</p>
+<ul>
+<li>土区 Apple ID 注册</li>
+<li>App Store 切换到土耳其区</li>
+<li>礼品卡充值</li>
+</ul>
+<p>然后直接打开 ChatGPT App 订阅 Plus。</p>
+<p>当你点击订阅时，系统会自动弹出付款信息填写页面。</p>
+<p>这时候不需要选择 None，只需要简单填写土耳其地址信息即可。</p>
+<p>地址可以继续使用前面生成的土耳其地址。</p>
+<p>填写完成后，系统会直接从 Apple ID 余额中扣款完成订阅。</p>
+<hr />
+<h2 id="chatgpt-plus">六、订阅 ChatGPT Plus</h2>
+<p>充值完成后：</p>
+<p>直接打开 ChatGPT App。</p>
+<p>然后：</p>
+<blockquote>
+<p>设置 → Upgrade → Subscribe</p>
+</blockquote>
+<p>即可完成订阅。</p>
+<p>如果系统弹出付款信息页面：</p>
+<ul>
+<li>不需要选择 None</li>
+<li>不需要绑定银行卡</li>
+<li>只需要填写土耳其地址信息</li>
+<li>确认后会优先使用 Apple ID 余额扣款</li>
+</ul>
+<hr />
+<p>这里需要再次强调：</p>
+<blockquote>
+<p>GPT 登录账号不需要是土区账号。</p>
+</blockquote>
+<p>真正需要土区的：</p>
+<p>只是支付 Apple ID。</p>
+<hr />
+<p>我这里之前已经订阅过 Plus，所以用 Pro 做演示。</p>
+<hr />
+<p><img alt="" src="assets/pasted-image-20260516142849.png" loading="lazy" decoding="async"  width="623" height="1364" /></p>
+<hr />
+<h2 id="apple_1">七、将土区账号加入中国区 Apple 家庭（附加功能）</h2>
+<p>这一部分：</p>
+<h3 id="gpt-plus">和 GPT Plus 共享无关</h3>
+<p>这里真正的意义是：</p>
+<blockquote>
+<p>后续可以共享土区 iCloud / Apple One 等订阅服务。</p>
+</blockquote>
+<hr />
+<h3 id="apple_2">方案：将土区账号加入中国区 Apple 家庭</h3>
+<p>正常邀请会提示：</p>
+<blockquote>
+<p>不能将其他地区账号加入家庭。</p>
+</blockquote>
+<p>所以这里推荐两个稳定方法。</p>
+<hr />
+<h3 id="_6">方法一：隔空投送邀请</h3>
+<p>在中国区家庭管理员设备上：</p>
+<p>进入：</p>
+<blockquote>
+<p>设置 → Apple ID → 家人共享</p>
+</blockquote>
+<p>然后：</p>
+<ul>
+<li>点击右上角添加账号</li>
+<li>选择【邀请他人】</li>
+<li>使用【隔空投送】</li>
+</ul>
+<hr />
+<p>此时：</p>
+<p>另一台登录土区账号的设备：</p>
+<p>开启：</p>
+<blockquote>
+<p>允许任何人隔空投送</p>
+</blockquote>
+<p>两台设备靠近后：</p>
+<ul>
+<li>会自动弹出邀请</li>
+</ul>
+<p>按提示操作即可。</p>
+<hr />
+<h3 id="imessage">方法二：iMessage 邀请（更稳定）</h3>
+<p>步骤基本一样。</p>
+<p>区别是：</p>
+<p>在邀请方式中选择：</p>
+<blockquote>
+<p>信息（iMessage）</p>
+</blockquote>
+<p>然后：</p>
+<ul>
+<li>输入土区 Apple ID 邮箱</li>
+</ul>
+<p>即可发送邀请。</p>
+<hr />
+<p>这个方法实际上更稳定。</p>
+<p>因为：</p>
+<ul>
+<li>隔空投送偶尔失败</li>
+<li>iMessage 成功率更高</li>
+</ul>
+<hr />
+<p><img alt="" src="assets/pasted-image-20260516143205.png" loading="lazy" decoding="async"  width="963" height="1325" /></p>
+<hr />
+<h2 id="_7">最后总结</h2>
+<p>至此，你已经完成了：</p>
+<ul>
+<li>土耳其 Apple ID 注册</li>
+<li>App Store 真正切换土区</li>
+<li>土区礼品卡购买</li>
+<li>Apple 余额充值</li>
+<li>GPT Plus 订阅</li>
+<li>土区账号加入中国区家庭</li>
+</ul>
+<p>整个流程目前依然稳定可用。</p>
+<p>如果你后续还准备：</p>
+<ul>
+<li>开通土区 iCloud+</li>
+<li>Apple One</li>
+<li>Apple Music</li>
+<li>Arcade</li>
+</ul>
+<p>那么提前维护一个长期稳定的土区 Apple ID，其实非常值得。</p>
+<hr />
+<h2 id="faq">常见问题 FAQ</h2>
+<h3 id="q1">Q1：必须使用代理吗？</h3>
+<p>不必须。</p>
+<p>我测试：</p>
+<ul>
+<li>开代理可以</li>
+<li>不开也能注册</li>
+</ul>
+<hr />
+<h3 id="q2-mac">Q2：为什么 Mac 无法支付？</h3>
+<p>因为 GPT Plus 的 App Store 内购：</p>
+<p>目前只能通过移动端完成。</p>
+<hr />
+<h3 id="q3gpt">Q3：GPT 账号必须是土区吗？</h3>
+<p>不需要。</p>
+<p>土区只负责：</p>
+<ul>
+<li>Apple 支付</li>
+</ul>
+<p>GPT 账号本身没有限制。</p>
+<hr />
+<h3 id="q4-apple-id-none">Q4：注册完土区 Apple ID 后，必须先添加付款方式并选择 None 吗？</h3>
+<p>不需要。</p>
+<p>很多教程会要求提前设置付款方式，并选择 None。</p>
+<p>但实际操作中：</p>
+<ul>
+<li>None 经常不出现</li>
+<li>可能无法保存</li>
+<li>容易卡在付款信息页面</li>
+</ul>
+<p>更简单的做法是：</p>
+<blockquote>
+<p>注册完成后不用管付款方式，直接充值礼品卡，然后去 ChatGPT App 订阅。</p>
+</blockquote>
+<p>订阅时系统会自动弹出付款信息填写页面。</p>
+<p>这时候只需要填写土耳其地址信息即可，不需要选择 None，也不需要绑定银行卡。</p>
+<hr />
+<h3 id="q5-gpt-plus">Q5：家庭共享是共享 GPT Plus 吗？</h3>
+<p>不是。</p>
+<p>这里只是：</p>
+<ul>
+<li>Apple 家庭共享</li>
+</ul>
+<p>主要用于后续：</p>
+<ul>
+<li>iCloud+</li>
+<li>Apple One</li>
+<li>Apple Music 等服务共享。</li>
+</ul>
+<hr />
+<h3 id="q6-apple-id">Q6：土区 Apple ID 会封号吗？</h3>
+<p>只要：</p>
+<ul>
+<li>不使用来路不明的黑卡</li>
+<li>不频繁切换地区</li>
+<li>不进行异常退款</li>
+<li>长期稳定使用</li>
+</ul>
+<p>一般都比较稳定。</p>
+<p>本文使用的是礼品卡充值方式，相对也更加安全。</p></article></div><nav class="page-toc article-toc is-visible" aria-label="On this page"><span class="toc-title">ON THIS PAGE</span><a href="#_1" class="toc-level-1">为什么选择土耳其区？</a><a href="#_2" class="toc-level-1">前期准备</a><a href="#1" class="toc-level-2">1. 一个全新的邮箱</a><a href="#2" class="toc-level-2">2. 一个手机号</a><a href="#3" class="toc-level-2">3. 一份土耳其地址信息</a><a href="#4-apple" class="toc-level-2">4. 一台 Apple 设备</a><a href="#apple-id" class="toc-level-1">一、注册土耳其 Apple ID</a><a href="#1-apple" class="toc-level-2">1. 打开 Apple 官网</a><a href="#2-apple" class="toc-level-2">2. 创建 Apple 账户</a><a href="#3_1" class="toc-level-2">3. 验证信息</a><a href="#app-store" class="toc-level-1">二、真正切换 App Store 到土耳其区（关键步骤）</a><a href="#app-store_1" class="toc-level-2">使用 App Store 地区跳转链接（强烈推荐）</a><a href="#1-app-store" class="toc-level-2">1. 退出当前 App Store 账号</a><a href="#2-safari" class="toc-level-2">2. 使用 Safari 打开土区跳转链接</a><a href="#3_2" class="toc-level-2">3. 直接登录刚注册的土区账号</a><a href="#apple" class="toc-level-1">三、购买土耳其 Apple 礼品卡</a><a href="#_3" class="toc-level-2">方案一：正规虚拟卡平台（推荐）</a><a href="#_4" class="toc-level-2">方案二：国内二手平台</a><a href="#_5" class="toc-level-1">四、购买礼品卡并充值</a><a href="#1-seagm" class="toc-level-2">1. 使用支持支付宝的 SEAGM 购买礼品卡</a><a href="#2_1" class="toc-level-2">2. 获取礼品卡代码</a><a href="#3-app-store" class="toc-level-2">3. App Store 兑换礼品卡</a><a href="#none" class="toc-level-1">五、关于付款信息：不需要提前选择 None</a><a href="#chatgpt-plus" class="toc-level-1">六、订阅 ChatGPT Plus</a><a href="#apple_1" class="toc-level-1">七、将土区账号加入中国区 Apple 家庭（附加功能）</a><a href="#gpt-plus" class="toc-level-2">和 GPT Plus 共享无关</a><a href="#apple_2" class="toc-level-2">方案：将土区账号加入中国区 Apple 家庭</a><a href="#_6" class="toc-level-2">方法一：隔空投送邀请</a><a href="#imessage" class="toc-level-2">方法二：iMessage 邀请（更稳定）</a><a href="#_7" class="toc-level-1">最后总结</a><a href="#faq" class="toc-level-1">常见问题 FAQ</a><a href="#q1" class="toc-level-2">Q1：必须使用代理吗？</a><a href="#q2-mac" class="toc-level-2">Q2：为什么 Mac 无法支付？</a><a href="#q3gpt" class="toc-level-2">Q3：GPT 账号必须是土区吗？</a><a href="#q4-apple-id-none" class="toc-level-2">Q4：注册完土区 Apple ID 后，必须先添加付款方式并选择 None 吗？</a><a href="#q5-gpt-plus" class="toc-level-2">Q5：家庭共享是共享 GPT Plus 吗？</a><a href="#q6-apple-id" class="toc-level-2">Q6：土区 Apple ID 会封号吗？</a></nav></div><nav class="post-neighbors" aria-label="Adjacent posts"><a class="post-neighbor previous" href="/blog/on-the-road-accumulating-choices/"><span class="post-neighbor-label"><i class="link-arrow link-arrow-left" aria-hidden="true"></i>Previous post</span><strong>我们都还在路上：在不确定中攒出自己的选择权</strong></a><a class="post-neighbor next" href="/blog/clash-verge-campus-network-proxy/"><span class="post-neighbor-label">Next post<i class="link-arrow" aria-hidden="true"></i></span><strong>Clash Verge 校园网代理连接异常排查</strong></a></nav></main>
+<footer class="site-footer">
+  <div class="wrap footer-utility">
+    <a class="footer-license" href="https://github.com/FuTseYi/futseyi.github.io/blob/main/LICENSING.md" target="_blank" rel="noopener noreferrer"><span>Go ahead, steal it</span><span class="link-arrow" aria-hidden="true"></span><span>CC BY 4.0 &middot; Code MIT</span></a>
+    <a class="footer-back-top" href="#main">Back to top <span class="link-arrow link-arrow-up" aria-hidden="true"></span></a>
+  </div>
+  <div class="footer-divider"><div class="wrap footer-inner">
+    <a class="footer-brand" href="https://github.com/FuTseYi/futseyi.github.io" target="_blank" rel="noopener noreferrer">&copy; <time data-current-year datetime="2026">2026</time> <span>FuTseYi <span class="alias">(Shine)</span></span></a>
+    <nav class="hero-links footer-social" aria-label="Social links"><a href="mailto:hello@futseyi.com" aria-label="Email" title="Email"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 6 9 7 9-7"/></svg></a>
+<a href="https://github.com/FuTseYi" target="_blank" rel="noopener noreferrer" aria-label="GitHub" title="GitHub"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 19c-4.3 1.3-4.3-2.2-6-2.6m12 5v-3.4c0-1 .1-1.5-.5-2.1 3.3-.4 6.8-1.6 6.8-7.3a5.7 5.7 0 0 0-1.5-4c.2-.4.7-1.9-.2-3.9 0 0-1.2-.4-4 1.5a13.7 13.7 0 0 0-7.2 0C5.6.3 4.4.7 4.4.7c-.9 2-.4 3.5-.2 3.9a5.7 5.7 0 0 0-1.5 4c0 5.7 3.5 6.9 6.8 7.3-.5.5-.6 1.1-.5 2.1v3.4"/></svg></a>
+<a href="https://www.linkedin.com/in/futseyi" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" title="LinkedIn"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 10v7m0-10v.01M11 17v-7m0 3a3 3 0 0 1 6 0v4"/></svg></a>
+          <a href="https://x.com/FuTseYi" target="_blank" rel="noopener noreferrer" aria-label="X" title="X"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 4h4l12 16h-4L4 4ZM4 20 20 4"/></svg></a></nav>
+  </div></div>
+</footer>
+</body></html>

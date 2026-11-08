@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="众所周知，vscode 是一个非常好用的 文本编辑器 ，通过各式各样的插件几乎是万能的，也可以作为好用的 IDE，但 vscode 有很多默认不开启的、个人认为非常好用的一些设置，因此，在这里与大家分享，同时也推荐几个好用的插件。">
+<meta property="og:site_name" content="FuTseYi (Shine)">
+<meta property="og:title" content="VS Code 配置与扩展推荐">
+<meta property="og:description" content="众所周知，vscode 是一个非常好用的 文本编辑器 ，通过各式各样的插件几乎是万能的，也可以作为好用的 IDE，但 vscode 有很多默认不开启的、个人认为非常好用的一些设置，因此，在这里与大家分享，同时也推荐几个好用的插件。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.futseyi.com/blog/vscode-settings-extensions/">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.futseyi.com/assets/images/profile/me.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1378">
+<meta property="og:image:height" content="2065">
+<meta property="og:image:alt" content="FuTseYi&#x27;s profile photo">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:site" content="@FuTseYi">
+<meta name="twitter:title" content="VS Code 配置与扩展推荐">
+<meta name="twitter:description" content="众所周知，vscode 是一个非常好用的 文本编辑器 ，通过各式各样的插件几乎是万能的，也可以作为好用的 IDE，但 vscode 有很多默认不开启的、个人认为非常好用的一些设置，因此，在这里与大家分享，同时也推荐几个好用的插件。">
+<meta name="twitter:image" content="https://www.futseyi.com/assets/images/profile/me.jpg">
+<meta name="twitter:image:alt" content="FuTseYi&#x27;s profile photo">
+<meta property="article:tag" content="VS Code">
+<meta property="article:tag" content="Development Tools">
+<title>VS Code 配置与扩展推荐 · FuTseYi</title><link rel="canonical" href="https://www.futseyi.com/blog/vscode-settings-extensions/">
+<link rel="icon" href="/assets/icons/favicon.ico" sizes="any">
+<link rel="icon" href="/assets/icons/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="/assets/icons/site.webmanifest">
+<link rel="preload" href="/assets/fonts/caveat-handwriting.woff2" as="font" type="font/woff2" crossorigin>
+<script data-theme-init>
+    (() => {
+      document.documentElement.classList.add('js');
+      let theme = 'system';
+      try { theme = localStorage.getItem('site-theme') || 'system'; } catch {}
+      if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+    })();
+  </script>
+<link rel="stylesheet" href="/assets/css/style.css?v=525538209899"><script src="https://cdn.jsdelivr.net/npm/swup@4.10.0/dist/Swup.umd.js" defer></script>
+<script src="/assets/js/site.js?v=7c24c70d02eb" defer></script>
+<script src="/assets/js/atmosphere.js?v=a822ac798e30" defer></script>
+</head>
+<body class="blog-page article-page">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header" id="site-header">
+  <div class="header-inner">
+    <a class="brand" href="/" aria-label="FuTseYi (Shine) homepage"><img src="/assets/icons/favicon.svg" alt="" width="36" height="36"></a>
+    <button class="theme-control" type="button" aria-label="Color theme: System. Switch to Light" title="System theme. Click for Light" data-mode="system">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <g data-theme-icon="system"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></g>
+        <g data-theme-icon="light"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.4 1.4m11.2 11.2L19 19M5 19l1.4-1.4M17.6 6.4 19 5"/></g>
+        <g data-theme-icon="dark"><path d="M20.5 14A8.5 8.5 0 0 1 10 3.5 8.5 8.5 0 1 0 20.5 14Z"/></g>
+      </svg>
+    </button>
+    <button class="nav-toggle" type="button" aria-controls="primary-navigation" aria-expanded="false" aria-label="Open navigation menu">
+      <span class="menu-icon" aria-hidden="true"><span></span><span></span><span></span></span>
+    </button>
+    <nav class="nav-links" id="primary-navigation" aria-label="Main navigation">
+      <a href="/#about">About</a>
+      <a href="/#education">Education</a>
+
+      <a href="/#active-in">Active In</a>
+      <a href="/#contributions">Contributions</a>
+      <a href="/blog/" class="is-active" aria-current="page">Blog</a>
+
+    </nav>
+  </div>
+</header>
+<main class="blog-container wrap" id="main"><div class="article-layout"><div class="article-main"><a class="back-link" href="/blog/"><span class="link-arrow link-arrow-left" aria-hidden="true"></span>All posts</a><div class="article-head"><span class="blog-kicker">BLOG & NOTES</span><h1>VS Code 配置与扩展推荐</h1><div class="article-meta"><time class="post-date" datetime="2025-09-17">Sep 17, 2025</time><a class="post-date" href="https://github.com/FuTseYi/futseyi.github.io/edit/main/posts/vscode-settings-extensions/index.md" target="_blank" rel="noopener noreferrer"><em>Edit on GitHub</em></a></div><div class="post-tags"><a class="post-tag" href="/blog/tags/#tag-64edc3e61e99"># VS Code</a><a class="post-tag" href="/blog/tags/#tag-c659a4110247"># Development Tools</a></div></div><div class="article-toc-inline"><button class="article-toc-toggle" type="button" aria-expanded="false" aria-controls="article-toc-links">On this page</button><div class="article-toc-panel"><div class="article-toc-clip"><nav id="article-toc-links" aria-label="Article contents"><a href="#vscode" class="toc-level-1">VSCode 优化使用体验篇（设置 | 插件）</a><a href="#_1" class="toc-level-1">推荐设置</a><a href="#_2" class="toc-level-1">插件</a><a href="#_3" class="toc-level-2">外观类</a><a href="#_6" class="toc-level-2">背景</a><a href="#_7" class="toc-level-2">基础功能类</a><a href="#_8" class="toc-level-2">拓展功能类</a><a href="#_9" class="toc-level-2">算法练习类</a><a href="#_10" class="toc-level-1">参考链接</a></nav></div></div></div><article class="article" data-pagefind-body><h2 id="vscode">VSCode 优化使用体验篇（设置 | 插件）</h2>
+<blockquote>
+<p>众所周知，vscode 是一个非常好用的 <strong>文本编辑器</strong>，通过各式各样的插件几乎是万能的，也可以作为好用的 IDE，但 vscode 有很多默认不开启的、个人认为非常好用的一些设置，因此，在这里与大家分享，同时也推荐几个好用的插件。</p>
+</blockquote>
+<hr />
+<p>vscode 官网：<a href="https://code.visualstudio.com/">https://code.visualstudio.com/</a></p>
+<h2 id="_1">推荐设置</h2>
+<p>下面是我的 <code>settings.json</code> 其中的一些基础配置</p>
+<div class="codehilite"><pre><span></span><code><span class="o">{</span>
+<span class="w">  </span><span class="s2">"files.autoSave"</span>:<span class="w"> </span><span class="s2">"afterDelay"</span>,
+<span class="w">  </span><span class="s2">"files.autoGuessEncoding"</span>:<span class="w"> </span>true,
+<span class="w">  </span><span class="s2">"workbench.list.smoothScrolling"</span>:<span class="w"> </span>true,
+<span class="w">  </span><span class="s2">"editor.cursorSmoothCaretAnimation"</span>:<span class="w"> </span><span class="s2">"on"</span>,
+<span class="w">  </span><span class="s2">"editor.smoothScrolling"</span>:<span class="w"> </span>true,
+<span class="w">  </span><span class="s2">"editor.cursorBlinking"</span>:<span class="w"> </span><span class="s2">"smooth"</span>,
+<span class="w">  </span><span class="s2">"editor.mouseWheelZoom"</span>:<span class="w"> </span>true,
+<span class="w">  </span><span class="s2">"editor.formatOnPaste"</span>:<span class="w"> </span>true,
+<span class="w">  </span><span class="s2">"editor.formatOnType"</span>:<span class="w"> </span>true,
+<span class="w">  </span><span class="s2">"editor.formatOnSave"</span>:<span class="w"> </span>true,
+<span class="w">  </span><span class="s2">"editor.wordWrap"</span>:<span class="w"> </span><span class="s2">"on"</span>,
+<span class="w">  </span><span class="s2">"editor.guides.bracketPairs"</span>:<span class="w"> </span>true,
+<span class="w">  </span>//<span class="s2">"editor.bracketPairColorization.enabled"</span>:<span class="w"> </span>true,<span class="w"> </span><span class="o">(</span>此设置vscode在较新版本已默认开启<span class="o">)</span>
+<span class="w">  </span><span class="s2">"editor.suggest.snippetsPreventQuickSuggestions"</span>:<span class="w"> </span>false,
+<span class="w">  </span><span class="s2">"editor.acceptSuggestionOnEnter"</span>:<span class="w"> </span><span class="s2">"smart"</span>,
+<span class="w">  </span><span class="s2">"editor.suggestSelection"</span>:<span class="w"> </span><span class="s2">"recentlyUsed"</span>,
+<span class="w">  </span><span class="s2">"window.dialogStyle"</span>:<span class="w"> </span><span class="s2">"custom"</span>,
+<span class="w">  </span><span class="s2">"debug.showBreakpointsInOverviewRuler"</span>:<span class="w"> </span>true,
+<span class="o">}</span>
+</code></pre></div>
+
+<h2 id="_2">插件</h2>
+<blockquote>
+<p>插件种类繁多，对于各式各样的插件，我将我推荐的插件分成了四类，其中基础功能类是我认为在各种地方都很有帮助的插件，几乎可以是必备，其余的插件在很多情况下也很有用，可以按需安装</p>
+</blockquote>
+<h3 id="_3">外观类</h3>
+<h4 id="_4">主题</h4>
+<ol>
+<li>
+<p><code>Night</code></p>
+<p>专门为夜猫子准备的,不过亮色主题也很不错</p>
+<p><img alt="2025-09-17_17-16-02.png" src="assets/20250917171627107.png" loading="lazy" decoding="async"  width="1605" height="305" /></p>
+</li>
+<li>
+<p><code>One Dark Pro</code></p>
+<p>一款非常推荐的暗色调主题，好看又护眼。</p>
+<p><img alt="2025-09-17_17-14-43.png" src="assets/20250917171445437.png" loading="lazy" decoding="async"  width="1029" height="267" /></p>
+</li>
+<li>
+<p><code>GitHub Theme</code></p>
+<p>GitHub 的官方主题</p>
+<p><img alt="2025-09-17_17-14-58.png" src="assets/20250917171501461.png" loading="lazy" decoding="async"  width="1076" height="257" /></p>
+</li>
+<li>
+<p><code>Dracula Official</code></p>
+<p>一款很有特点的吸血鬼主题</p>
+<p><img alt="2025-09-17_17-15-26.png" src="assets/20250917171528469.png" loading="lazy" decoding="async"  width="1216" height="263" /></p>
+</li>
+</ol>
+<h4 id="_5">图标主题</h4>
+<ul>
+<li>
+<p><code>Material Icon Theme</code></p>
+<p>个人正在用的图标主题，好看，类型大而全</p>
+<p><img alt="2025-09-17_17-17-13.png" src="assets/20250917171716120.png" loading="lazy" decoding="async"  width="1185" height="256" /></p>
+</li>
+</ul>
+<h3 id="_6">背景</h3>
+<ol>
+<li>
+<p><code>Vibrancy Continued</code></p>
+<p>使 vscode 背景高斯模糊，非常吃性能（慎用</p>
+<p>使用方法：按 <code>F1</code> 或者 <code>ctrl+shift+p</code>，键入 <code>Reload Vibrancy</code>，然后重启 vscode</p>
+<p>取消方法：按 <code>F1</code> 或者 <code>ctrl+shift+p</code>，键入 <code>Disable Vibrancy</code>，然后重启 vscode</p>
+<p><img alt="2025-09-17_17-20-16.png" src="assets/20250917172019180.png" loading="lazy" decoding="async"  width="1142" height="269" /></p>
+</li>
+</ol>
+<h3 id="_7">基础功能类</h3>
+<ol>
+<li>
+<p><code>Chinese (Simplified) (简体中文)</code></p>
+<p>【中文语言包】这应该不用多介绍，是 vscode 的官方中文语言包</p>
+<p><img alt="2025-09-17_17-20-30.png" src="assets/20250917172033825.png" loading="lazy" decoding="async"  width="1577" height="267" /></p>
+</li>
+<li>
+<p><code>Error Lens</code></p>
+<p>【错误提示】可以将原先显示的问题显示在对应行右侧并高亮</p>
+<p><img alt="2025-09-17_17-20-39.png" src="assets/20250917172041341.png" loading="lazy" decoding="async"  width="1264" height="284" /></p>
+</li>
+<li>
+<p><code>Path Intellisense</code></p>
+<p>【路径补全】在输入路径时，有智能提示补全</p>
+<p><img alt="2025-09-17_17-20-47.png" src="assets/20250917172049104.png" loading="lazy" decoding="async"  width="1150" height="299" /></p>
+</li>
+<li>
+<p><code>Image preview</code></p>
+<p>【图像预览】可以预览引入的图像</p>
+<p><img alt="2025-09-17_17-21-07.png" src="assets/20250917172109191.png" loading="lazy" decoding="async"  width="924" height="276" /></p>
+</li>
+</ol>
+<h3 id="_8">拓展功能类</h3>
+<ol>
+<li>
+<p><code>CodeSnap</code></p>
+<p>【代码截图】一款非常好用的代码截图插件</p>
+<p><strong>使用方法</strong>:Open the command palette (Ctrl+Shift+P on Windows and Linux, Cmd+Shift+P on OS X) and search for <code>CodeSnap</code></p>
+<p><img alt="2025-09-17_17-21-18.png" src="assets/20250917172120732.png" loading="lazy" decoding="async"  width="874" height="251" /></p>
+</li>
+<li>
+<p><code>Prettier - Code formatter</code></p>
+<p>【代码格式化工具】支持超多语言，一键格式化，美化代码格式</p>
+<p><img alt="2025-09-17_17-22-41.png" src="assets/20250917172243041.png" loading="lazy" decoding="async"  width="1298" height="275" /></p>
+</li>
+<li>
+<p><code>GBK to UTF8 for vscode</code></p>
+<p>【文件编码转化】可以将文件在 GBK 与 UTF8 编码之间无瑕转换</p>
+<p><img alt="2025-09-17_17-22-57.png" src="assets/20250917172259963.png" loading="lazy" decoding="async"  width="972" height="276" /></p>
+</li>
+<li>
+<p><code>Hex Editor</code></p>
+<p>用来查看文件的 hex 或 UTF-8 编码</p>
+<p><img alt="2025-09-17_17-23-16.png" src="assets/20250917172318008.png" loading="lazy" decoding="async"  width="1081" height="247" /></p>
+</li>
+<li>
+<p><code>Doxygen Documentation Generator</code></p>
+<p>【文档生成器】写注释和文档时非常好用</p>
+<p>默认的使用方法为：在==代码文件头==或者==自定义函数==上方的位置输入：/ ** 然后 enter 键,则会自动生成相应的注释</p>
+<p>自定义代码格式可以通过：File–&gt;Preference–&gt;Settings–&gt;Extensions–&gt;Doxygen Documentation Generator Settings 设置相应的格式</p>
+<p><img alt="2025-09-17_17-23-31.png" src="assets/20250917172332629.png" loading="lazy" decoding="async"  width="1152" height="278" /></p>
+</li>
+<li>
+<p><code>Remote - SSH</code></p>
+<p>【ssh 连接】连接远程服务器或虚拟机</p>
+<p><img alt="2025-09-17_17-23-48.png" src="assets/20250917172350639.png" loading="lazy" decoding="async"  width="1460" height="274" /></p>
+</li>
+<li>
+<p><code>Hungry Delete</code></p>
+<p>【像 IDEA 的退格键】删除整个空格或制表符块，并减少程序员按退格键所需的时间</p>
+<p><strong>使用方法</strong>:ctrl+backspace</p>
+<p><img alt="2025-09-17_17-24-01.png" src="assets/20250917172402545.png" loading="lazy" decoding="async"  width="1541" height="270" /></p>
+</li>
+</ol>
+<h3 id="_9">算法练习类</h3>
+<ol>
+<li>
+<p><code>Code Runner</code></p>
+<p>【代码运行工具】支持多种语言，语言运行环境需自己配置</p>
+<p>推荐修改配置：</p>
+<p><code>bash
+{
+  "code-runner.runInTerminal": true,
+  "code-runner.saveAllFilesBeforeRun": true,
+  "code-runner.saveFileBeforeRun": true
+}</code></p>
+<p><img alt="2025-09-17_17-24-49.png" src="assets/20250917172451938.png" loading="lazy" decoding="async"  width="1571" height="241" /></p>
+</li>
+<li>
+<p><code>Competitive Programming Helper (cph)</code></p>
+<p>刷算法题时很好用，可以自己设置样例，一键全部运行</p>
+<p><img alt="2025-09-17_17-25-08.png" src="assets/20250917172510419.png" loading="lazy" decoding="async"  width="1619" height="254" /></p>
+</li>
+</ol>
+<h2 id="_10">参考链接</h2>
+<p><a href="https://blog.csdn.net/qq_51173321/article/details/126287293">vscode优化使用体验篇（设置 | 插件）_vscode如何开启高帧率-CSDN博客</a></p></article></div><nav class="page-toc article-toc is-visible" aria-label="On this page"><span class="toc-title">ON THIS PAGE</span><a href="#vscode" class="toc-level-1">VSCode 优化使用体验篇（设置 | 插件）</a><a href="#_1" class="toc-level-1">推荐设置</a><a href="#_2" class="toc-level-1">插件</a><a href="#_3" class="toc-level-2">外观类</a><a href="#_6" class="toc-level-2">背景</a><a href="#_7" class="toc-level-2">基础功能类</a><a href="#_8" class="toc-level-2">拓展功能类</a><a href="#_9" class="toc-level-2">算法练习类</a><a href="#_10" class="toc-level-1">参考链接</a></nav></div><nav class="post-neighbors" aria-label="Adjacent posts"><a class="post-neighbor previous" href="/blog/yolo-v7-rk3588-deployment/"><span class="post-neighbor-label"><i class="link-arrow link-arrow-left" aria-hidden="true"></i>Previous post</span><strong>YOLOv7 在 RK3588 上的部署与多线程优化</strong></a><a class="post-neighbor next" href="/blog/astro-waline-comments/"><span class="post-neighbor-label">Next post<i class="link-arrow" aria-hidden="true"></i></span><strong>Astro 博客的 Waline 评论系统集成与定制</strong></a></nav></main>
+<footer class="site-footer">
+  <div class="wrap footer-utility">
+    <a class="footer-license" href="https://github.com/FuTseYi/futseyi.github.io/blob/main/LICENSING.md" target="_blank" rel="noopener noreferrer"><span>Go ahead, steal it</span><span class="link-arrow" aria-hidden="true"></span><span>CC BY 4.0 &middot; Code MIT</span></a>
+    <a class="footer-back-top" href="#main">Back to top <span class="link-arrow link-arrow-up" aria-hidden="true"></span></a>
+  </div>
+  <div class="footer-divider"><div class="wrap footer-inner">
+    <a class="footer-brand" href="https://github.com/FuTseYi/futseyi.github.io" target="_blank" rel="noopener noreferrer">&copy; <time data-current-year datetime="2026">2026</time> <span>FuTseYi <span class="alias">(Shine)</span></span></a>
+    <nav class="hero-links footer-social" aria-label="Social links"><a href="mailto:hello@futseyi.com" aria-label="Email" title="Email"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 6 9 7 9-7"/></svg></a>
+<a href="https://github.com/FuTseYi" target="_blank" rel="noopener noreferrer" aria-label="GitHub" title="GitHub"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 19c-4.3 1.3-4.3-2.2-6-2.6m12 5v-3.4c0-1 .1-1.5-.5-2.1 3.3-.4 6.8-1.6 6.8-7.3a5.7 5.7 0 0 0-1.5-4c.2-.4.7-1.9-.2-3.9 0 0-1.2-.4-4 1.5a13.7 13.7 0 0 0-7.2 0C5.6.3 4.4.7 4.4.7c-.9 2-.4 3.5-.2 3.9a5.7 5.7 0 0 0-1.5 4c0 5.7 3.5 6.9 6.8 7.3-.5.5-.6 1.1-.5 2.1v3.4"/></svg></a>
+<a href="https://www.linkedin.com/in/futseyi" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" title="LinkedIn"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 10v7m0-10v.01M11 17v-7m0 3a3 3 0 0 1 6 0v4"/></svg></a>
+          <a href="https://x.com/FuTseYi" target="_blank" rel="noopener noreferrer" aria-label="X" title="X"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 4h4l12 16h-4L4 4ZM4 20 20 4"/></svg></a></nav>
+  </div></div>
+</footer>
+</body></html>

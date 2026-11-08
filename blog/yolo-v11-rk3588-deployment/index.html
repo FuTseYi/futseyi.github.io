@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="YOLO11 在 RK3588 上的部署与多线程优化">
+<meta property="og:site_name" content="FuTseYi (Shine)">
+<meta property="og:title" content="YOLO11 在 RK3588 上的部署与多线程优化">
+<meta property="og:description" content="YOLO11 在 RK3588 上的部署与多线程优化">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.futseyi.com/blog/yolo-v11-rk3588-deployment/">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.futseyi.com/assets/images/profile/me.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1378">
+<meta property="og:image:height" content="2065">
+<meta property="og:image:alt" content="FuTseYi&#x27;s profile photo">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:site" content="@FuTseYi">
+<meta name="twitter:title" content="YOLO11 在 RK3588 上的部署与多线程优化">
+<meta name="twitter:description" content="YOLO11 在 RK3588 上的部署与多线程优化">
+<meta name="twitter:image" content="https://www.futseyi.com/assets/images/profile/me.jpg">
+<meta name="twitter:image:alt" content="FuTseYi&#x27;s profile photo">
+<meta property="article:tag" content="YOLO11">
+<meta property="article:tag" content="RK3588">
+<meta property="article:tag" content="RKNN">
+<meta property="article:tag" content="Edge AI">
+<title>YOLO11 在 RK3588 上的部署与多线程优化 · FuTseYi</title><link rel="canonical" href="https://www.futseyi.com/blog/yolo-v11-rk3588-deployment/">
+<link rel="icon" href="/assets/icons/favicon.ico" sizes="any">
+<link rel="icon" href="/assets/icons/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="/assets/icons/site.webmanifest">
+<link rel="preload" href="/assets/fonts/caveat-handwriting.woff2" as="font" type="font/woff2" crossorigin>
+<script data-theme-init>
+    (() => {
+      document.documentElement.classList.add('js');
+      let theme = 'system';
+      try { theme = localStorage.getItem('site-theme') || 'system'; } catch {}
+      if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+    })();
+  </script>
+<link rel="stylesheet" href="/assets/css/style.css?v=525538209899"><script src="https://cdn.jsdelivr.net/npm/swup@4.10.0/dist/Swup.umd.js" defer></script>
+<script src="/assets/js/site.js?v=7c24c70d02eb" defer></script>
+<script src="/assets/js/atmosphere.js?v=a822ac798e30" defer></script>
+</head>
+<body class="blog-page article-page">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header" id="site-header">
+  <div class="header-inner">
+    <a class="brand" href="/" aria-label="FuTseYi (Shine) homepage"><img src="/assets/icons/favicon.svg" alt="" width="36" height="36"></a>
+    <button class="theme-control" type="button" aria-label="Color theme: System. Switch to Light" title="System theme. Click for Light" data-mode="system">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <g data-theme-icon="system"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></g>
+        <g data-theme-icon="light"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.4 1.4m11.2 11.2L19 19M5 19l1.4-1.4M17.6 6.4 19 5"/></g>
+        <g data-theme-icon="dark"><path d="M20.5 14A8.5 8.5 0 0 1 10 3.5 8.5 8.5 0 1 0 20.5 14Z"/></g>
+      </svg>
+    </button>
+    <button class="nav-toggle" type="button" aria-controls="primary-navigation" aria-expanded="false" aria-label="Open navigation menu">
+      <span class="menu-icon" aria-hidden="true"><span></span><span></span><span></span></span>
+    </button>
+    <nav class="nav-links" id="primary-navigation" aria-label="Main navigation">
+      <a href="/#about">About</a>
+      <a href="/#education">Education</a>
+
+      <a href="/#active-in">Active In</a>
+      <a href="/#contributions">Contributions</a>
+      <a href="/blog/" class="is-active" aria-current="page">Blog</a>
+
+    </nav>
+  </div>
+</header>
+<main class="blog-container wrap" id="main"><div class="article-layout"><div class="article-main"><a class="back-link" href="/blog/"><span class="link-arrow link-arrow-left" aria-hidden="true"></span>All posts</a><div class="article-head"><span class="blog-kicker">BLOG & NOTES</span><h1>YOLO11 在 RK3588 上的部署与多线程优化</h1><div class="article-meta"><time class="post-date" datetime="2025-07-26">Jul 26, 2025</time><a class="post-date" href="https://github.com/FuTseYi/futseyi.github.io/edit/main/posts/yolo-v11-rk3588-deployment/index.md" target="_blank" rel="noopener noreferrer"><em>Edit on GitHub</em></a></div><div class="post-tags"><a class="post-tag" href="/blog/tags/#tag-cfbe6f6829c5"># YOLO11</a><a class="post-tag" href="/blog/tags/#tag-b3fe09a1fa53"># RK3588</a><a class="post-tag" href="/blog/tags/#tag-9b2febbfdec7"># RKNN</a><a class="post-tag" href="/blog/tags/#tag-342c2eeba912"># Edge AI</a></div></div><div class="article-toc-inline"><button class="article-toc-toggle" type="button" aria-expanded="false" aria-controls="article-toc-links">On this page</button><div class="article-toc-panel"><div class="article-toc-clip"><nav id="article-toc-links" aria-label="Article contents"><a href="#_1" class="toc-level-1">环境部署</a><a href="#rk3588rk3588s" class="toc-level-1">RK3588/RK3588S</a><a href="#anaconda" class="toc-level-2">板端 Anaconda 环境创建</a><a href="#_2" class="toc-level-1">模型选择</a><a href="#1-onnx" class="toc-level-2">1.板端下载官方预转换的 ONNX 模型</a><a href="#2" class="toc-level-2">2.使用服务器训练好的模型</a><a href="#_3" class="toc-level-1">模型部署</a><a href="#cmake" class="toc-level-2">板端升级 Cmake 版本</a><a href="#rknn-toolkit230" class="toc-level-2">板端安装 rknn-toolkit（2.3.0 版本）</a><a href="#model" class="toc-level-2">板端克隆官方 Model 仓库</a><a href="#onnx-rknn" class="toc-level-2">板端 ONNX 转 RKNN 模型</a><a href="#_4" class="toc-level-2">板端运行示例代码</a><a href="#_5" class="toc-level-1">其他</a><a href="#npu" class="toc-level-2">查看 NPU 驱动版本</a><a href="#npu_1" class="toc-level-2">查看实时 NPU 占用</a></nav></div></div></div><article class="article" data-pagefind-body><p><img alt="" src="assets/rk3588s.jpg" loading="lazy" decoding="async"  width="4024" height="3018" /></p>
+<p>参考项目<a href="https://github.com/leafqycc/rknn-multi-threaded">https://github.com/leafqycc/rknn-multi-threaded</a></p>
+<h2 id="_1">环境部署</h2>
+<h2 id="rk3588rk3588s">RK3588/RK3588S</h2>
+<h3 id="anaconda">板端 Anaconda 环境创建</h3>
+<blockquote>
+<p>安装 Anaconda</p>
+</blockquote>
+<div class="codehilite"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>~
+wget<span class="w"> </span>--user-agent<span class="o">=</span><span class="s2">"Mozilla"</span><span class="w"> </span>https://mirrors.tuna.tsinghua.edu.cn/anaconda/archive/Anaconda3-2024.10-1-Linux-aarch64.sh
+sh<span class="w"> </span>Anaconda3-2024.10-1-Linux-aarch64.sh
+<span class="c1"># 如果不能使用conda命令，在环境变量最后加上</span>
+nano<span class="w"> </span>~/.bashrc
+<span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span>/home/orangepi/anaconda3/bin:<span class="nv">$PATH</span>
+<span class="nb">source</span><span class="w"> </span>~/.bashrc
+</code></pre></div>
+
+<blockquote>
+<p>创建 yolo11 环境并激活</p>
+</blockquote>
+<div class="codehilite"><pre><span></span><code>conda<span class="w"> </span>create<span class="w"> </span>-y<span class="w"> </span>-n<span class="w"> </span>yolo11<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.10
+conda<span class="w"> </span>activate<span class="w"> </span>yolo11
+</code></pre></div>
+
+<h2 id="_2">模型选择</h2>
+<h3 id="1-onnx">1.板端下载官方预转换的 ONNX 模型</h3>
+<div class="codehilite"><pre><span></span><code><span class="c1"># yolo11n</span>
+wget<span class="w"> </span>https://ftrg.zbox.filez.com/v2/delivery/data/95f00b0fc900458ba134f8b180b3f7a1/examples/yolo11/yolo11n.onnx
+<span class="c1"># yolo11s</span>
+wget<span class="w"> </span>https://ftrg.zbox.filez.com/v2/delivery/data/95f00b0fc900458ba134f8b180b3f7a1/examples/yolo11/yolo11s.onnx
+<span class="c1"># yolo11m</span>
+wget<span class="w"> </span>https://ftrg.zbox.filez.com/v2/delivery/data/95f00b0fc900458ba134f8b180b3f7a1/examples/yolo11/yolo11m.onnx
+</code></pre></div>
+
+<h3 id="2">2.使用服务器训练好的模型</h3>
+<h2 id="_3">模型部署</h2>
+<h3 id="cmake">板端升级 Cmake 版本</h3>
+<div class="codehilite"><pre><span></span><code>conda<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span><span class="nv">cmake</span><span class="o">=</span><span class="m">3</span>.25.*
+</code></pre></div>
+
+<h3 id="rknn-toolkit230">板端安装 rknn-toolkit（2.3.0 版本）</h3>
+<div class="codehilite"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>--branch<span class="w"> </span>v2.3.0<span class="w"> </span>https://github.com/airockchip/rknn-toolkit2.git
+<span class="nb">cd</span><span class="w"> </span>rknn-toolkit2/packages/arm64
+
+conda<span class="w"> </span>activate<span class="w"> </span>yolo11
+pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>arm64_requirements_cp310.txt<span class="w"> </span>-i<span class="w"> </span>https://pypi.tuna.tsinghua.edu.cn/simple
+pip<span class="w"> </span>install<span class="w"> </span>rknn_toolkit2-2.3.0-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl
+
+<span class="nb">cd</span><span class="w"> </span>~/rknn-toolkit2/rknn-toolkit-lite2/packages
+pip<span class="w"> </span>install<span class="w"> </span>rknn_toolkit_lite2-2.3.0-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl
+
+<span class="c1"># 把 RKNN-Toolkit2 里的可执行文件和动态库手动复制到系统的标准路径中，方便系统识别和调用</span>
+<span class="nb">cd</span><span class="w"> </span>~/rknn-toolkit2/rknpu2/runtime/Linux/rknn_server/aarch64/usr/bin
+sudo<span class="w"> </span>cp<span class="w"> </span>*<span class="w"> </span>/usr/bin/
+<span class="nb">cd</span><span class="w"> </span>~/rknn-toolkit2/rknpu2/runtime/Linux/librknn_api/aarch64
+sudo<span class="w"> </span>cp<span class="w"> </span>*<span class="w"> </span>/usr/lib/
+</code></pre></div>
+
+<blockquote>
+<p>注意！务必检查安装的 torch 版本是否等于 1.13.1，版本不对会报错</p>
+</blockquote>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 若版本不对，使用下面命令重新安装torch</span>
+pip<span class="w"> </span>install<span class="w"> </span><span class="nv">torch</span><span class="o">==</span><span class="m">1</span>.13.1<span class="w"> </span>-i<span class="w"> </span>https://pypi.tuna.tsinghua.edu.cn/simple
+</code></pre></div>
+
+<h3 id="model">板端克隆官方 Model 仓库</h3>
+<div class="codehilite"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/airockchip/rknn_model_zoo.git
+</code></pre></div>
+
+<h3 id="onnx-rknn">板端 ONNX 转 RKNN 模型</h3>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 将ONNX模型放在rknn_model_zoo/examples/yolo11/model</span>
+<span class="nb">cd</span><span class="w"> </span>rknn_model_zoo/examples/yolo11/python
+python<span class="w"> </span>convert.py<span class="w"> </span>../model/best.onnx<span class="w"> </span>rk3588<span class="w"> </span><span class="c1"># model文件夹会得到yolo11.rknn</span>
+</code></pre></div>
+
+<h3 id="_4">板端运行示例代码</h3>
+<div class="codehilite"><pre><span></span><code>python<span class="w"> </span>yolo11.py<span class="w"> </span>--model_path<span class="w"> </span>../model/yolo11.rknn<span class="w"> </span>--target<span class="w"> </span>rk3588<span class="w"> </span>--img_show
+</code></pre></div>
+
+<h2 id="_5">其他</h2>
+<h3 id="npu">查看 NPU 驱动版本</h3>
+<div class="codehilite"><pre><span></span><code>cat<span class="w"> </span>/sys/kernel/debug/rknpu/driver_version
+</code></pre></div>
+
+<h3 id="npu_1">查看实时 NPU 占用</h3>
+<div class="codehilite"><pre><span></span><code>sudo<span class="w"> </span>watch<span class="w"> </span>-n<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="s2">"cat /sys/kernel/debug/rknpu/load"</span>
+</code></pre></div></article></div><nav class="page-toc article-toc is-visible" aria-label="On this page"><span class="toc-title">ON THIS PAGE</span><a href="#_1" class="toc-level-1">环境部署</a><a href="#rk3588rk3588s" class="toc-level-1">RK3588/RK3588S</a><a href="#anaconda" class="toc-level-2">板端 Anaconda 环境创建</a><a href="#_2" class="toc-level-1">模型选择</a><a href="#1-onnx" class="toc-level-2">1.板端下载官方预转换的 ONNX 模型</a><a href="#2" class="toc-level-2">2.使用服务器训练好的模型</a><a href="#_3" class="toc-level-1">模型部署</a><a href="#cmake" class="toc-level-2">板端升级 Cmake 版本</a><a href="#rknn-toolkit230" class="toc-level-2">板端安装 rknn-toolkit（2.3.0 版本）</a><a href="#model" class="toc-level-2">板端克隆官方 Model 仓库</a><a href="#onnx-rknn" class="toc-level-2">板端 ONNX 转 RKNN 模型</a><a href="#_4" class="toc-level-2">板端运行示例代码</a><a href="#_5" class="toc-level-1">其他</a><a href="#npu" class="toc-level-2">查看 NPU 驱动版本</a><a href="#npu_1" class="toc-level-2">查看实时 NPU 占用</a></nav></div><nav class="post-neighbors" aria-label="Adjacent posts"><a class="post-neighbor previous" href="/blog/zotero-tara-backup-restore/"><span class="post-neighbor-label"><i class="link-arrow link-arrow-left" aria-hidden="true"></i>Previous post</span><strong>Zotero 配置备份与恢复：Tara 插件</strong></a><a class="post-neighbor next" href="/blog/yolo-v7-rk3588-deployment/"><span class="post-neighbor-label">Next post<i class="link-arrow" aria-hidden="true"></i></span><strong>YOLOv7 在 RK3588 上的部署与多线程优化</strong></a></nav></main>
+<footer class="site-footer">
+  <div class="wrap footer-utility">
+    <a class="footer-license" href="https://github.com/FuTseYi/futseyi.github.io/blob/main/LICENSING.md" target="_blank" rel="noopener noreferrer"><span>Go ahead, steal it</span><span class="link-arrow" aria-hidden="true"></span><span>CC BY 4.0 &middot; Code MIT</span></a>
+    <a class="footer-back-top" href="#main">Back to top <span class="link-arrow link-arrow-up" aria-hidden="true"></span></a>
+  </div>
+  <div class="footer-divider"><div class="wrap footer-inner">
+    <a class="footer-brand" href="https://github.com/FuTseYi/futseyi.github.io" target="_blank" rel="noopener noreferrer">&copy; <time data-current-year datetime="2026">2026</time> <span>FuTseYi <span class="alias">(Shine)</span></span></a>
+    <nav class="hero-links footer-social" aria-label="Social links"><a href="mailto:hello@futseyi.com" aria-label="Email" title="Email"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 6 9 7 9-7"/></svg></a>
+<a href="https://github.com/FuTseYi" target="_blank" rel="noopener noreferrer" aria-label="GitHub" title="GitHub"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 19c-4.3 1.3-4.3-2.2-6-2.6m12 5v-3.4c0-1 .1-1.5-.5-2.1 3.3-.4 6.8-1.6 6.8-7.3a5.7 5.7 0 0 0-1.5-4c.2-.4.7-1.9-.2-3.9 0 0-1.2-.4-4 1.5a13.7 13.7 0 0 0-7.2 0C5.6.3 4.4.7 4.4.7c-.9 2-.4 3.5-.2 3.9a5.7 5.7 0 0 0-1.5 4c0 5.7 3.5 6.9 6.8 7.3-.5.5-.6 1.1-.5 2.1v3.4"/></svg></a>
+<a href="https://www.linkedin.com/in/futseyi" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" title="LinkedIn"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 10v7m0-10v.01M11 17v-7m0 3a3 3 0 0 1 6 0v4"/></svg></a>
+          <a href="https://x.com/FuTseYi" target="_blank" rel="noopener noreferrer" aria-label="X" title="X"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 4h4l12 16h-4L4 4ZM4 20 20 4"/></svg></a></nav>
+  </div></div>
+</footer>
+</body></html>

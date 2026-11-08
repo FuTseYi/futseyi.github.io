@@ -281,9 +281,6 @@
     document.querySelectorAll('[data-expandable]').forEach((list) => {
       const extra = [...list.querySelectorAll(':scope > .project-item')].slice(3);
       if (!extra.length) return;
-      const dated = list.id === 'contribution-list';
-      const yearOf = (item) => dated ? item.querySelector('time[datetime]').getAttribute('datetime').slice(0, 4) : 'all';
-      const years = [...new Set(extra.map(yearOf))];
       const panel = document.createElement('div');
       panel.className = 'expandable-panel';
       panel.id = `${list.id}-extra`;
@@ -296,21 +293,15 @@
       button.type = 'button';
       button.className = 'list-toggle';
       button.setAttribute('aria-controls', panel.id);
-      let revealed = 0;
-      const sync = () => {
-        const expanded = revealed > 0;
+      const setExpanded = (expanded) => {
         list.classList.toggle('is-open', expanded);
         panel.inert = !expanded;
-        extra.forEach((item) => { item.hidden = years.indexOf(yearOf(item)) >= revealed; });
         button.setAttribute('aria-expanded', String(expanded));
-        button.dataset.hasMore = String(revealed < years.length);
-        button.textContent = revealed === years.length ? 'Show less' : dated ? `Show more · ${years[revealed]}` : 'Show more';
+        button.textContent = expanded ? 'Show less' : 'Show more';
       };
-      sync();
+      setExpanded(false);
       button.addEventListener('click', () => {
-        revealed = revealed === years.length ? 0 : revealed + 1;
-        sync();
-        if (revealed > 0) requestAnimationFrame(() => scrollExpandedIntoView(list));
+        setExpanded(!list.classList.contains('is-open'));
         releaseTarget();
       });
       panel.addEventListener('transitionend', (event) => {

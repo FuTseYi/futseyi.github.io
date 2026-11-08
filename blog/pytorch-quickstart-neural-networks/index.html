@@ -1,0 +1,1019 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="torch.nn 是非常常用的包，其中 torch.container 中的 「Module」 是所有神经网络的基类">
+<meta property="og:site_name" content="FuTseYi (Shine)">
+<meta property="og:title" content="PyTorch 入门 03：神经网络">
+<meta property="og:description" content="torch.nn 是非常常用的包，其中 torch.container 中的 「Module」 是所有神经网络的基类">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.futseyi.com/blog/pytorch-quickstart-neural-networks/">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.futseyi.com/assets/images/profile/me.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1378">
+<meta property="og:image:height" content="2065">
+<meta property="og:image:alt" content="FuTseYi&#x27;s profile photo">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:site" content="@FuTseYi">
+<meta name="twitter:title" content="PyTorch 入门 03：神经网络">
+<meta name="twitter:description" content="torch.nn 是非常常用的包，其中 torch.container 中的 「Module」 是所有神经网络的基类">
+<meta name="twitter:image" content="https://www.futseyi.com/assets/images/profile/me.jpg">
+<meta name="twitter:image:alt" content="FuTseYi&#x27;s profile photo">
+<meta property="article:tag" content="PyTorch">
+<meta property="article:tag" content="Deep Learning">
+<meta property="article:tag" content="Tutorial">
+<title>PyTorch 入门 03：神经网络 · FuTseYi</title><link rel="canonical" href="https://www.futseyi.com/blog/pytorch-quickstart-neural-networks/">
+<link rel="icon" href="/assets/icons/favicon.ico" sizes="any">
+<link rel="icon" href="/assets/icons/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="/assets/icons/site.webmanifest">
+<link rel="preload" href="/assets/fonts/caveat-handwriting.woff2" as="font" type="font/woff2" crossorigin>
+<script data-theme-init>
+    (() => {
+      document.documentElement.classList.add('js');
+      let theme = 'system';
+      try { theme = localStorage.getItem('site-theme') || 'system'; } catch {}
+      if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+    })();
+  </script>
+<link rel="stylesheet" href="/assets/css/style.css?v=525538209899"><script src="https://cdn.jsdelivr.net/npm/swup@4.10.0/dist/Swup.umd.js" defer></script>
+<script src="/assets/js/site.js?v=7c24c70d02eb" defer></script>
+<script src="/assets/js/atmosphere.js?v=a822ac798e30" defer></script>
+</head>
+<body class="blog-page article-page">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header" id="site-header">
+  <div class="header-inner">
+    <a class="brand" href="/" aria-label="FuTseYi (Shine) homepage"><img src="/assets/icons/favicon.svg" alt="" width="36" height="36"></a>
+    <button class="theme-control" type="button" aria-label="Color theme: System. Switch to Light" title="System theme. Click for Light" data-mode="system">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <g data-theme-icon="system"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></g>
+        <g data-theme-icon="light"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.4 1.4m11.2 11.2L19 19M5 19l1.4-1.4M17.6 6.4 19 5"/></g>
+        <g data-theme-icon="dark"><path d="M20.5 14A8.5 8.5 0 0 1 10 3.5 8.5 8.5 0 1 0 20.5 14Z"/></g>
+      </svg>
+    </button>
+    <button class="nav-toggle" type="button" aria-controls="primary-navigation" aria-expanded="false" aria-label="Open navigation menu">
+      <span class="menu-icon" aria-hidden="true"><span></span><span></span><span></span></span>
+    </button>
+    <nav class="nav-links" id="primary-navigation" aria-label="Main navigation">
+      <a href="/#about">About</a>
+      <a href="/#education">Education</a>
+
+      <a href="/#active-in">Active In</a>
+      <a href="/#contributions">Contributions</a>
+      <a href="/blog/" class="is-active" aria-current="page">Blog</a>
+
+    </nav>
+  </div>
+</header>
+<main class="blog-container wrap" id="main"><div class="article-layout"><div class="article-main"><a class="back-link" href="/blog/"><span class="link-arrow link-arrow-left" aria-hidden="true"></span>All posts</a><div class="article-head"><span class="blog-kicker">BLOG & NOTES</span><h1>PyTorch 入门 03：神经网络</h1><div class="article-meta"><time class="post-date" datetime="2025-07-15">Jul 15, 2025</time><a class="post-date" href="https://github.com/FuTseYi/futseyi.github.io/edit/main/posts/pytorch-quickstart-neural-networks/index.md" target="_blank" rel="noopener noreferrer"><em>Edit on GitHub</em></a></div><div class="post-tags"><a class="post-tag" href="/blog/tags/#tag-98a2e30eeb85"># PyTorch</a><a class="post-tag" href="/blog/tags/#tag-5b8059958504"># Deep Learning</a><a class="post-tag" href="/blog/tags/#tag-2701a94c0eb5"># Tutorial</a></div></div><div class="article-toc-inline"><button class="article-toc-toggle" type="button" aria-expanded="false" aria-controls="article-toc-links">On this page</button><div class="article-toc-panel"><div class="article-toc-clip"><nav id="article-toc-links" aria-label="Article contents"><a href="#03" class="toc-level-1">第 03 讲 神经网络📝</a><a href="#11" class="toc-level-1">1.1 基本骨架</a><a href="#111-module" class="toc-level-2">1.1.1 Module</a><a href="#112-layers" class="toc-level-2">1.1.2 Layers</a><a href="#1121-i" class="toc-level-2">1.1.2.1 Ⅰ 卷积层</a><a href="#1122-ii" class="toc-level-2">1.1.2.2 Ⅱ 池化层</a><a href="#1123-iii" class="toc-level-2">1.1.2.3 Ⅲ 激活层</a><a href="#1124-iv" class="toc-level-2">1.1.2.4 Ⅳ 其他层</a><a href="#113-sequential" class="toc-level-2">1.1.3 Sequential</a><a href="#12" class="toc-level-1">1.2 损失&amp;优化</a><a href="#121" class="toc-level-2">1.2.1 损失函数</a><a href="#122" class="toc-level-2">1.2.2 反向传播</a><a href="#123" class="toc-level-2">1.2.3 优化器</a></nav></div></div></div><article class="article" data-pagefind-body><h2 id="03">第 03 讲 神经网络📝</h2>
+<h2 id="11">1.1 基本骨架</h2>
+<h3 id="111-module">1.1.1 Module</h3>
+<blockquote>
+<p><code>torch.nn</code> 是非常常用的包，其中 <code>torch.container</code> 中的 <strong>「Module」</strong> 是所有神经网络的基类</p>
+<p>自己定义的模型需要实现「Module」的 <code>__init__</code> 和 <code>forward</code> 函数</p>
+<p>前向传播</p>
+<p>此图的 F. 是下面代码块定义的 -&gt; import torch.nn.functional as F
+<img alt="" src="assets/fca95ba8f46ae627d659f12c0db2e616-tljk4sl0-z5swsr.webp" loading="lazy" decoding="async"  width="692" height="351" /></p>
+<p>nn_module.py</p>
+</blockquote>
+<div class="codehilite"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>  
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch</span><span class="w"> </span><span class="kn">import</span> <span class="n">nn</span>  
+
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Tudui</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>  
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>  <span class="c1">## 习惯性添加,调用了父类 `nn.Module` 的初始化方法,及时下面过程没有使用 `nn.Module` 的高级功能</span>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">):</span>  <span class="c1">## 当你自定义一个模型，只要继承自 `nn.Module`，就必须定义一个名为 `forward(self, …)` 的方法，用来描述模型的前向传播逻辑</span>
+
+
+        <span class="n">output</span> <span class="o">=</span> <span class="nb">input</span> <span class="o">+</span> <span class="mi">1</span>  
+
+        <span class="k">return</span> <span class="n">output</span>  
+
+
+
+<span class="n">tudui</span> <span class="o">=</span> <span class="n">Tudui</span><span class="p">()</span>  
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">1.0</span><span class="p">])</span>  
+
+<span class="n">output</span> <span class="o">=</span> <span class="n">tudui</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>  
+
+<span class="nb">print</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+<span class="c1"># 输出tensor([2.])PyTorch 默认的张量打印格式，表示其值为 2.0</span>
+</code></pre></div>
+
+<h3 id="112-layers">1.1.2 Layers</h3>
+<h3 id="1121-i">1.1.2.1 Ⅰ 卷积层</h3>
+<blockquote>
+<p>卷积层中最常使用 <strong>Conv2d</strong> -- 因为图像为二维</p>
+<p>卷积核的 <strong>「size」</strong> 一般是预定义好的</p>
+<p>卷积核的 <strong>「weights」</strong> 一般是先初始化然后通过不断迭代学习而来的</p>
+</blockquote>
+<p><img alt="" src="assets/padding-strides-odd.gif" loading="lazy" decoding="async"  width="445" height="411" /></p>
+<p><img alt="" src="assets/50b94b73ec2b1924a4d770ea06e4f721-dubrwwms-z1pxu8c.webp" loading="lazy" decoding="async"  width="1058" height="586" /></p>
+<blockquote>
+<p>Original illustration unavailable: <a href="https://www.morinha.cc/_astro/d71ecdc3e869d3439ddcb62e22cc892e.CFvv4ckn_DI5V1.webp">source image</a>.</p>
+<p>以上完整输出为:
+<img alt="2025-07-17_10-19-29.png" src="assets/20250717101933745.png" loading="lazy" decoding="async"  width="236" height="84" /></p>
+<p>nn_conv.py</p>
+</blockquote>
+<div class="codehilite"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>  
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn.functional</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">F</span>  
+
+
+
+<span class="nb">input</span> <span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span>  
+
+                     <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span>  
+
+                     <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>  
+
+                     <span class="p">[</span><span class="mi">5</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span>  
+
+                     <span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]])</span>  
+
+
+
+<span class="n">kernel</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span>  
+
+                       <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>  
+
+                       <span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]])</span>  
+
+
+<span class="nb">print</span><span class="p">(</span><span class="nb">input</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>  
+
+<span class="nb">print</span><span class="p">(</span><span class="n">kernel</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>  
+<span class="c1">#以上输出torch.Size([5,5])和torch.Size([3,3]),不满足使用条件-&gt; - reshape 是为了让数据 shape 满足 conv2d 的要求</span>
+
+<span class="c1"># 01 看shape发现不满足,修改一下shape</span>
+
+
+<span class="nb">input</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="nb">input</span><span class="p">,(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">))</span>  
+
+<span class="n">kernel</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">kernel</span><span class="p">,(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>  
+
+
+
+<span class="c1">## 02 卷积 conv2d</span>
+
+<span class="n">output</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">conv2d</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span><span class="n">kernel</span><span class="p">,</span><span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="c1">## 这里的stride=1代表上下左右各移动一个像素(去扫描)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>  
+
+
+
+<span class="n">output2</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">conv2d</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span><span class="n">kernel</span><span class="p">,</span><span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>  
+
+<span class="nb">print</span><span class="p">(</span><span class="n">output2</span><span class="p">)</span>  
+
+
+
+<span class="n">output3</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">conv2d</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span><span class="n">kernel</span><span class="p">,</span><span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">padding</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1">## padding=1代表上下左右填充1个像素</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">output3</span><span class="p">)</span>
+</code></pre></div>
+
+<blockquote>
+<p>观察以下过程</p>
+<p>输出 channel=2,代表有两个卷积核去扫描.并且两个卷积核数值是随机的</p>
+</blockquote>
+<p><img alt="" src="assets/81512b024b672f6a650b5b7ebd0cc78c-z-fku6ud-z1ake0o.webp" loading="lazy" decoding="async"  width="947" height="462" /></p>
+<blockquote>
+<p>nn_conv2d.py</p>
+<p>以下正式讲解卷积层的使用</p>
+</blockquote>
+<div class="codehilite"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>  
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">torchvision</span>  
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch</span><span class="w"> </span><span class="kn">import</span> <span class="n">nn</span>  
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.nn</span><span class="w"> </span><span class="kn">import</span> <span class="n">Conv2d</span>  
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataLoader</span>  
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.tensorboard</span><span class="w"> </span><span class="kn">import</span> <span class="n">SummaryWriter</span>  
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">urllib3.filepost</span><span class="w"> </span><span class="kn">import</span> <span class="n">writer</span>  
+
+
+<span class="c1"># 准备数据集</span>
+<span class="n">datset</span> <span class="o">=</span> <span class="n">torchvision</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">CIFAR10</span><span class="p">(</span><span class="s2">"data"</span><span class="p">,</span>  
+
+                                      <span class="n">train</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="c1">## 训练数据集太大了,就用测试数据集 </span>
+
+                                      <span class="n">transform</span><span class="o">=</span><span class="n">torchvision</span><span class="o">.</span><span class="n">transforms</span><span class="o">.</span><span class="n">ToTensor</span><span class="p">(),</span>  
+
+                                      <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  
+
+
+<span class="c1"># 加载数据集</span>
+<span class="n">dataloader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">datset</span><span class="p">,</span><span class="n">batch_size</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span>  
+
+
+<span class="c1"># 自定义神经网络</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Tudui</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>  
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>  
+
+
+<span class="c1">## 创建conv1,表示你的第一个卷积层，并且后续可以在`forward`方法里直接用</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+
+                              <span class="n">out_channels</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+
+                               <span class="n">kernel_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="c1">##卷积核大小</span>
+
+                                    <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+
+                                    <span class="n">padding</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>  
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>  
+
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>  
+
+        <span class="k">return</span> <span class="n">x</span>  
+
+
+<span class="c1"># 初始化这个网络</span>
+
+<span class="n">tudui</span> <span class="o">=</span> <span class="n">Tudui</span><span class="p">()</span>  
+
+<span class="c1">## print(tudui)  </span>
+
+
+<span class="n">writer</span> <span class="o">=</span> <span class="n">SummaryWriter</span><span class="p">(</span><span class="s2">"logs"</span><span class="p">)</span>  
+
+<span class="n">step</span> <span class="o">=</span> <span class="mi">0</span>  
+
+<span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">dataloader</span><span class="p">:</span>  <span class="c1">## `data` 只是一个变量名 它代表每次迭代从 `dataloader` 取出的那 1 批数据</span>
+
+    <span class="n">imgs</span><span class="p">,</span> <span class="n">targets</span> <span class="o">=</span> <span class="n">data</span>  
+
+    <span class="n">output</span> <span class="o">=</span> <span class="n">tudui</span><span class="p">(</span><span class="n">imgs</span><span class="p">)</span>  
+
+    <span class="c1"># print(imgs.shape)  </span>
+
+    <span class="c1"># print(output.shape)  </span>
+
+    <span class="n">writer</span><span class="o">.</span><span class="n">add_images</span><span class="p">(</span><span class="s2">"input"</span><span class="p">,</span><span class="n">imgs</span><span class="p">,</span><span class="n">step</span><span class="p">)</span> <span class="c1"># 输入的torch.Size([64, 3, 32, 32]) 在卷积层中运行后 会输出 [64, 6, 30, 30] 有6通道;TensorBoard add_images 只支持 1 或 3 通道图片，不支持 6 通道</span>
+
+
+    <span class="n">output</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">output</span><span class="p">,(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">30</span><span class="p">,</span><span class="mi">30</span><span class="p">))</span> 
+    <span class="c1">## `-1` 代表自动根据其他维度推算 batch 数量, 意思就是这个-1会经过reshape后自动计算成对应的数值.比如将以上[64, 6, 30, 30]的6压缩成两组3的话,就变成[128, 3, 30, 30]</span>
+
+
+
+    <span class="n">writer</span><span class="o">.</span><span class="n">add_images</span><span class="p">(</span><span class="s2">"output"</span><span class="p">,</span><span class="n">output</span><span class="p">,</span><span class="n">step</span><span class="p">)</span> <span class="c1"># 输出的torch.Size([128, 3, 30, 30])  </span>
+
+    <span class="n">step</span> <span class="o">=</span> <span class="n">step</span> <span class="o">+</span> <span class="mi">1</span>
+
+
+
+<span class="n">writer</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</code></pre></div>
+
+<h3 id="1122-ii">1.1.2.2 Ⅱ 池化层</h3>
+<blockquote>
+<p>池化层中最常使用 <strong>「MaxPool2d」</strong></p>
+<p>其一是对卷积层所提取的信息做更一步降维， <strong>减少计算量</strong> ，</p>
+<p>其二是 <strong>加强图像特征的不变性</strong> ，使之增加图像的偏移、旋转等方面的鲁棒性</p>
+</blockquote>
+<p><img alt="" src="assets/dilation.gif" loading="lazy" decoding="async"  width="395" height="381" /></p>
+<p><img alt="" src="assets/057676433aa75853dbf92cdf33c025ff-tpyc1fer-1keqeg.webp" loading="lazy" decoding="async"  width="891" height="439" /></p>
+<blockquote>
+<p>nn_maxpool.py</p>
+</blockquote>
+<div class="codehilite"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>  
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">torchvision</span>  
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch</span><span class="w"> </span><span class="kn">import</span> <span class="n">nn</span>  
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataLoader</span>  
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.tensorboard</span><span class="w"> </span><span class="kn">import</span> <span class="n">SummaryWriter</span>  
+
+
+
+<span class="c1"># 01 测试最大池化的实现  </span>
+
+<span class="c1"># input =torch.tensor([ [1,2,0,3,1],  </span>
+
+<span class="c1">#                       [0,1,2,3,1],  </span>
+
+<span class="c1">#                       [1,2,1,0,0], </span>
+
+<span class="c1">#                       [5,2,3,1,1],</span>
+
+<span class="c1">#                       [2,1,0,1,1]  ],</span>
+
+<span class="c1">#                      dtype=torch.float32)</span>
+                        <span class="c1">## 这是因为池化操作在底层实现时，用的都是浮点计算</span>
+
+<span class="c1"># input = torch.reshape(input,(-1,1,5,5))  </span>
+
+<span class="c1"># print(input.shape)  </span>
+    <span class="c1">##输出torch.Size([1,1,5,5])</span>
+
+<span class="c1">#  </span>
+
+<span class="c1"># class Tudui(nn.Module):  </span>
+
+<span class="c1">#     def __init__(self):  </span>
+
+<span class="c1">#         super().__init__()  </span>
+
+<span class="c1">#         self.maxpool1 = nn.MaxPool2d(kernel_size=3,ceil_mode=True)  </span>
+
+<span class="c1">#  </span>
+
+<span class="c1">#     def forward(self, input):  </span>
+
+<span class="c1">#         output = self.maxpool1(input)  </span>
+
+<span class="c1">#         return output  </span>
+
+<span class="c1">#  </span>
+
+<span class="c1"># tudui = Tudui()  </span>
+
+<span class="c1"># output = tudui(input)  </span>
+
+<span class="c1"># print(output)  </span>
+
+
+
+<span class="c1"># 02 针对数据集测试  </span>
+
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">torchvision</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">CIFAR10</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="s1">'./data'</span><span class="p">,</span>  
+
+                                       <span class="n">train</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>  
+
+                                       <span class="n">transform</span><span class="o">=</span><span class="n">torchvision</span><span class="o">.</span><span class="n">transforms</span><span class="o">.</span><span class="n">ToTensor</span><span class="p">(),</span>  
+
+                                       <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  
+
+<span class="n">dataloader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span><span class="n">batch_size</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span>  
+
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Tudui</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>  
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>  
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">maxpool1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">MaxPool2d</span><span class="p">(</span><span class="n">kernel_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span><span class="n">ceil_mode</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>  
+
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">):</span>  
+
+        <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxpool1</span><span class="p">(</span><span class="nb">input</span><span class="p">)</span>  
+
+        <span class="k">return</span> <span class="n">output</span>  
+
+
+
+<span class="n">tudui</span> <span class="o">=</span> <span class="n">Tudui</span><span class="p">()</span>  
+
+
+
+<span class="n">writer</span> <span class="o">=</span> <span class="n">SummaryWriter</span><span class="p">(</span><span class="s2">"logs"</span><span class="p">)</span>  
+
+<span class="n">step</span> <span class="o">=</span> <span class="mi">0</span>  
+
+<span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">dataloader</span><span class="p">:</span>  
+
+    <span class="n">imgs</span><span class="p">,</span> <span class="n">targets</span> <span class="o">=</span> <span class="n">data</span>  
+
+    <span class="n">writer</span><span class="o">.</span><span class="n">add_images</span><span class="p">(</span><span class="s2">"input"</span><span class="p">,</span><span class="n">imgs</span><span class="p">,</span><span class="n">step</span><span class="p">)</span>  
+
+
+    <span class="n">output</span> <span class="o">=</span> <span class="n">tudui</span><span class="p">(</span><span class="n">imgs</span><span class="p">)</span>  
+
+
+
+    <span class="n">writer</span><span class="o">.</span><span class="n">add_images</span><span class="p">(</span><span class="s2">"output"</span><span class="p">,</span><span class="n">output</span><span class="p">,</span><span class="n">step</span><span class="p">)</span>  
+
+    <span class="n">step</span> <span class="o">=</span> <span class="n">step</span> <span class="o">+</span> <span class="mi">1</span>  
+
+
+
+<span class="n">writer</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</code></pre></div>
+
+<h3 id="1123-iii">1.1.2.3 Ⅲ 激活层</h3>
+<blockquote>
+<p>激活层一般采用 <strong>「非线性激活」</strong> ，神经网络中引入非线性的特质，才能训练出符合各种特征的模型</p>
+<p>非线性激活函数有很多，如比较常见 <strong>「ReLU」</strong> 和 <strong>「Sigmoid」</strong></p>
+<p>nn_relu.py</p>
+</blockquote>
+<div class="codehilite"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>  
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">torchvision</span>  
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch</span><span class="w"> </span><span class="kn">import</span> <span class="n">nn</span>  
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.nn</span><span class="w"> </span><span class="kn">import</span> <span class="n">ReLU</span>  
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataLoader</span>  
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.tensorboard</span><span class="w"> </span><span class="kn">import</span> <span class="n">SummaryWriter</span>  
+
+
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">nn_conv2d</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataloader</span>  
+
+
+
+<span class="c1"># # 01 测试ReLU  </span>
+
+<span class="c1"># input = torch.tensor([[1,-0.5],  </span>
+
+<span class="c1">#                        [-1,3]])  </span>
+
+
+<span class="c1"># output = torch.reshape(input,(-1,1,2,2))  </span>
+    <span class="c1">## 输出( [[[[1, -0.5],</span>
+    <span class="c1">##            [-1, 3]]]] )</span>
+    <span class="c1">## 如果仅仅在此测试Relu中,可以不需要reshape,但在Conv2d这样的情况下就需要</span>
+
+<span class="c1"># print(output.shape)  </span>
+    <span class="c1">## 输出(1,1,2,2)</span>
+
+
+
+<span class="c1"># class Tudui(nn.Module):  </span>
+
+<span class="c1">#     def __init__(self):  </span>
+
+<span class="c1">#         super().__init__()  </span>
+
+<span class="c1">#         self.relu1 = nn.ReLU()  </span>
+
+
+
+<span class="c1">#     def forward(self, input):  </span>
+
+<span class="c1">#         output = self.relu1(input)  </span>
+
+<span class="c1">#         return output  </span>
+
+
+
+<span class="c1"># tudui = Tudui()  </span>
+
+<span class="c1"># output = tudui(input)  </span>
+
+<span class="c1"># print(output)  </span>
+    <span class="c1">## 输出( [[[[1.,0.],</span>
+    <span class="c1">##            [0., 3.]]]] )</span>
+
+
+
+
+<span class="c1"># 02 Sigmoid  </span>
+
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">torchvision</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">CIFAR10</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="s1">'./data'</span><span class="p">,</span>  
+
+                                       <span class="n">train</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>  
+
+                                       <span class="n">transform</span><span class="o">=</span><span class="n">torchvision</span><span class="o">.</span><span class="n">transforms</span><span class="o">.</span><span class="n">ToTensor</span><span class="p">(),</span>  
+
+                                       <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  
+
+
+
+<span class="n">dataloader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span><span class="n">batch_size</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span>  
+
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Tudui</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>  
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>  
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">sigmoid1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sigmoid</span><span class="p">()</span>  
+
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">):</span>  
+
+        <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigmoid1</span><span class="p">(</span><span class="nb">input</span><span class="p">)</span>  
+
+        <span class="k">return</span> <span class="n">output</span>  
+
+
+
+<span class="n">tudui</span> <span class="o">=</span> <span class="n">Tudui</span><span class="p">()</span>  
+
+
+
+<span class="n">writer</span> <span class="o">=</span> <span class="n">SummaryWriter</span><span class="p">(</span><span class="s2">"logs"</span><span class="p">)</span>  
+
+
+
+<span class="n">step</span> <span class="o">=</span> <span class="mi">0</span>  
+
+<span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">dataloader</span><span class="p">:</span>  
+
+    <span class="n">imgs</span><span class="p">,</span> <span class="n">targets</span> <span class="o">=</span> <span class="n">data</span>  
+
+    <span class="n">writer</span><span class="o">.</span><span class="n">add_images</span><span class="p">(</span><span class="s2">"input"</span><span class="p">,</span><span class="n">imgs</span><span class="p">,</span><span class="n">step</span><span class="p">)</span>  
+
+    <span class="n">output</span> <span class="o">=</span> <span class="n">tudui</span><span class="p">(</span><span class="n">imgs</span><span class="p">)</span>  
+
+    <span class="n">writer</span><span class="o">.</span><span class="n">add_images</span><span class="p">(</span><span class="s2">"output"</span><span class="p">,</span><span class="n">output</span><span class="p">,</span><span class="n">step</span><span class="p">)</span>  
+
+    <span class="n">step</span> <span class="o">+=</span> <span class="mi">1</span>  
+
+
+
+<span class="n">writer</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</code></pre></div>
+
+<blockquote>
+<p>对于 Relu(input,inplace=True/False)</p>
+<p>True 代表替换原来的变量
+ <img alt="" src="assets/d1eca2a28f401217b5945dfbf806a631-6lcvf4zt-z2ft5lv.webp" loading="lazy" decoding="async"  width="750" height="205" /></p>
+</blockquote>
+<h3 id="1124-iv">1.1.2.4 Ⅳ 其他层</h3>
+<blockquote>
+<p>「Transformer Layers」 特定的网络结构</p>
+<p>「Sparse Layers」 特定的网络结构，其中的 Embedding 用于自然语言处理</p>
+<p>「Linear Layers」 用的较多，即 全连接层
+<img alt="" src="assets/91c6d5f2a22884cd2ac3f956ff27ae5d-k9wvj-79-ztqv3o.webp" loading="lazy" decoding="async"  width="1246" height="697" /></p>
+<p>nn_linear.py</p>
+</blockquote>
+<div class="codehilite"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>  
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">torchvision</span>  
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch</span><span class="w"> </span><span class="kn">import</span> <span class="n">nn</span>  
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.nn</span><span class="w"> </span><span class="kn">import</span> <span class="n">Linear</span>  
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataLoader</span>  
+
+
+
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">torchvision</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">CIFAR10</span><span class="p">(</span><span class="s2">"./data"</span><span class="p">,</span>  
+
+                                       <span class="n">train</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>  
+
+                                       <span class="n">transform</span><span class="o">=</span><span class="n">torchvision</span><span class="o">.</span><span class="n">transforms</span><span class="o">.</span><span class="n">ToTensor</span><span class="p">(),</span>  
+
+                                       <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  
+
+
+
+<span class="n">dataloader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span>  
+
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Tudui</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>  
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>  
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">linear1</span> <span class="o">=</span> <span class="n">Linear</span><span class="p">(</span><span class="mi">196608</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>  
+
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">):</span>  
+
+        <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">linear1</span><span class="p">(</span><span class="nb">input</span><span class="p">)</span>  
+
+        <span class="k">return</span> <span class="n">output</span>  
+
+
+
+<span class="n">tudui</span> <span class="o">=</span> <span class="n">Tudui</span><span class="p">()</span>  
+
+
+
+<span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">dataloader</span><span class="p">:</span>  
+
+    <span class="n">imgs</span><span class="p">,</span> <span class="n">targets</span> <span class="o">=</span> <span class="n">data</span>  
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">imgs</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="c1"># torch.Size([64, 3, 32, 32])  </span>
+
+
+
+    <span class="c1"># flatten 展平成一行  类似于reshape(1,1,1,-1),但是维度不一样哦</span>
+    <span class="c1"># 注意, torch.flatten和下面代码中的nn.Flatten()不一样</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">imgs</span><span class="p">)</span>  
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="c1"># torch.Size([196608])  注意:变成一维的了</span>
+
+
+    <span class="n">output</span> <span class="o">=</span> <span class="n">tudui</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>  
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="c1">## 输出torch.Size([10])</span>
+</code></pre></div>
+
+<blockquote>
+<p>注意点:</p>
+<p><code>torch.flatten(imgs)</code>，它<strong>直接把所有图片合成了一个一维向量</strong>，丢掉了 batch 信息。模型只能输出 `torch.Size([10])</p>
+<p><code>nn.Flatten()</code>，只展平单张图片，<strong>不会丢失 batch</strong>，所以每一张图片都能独立得到 10 维预测，输出就是 <code>torch.Size([64,10])</code></p>
+</blockquote>
+<h3 id="113-sequential">1.1.3 Sequential</h3>
+<blockquote>
+<p>Sequential 主要是方便代码的编写，使代码更加简洁</p>
+</blockquote>
+<p>根据下图搭建神经网络：判断一个图的类别（最后输出为十个类别，最后进行判断）<img alt="2025-07-18_15-29-47.png" src="assets/20250718152955923.png" loading="lazy" decoding="async"  width="791" height="186" /></p>
+<blockquote>
+<p>nn_seq.py</p>
+<p>未使用 sequential
+<img alt="2025-07-18_15-41-43.png" src="assets/20250718154312620.png" loading="lazy" decoding="async"  width="449" height="480" /></p>
+<p>使用 sequential 统一管理中间层</p>
+</blockquote>
+<div class="codehilite"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>  
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch</span><span class="w"> </span><span class="kn">import</span> <span class="n">nn</span>  
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.nn</span><span class="w"> </span><span class="kn">import</span> <span class="n">Conv2d</span><span class="p">,</span> <span class="n">MaxPool2d</span><span class="p">,</span> <span class="n">Flatten</span><span class="p">,</span> <span class="n">Linear</span><span class="p">,</span> <span class="n">Sequential</span>  
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.tensorboard</span><span class="w"> </span><span class="kn">import</span> <span class="n">SummaryWriter</span>  
+
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Tudui</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>  
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">Tudui</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>  
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">model1</span> <span class="o">=</span> <span class="n">Sequential</span><span class="p">(</span>  
+
+            <span class="n">Conv2d</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span><span class="c1">##对照以上那个图  </span>
+
+            <span class="n">MaxPool2d</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>  <span class="c1">##池化</span>
+
+            <span class="n">Conv2d</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>  
+
+            <span class="n">MaxPool2d</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>  
+
+            <span class="n">Conv2d</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>  
+
+            <span class="n">MaxPool2d</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>  
+
+            <span class="n">Flatten</span><span class="p">(),</span>  <span class="c1">## 展平成一维</span>
+
+            <span class="n">Linear</span><span class="p">(</span><span class="mi">1024</span><span class="p">,</span> <span class="mi">64</span><span class="p">),</span>  
+
+            <span class="n">Linear</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>  
+
+        <span class="p">)</span>  
+
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>  
+
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model1</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>  
+
+        <span class="k">return</span> <span class="n">x</span>  
+
+
+
+<span class="n">tudui</span> <span class="o">=</span> <span class="n">Tudui</span><span class="p">()</span>  
+
+<span class="nb">print</span><span class="p">(</span><span class="n">tudui</span><span class="p">)</span>  
+
+
+
+<span class="c1"># 检查网络  </span>
+
+<span class="nb">input</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">64</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">))</span>  
+
+<span class="n">output</span> <span class="o">=</span> <span class="n">tudui</span><span class="p">(</span><span class="nb">input</span><span class="p">)</span>  
+
+<span class="nb">print</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>  <span class="c1">## 输出 torch.Size([64,10])</span>
+
+
+<span class="c1"># tensorboard中的add_graph 查看神经网络的流程图  </span>
+
+<span class="n">writer</span> <span class="o">=</span> <span class="n">SummaryWriter</span><span class="p">(</span><span class="s2">"logs"</span><span class="p">)</span>  
+
+<span class="n">writer</span><span class="o">.</span><span class="n">add_graph</span><span class="p">(</span><span class="n">tudui</span><span class="p">,</span> <span class="nb">input</span><span class="p">)</span>  
+
+<span class="n">writer</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</code></pre></div>
+
+<h2 id="12">1.2 损失&amp;优化</h2>
+<h3 id="121">1.2.1 损失函数</h3>
+<blockquote>
+<p>损失函数（Loss Function）用于衡量模型的「预测输出」与「实际标签」之间的差异或者误差</p>
+<p>损失越小越好，根据 loss 调整参数，以减小损失 <img alt="" src="assets/304e06e4fc68fac4eaf17f5d86f68a49-d-nkg-qp-z2fic4r.webp" loading="lazy" decoding="async"  width="977" height="222" /></p>
+</blockquote>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 计算output和target之差的「绝对值」</span>
+
+<span class="n">nn</span><span class="o">.</span><span class="n">L1Loss</span><span class="p">()</span>
+
+<span class="c1"># 计算output和target之差的「均方差」</span>
+
+<span class="n">nn</span><span class="o">.</span><span class="n">MSELoss</span><span class="p">()</span>
+</code></pre></div>
+
+<p><img alt="" src="assets/0da9a7533ef2b36e39e3606f9a5225d9-byr0pmmp-zt78v1.webp" loading="lazy" decoding="async"  width="729" height="120" /></p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 交叉熵损失函数（Cross-Entropy Loss Function）是在分类问题中经常使用的一种损失函数</span>
+
+<span class="c1"># 当分类预测正确时，损失要比较小，即\`-x[class]\`相比右边的项应较大</span>
+
+<span class="n">nn</span><span class="o">.</span><span class="n">CrossEntropyLoss</span><span class="p">()</span>
+</code></pre></div>
+
+<p><img alt="" src="assets/df4fa6e51c50cdbc5ac66987b0378511-dxky2nws-1yuhfv.webp" loading="lazy" decoding="async"  width="1142" height="403" /></p>
+<blockquote>
+<p>nn_loss.py</p>
+</blockquote>
+<div class="codehilite"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>  
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.nn</span><span class="w"> </span><span class="kn">import</span> <span class="n">L1Loss</span>  
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch</span><span class="w"> </span><span class="kn">import</span> <span class="n">nn</span>  
+
+
+
+<span class="n">inputs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>  
+
+<span class="n">targets</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>  
+
+
+
+<span class="n">inputs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>  
+
+<span class="n">targets</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">targets</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>  
+
+
+
+<span class="c1"># 01 L1Loss  </span>
+
+<span class="n">loss</span> <span class="o">=</span> <span class="n">L1Loss</span><span class="p">(</span><span class="n">reduction</span><span class="o">=</span><span class="s1">'sum'</span><span class="p">)</span> <span class="c1"># mean or sum  选择计算方式</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">loss</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>  
+
+<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>  
+
+
+
+<span class="c1"># 02 MSELoss  </span>
+
+<span class="n">loss_mse</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">MSELoss</span><span class="p">()</span>  
+
+<span class="n">result_mse</span> <span class="o">=</span> <span class="n">loss_mse</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>  
+
+<span class="nb">print</span><span class="p">(</span><span class="n">result_mse</span><span class="p">)</span>  
+
+
+
+<span class="c1"># 03 CrossEntropyLoss  </span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">])</span>  
+
+<span class="n">y</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">1</span><span class="p">])</span>  
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>  
+<span class="c1">##`CrossEntropyLoss` 期望 x 的形状是 (1, 3)（一个样本，三个类别），y 的形状是 (1,)</span>
+<span class="c1">## 必须将 x 的形状由 (3,) 变为 (1, 3)</span>
+
+<span class="n">loss_cross</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">CrossEntropyLoss</span><span class="p">()</span>  
+
+<span class="n">result_cross</span> <span class="o">=</span> <span class="n">loss_cross</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>  
+
+<span class="nb">print</span><span class="p">(</span><span class="n">result_cross</span><span class="p">)</span>
+</code></pre></div>
+
+<h3 id="122">1.2.2 反向传播</h3>
+<blockquote>
+<p>前向传播：将训练集数据输入到 NN 的「输入层」，经过「隐藏层」，最后到达「输出层」并输出结果</p>
+<p>反向传播：计算估计值与实际值之间的误差，并将误差从「输出层」向「隐藏层」反向传播，直至「输入层」</p>
+<p>nn_loss_network.py</p>
+</blockquote>
+<div class="codehilite"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">torchvision</span>  
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch</span><span class="w"> </span><span class="kn">import</span> <span class="n">nn</span>  
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.nn</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequential</span><span class="p">,</span> <span class="n">Conv2d</span><span class="p">,</span> <span class="n">MaxPool2d</span><span class="p">,</span> <span class="n">Flatten</span><span class="p">,</span> <span class="n">Linear</span>  
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataLoader</span>  
+
+
+
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">torchvision</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">CIFAR10</span><span class="p">(</span><span class="s2">"./data"</span><span class="p">,</span>  
+
+                                       <span class="n">train</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>  
+
+                                       <span class="n">transform</span><span class="o">=</span><span class="n">torchvision</span><span class="o">.</span><span class="n">transforms</span><span class="o">.</span><span class="n">ToTensor</span><span class="p">(),</span>  
+
+                                       <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  
+
+
+
+<span class="n">dataloader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  
+
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Tudui</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>  
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">Tudui</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>  
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">model1</span> <span class="o">=</span> <span class="n">Sequential</span><span class="p">(</span>  
+
+            <span class="n">Conv2d</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>  
+
+            <span class="n">MaxPool2d</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>  
+
+            <span class="n">Conv2d</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>  
+
+            <span class="n">MaxPool2d</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>  
+
+            <span class="n">Conv2d</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>  
+
+            <span class="n">MaxPool2d</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>  
+
+            <span class="n">Flatten</span><span class="p">(),</span>  
+
+            <span class="n">Linear</span><span class="p">(</span><span class="mi">1024</span><span class="p">,</span> <span class="mi">64</span><span class="p">),</span>  
+
+            <span class="n">Linear</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>  
+
+        <span class="p">)</span>  
+
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>  
+
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model1</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>  
+
+        <span class="k">return</span> <span class="n">x</span>  
+
+
+
+<span class="n">loss</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">CrossEntropyLoss</span><span class="p">()</span>  
+
+<span class="n">tudui</span> <span class="o">=</span> <span class="n">Tudui</span><span class="p">()</span>  
+
+<span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">dataloader</span><span class="p">:</span>  
+
+    <span class="n">imgs</span><span class="p">,</span> <span class="n">targets</span> <span class="o">=</span> <span class="n">data</span>  
+
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">tudui</span><span class="p">(</span><span class="n">imgs</span><span class="p">)</span>  
+
+    <span class="n">result_loss</span> <span class="o">=</span> <span class="n">loss</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>  
+
+    <span class="c1"># 反向传播 计算梯度  </span>
+
+    <span class="n">result_loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>  
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"ok"</span><span class="p">)</span>
+</code></pre></div>
+
+<h3 id="123">1.2.3 优化器</h3>
+<blockquote>
+<p><strong>更新参数 减少损失</strong></p>
+<p>反向传播（backward）–&gt; 计算出梯度（grad）–&gt; 根据梯度和学习率更新参数 –&gt; 减小 loss</p>
+</blockquote>
+<p>优化器的种类比较多，常用的就是 SGD（随机梯度下降）</p>
+<p>不同优化器的参数列表不同，一般设置「parameters」和 l「lr」这两个参数，其他默认 <img alt="" src="assets/ea482701241d693f50662fa90f380ac0-ccnirmt4-2jtrqs.webp" loading="lazy" decoding="async"  width="736" height="403" /></p>
+<blockquote>
+<p>nn_optim.py</p>
+</blockquote>
+<div class="codehilite"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>  
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">torchvision</span>  
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch</span><span class="w"> </span><span class="kn">import</span> <span class="n">nn</span>  
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.nn</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequential</span><span class="p">,</span> <span class="n">Conv2d</span><span class="p">,</span> <span class="n">MaxPool2d</span><span class="p">,</span> <span class="n">Flatten</span><span class="p">,</span> <span class="n">Linear</span>  
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.optim.lr_scheduler</span><span class="w"> </span><span class="kn">import</span> <span class="n">StepLR</span>  
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataLoader</span>  
+
+
+
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">torchvision</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">CIFAR10</span><span class="p">(</span><span class="s2">"./data"</span><span class="p">,</span>  
+
+                                       <span class="n">train</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>  
+
+                                       <span class="n">transform</span><span class="o">=</span><span class="n">torchvision</span><span class="o">.</span><span class="n">transforms</span><span class="o">.</span><span class="n">ToTensor</span><span class="p">(),</span>  
+
+                                       <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  
+
+
+
+<span class="n">dataloader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  
+
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Tudui</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>  
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">Tudui</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>  
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">model1</span> <span class="o">=</span> <span class="n">Sequential</span><span class="p">(</span>  
+
+            <span class="n">Conv2d</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>  
+
+            <span class="n">MaxPool2d</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>  
+
+            <span class="n">Conv2d</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>  
+
+            <span class="n">MaxPool2d</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>  
+
+            <span class="n">Conv2d</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>  
+
+            <span class="n">MaxPool2d</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>  
+
+            <span class="n">Flatten</span><span class="p">(),</span>  
+
+            <span class="n">Linear</span><span class="p">(</span><span class="mi">1024</span><span class="p">,</span> <span class="mi">64</span><span class="p">),</span>  
+
+            <span class="n">Linear</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>  
+
+        <span class="p">)</span>  
+
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>  
+
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model1</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>  
+
+        <span class="k">return</span> <span class="n">x</span>  
+
+
+
+<span class="n">loss</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">CrossEntropyLoss</span><span class="p">()</span>  
+
+<span class="n">tudui</span> <span class="o">=</span> <span class="n">Tudui</span><span class="p">()</span>  
+
+
+
+<span class="c1"># 优化器 SGD（随机梯度下降）  </span>
+
+<span class="n">optim</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span><span class="n">tudui</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span> <span class="c1">## lr学习率，太大不稳定，太小收敛慢  </span>
+<span class="c1">##tudui.parameters() 的作用：这个方法会自动遍历 `Tudui` 网络中所有子模块（比如 `Conv2d` 和 `Linear` 层），收集这些层的所有可训练参数，返回到torch.optim.SGD</span>
+
+
+<span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">20</span><span class="p">):</span>  <span class="c1">## 进行多轮学习</span>
+
+    <span class="n">running_loss</span> <span class="o">=</span> <span class="mf">0.0</span>  
+
+    <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">dataloader</span><span class="p">:</span>  
+
+        <span class="n">imgs</span><span class="p">,</span> <span class="n">targets</span> <span class="o">=</span> <span class="n">data</span>  
+
+        <span class="n">outputs</span> <span class="o">=</span> <span class="n">tudui</span><span class="p">(</span><span class="n">imgs</span><span class="p">)</span>  
+
+        <span class="n">result_loss</span> <span class="o">=</span> <span class="n">loss</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>  
+
+
+
+        <span class="n">optim</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span> <span class="c1"># 把上一步的梯度清零，否则会累加  </span>
+
+        <span class="n">result_loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>  
+
+        <span class="n">optim</span><span class="o">.</span><span class="n">step</span><span class="p">()</span> <span class="c1"># 对weight参数进行更新  </span>
+
+
+
+        <span class="n">running_loss</span> <span class="o">=</span> <span class="n">running_loss</span> <span class="o">+</span> <span class="n">result_loss</span>  
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">running_loss</span><span class="p">)</span>
+</code></pre></div></article></div><nav class="page-toc article-toc is-visible" aria-label="On this page"><span class="toc-title">ON THIS PAGE</span><a href="#03" class="toc-level-1">第 03 讲 神经网络📝</a><a href="#11" class="toc-level-1">1.1 基本骨架</a><a href="#111-module" class="toc-level-2">1.1.1 Module</a><a href="#112-layers" class="toc-level-2">1.1.2 Layers</a><a href="#1121-i" class="toc-level-2">1.1.2.1 Ⅰ 卷积层</a><a href="#1122-ii" class="toc-level-2">1.1.2.2 Ⅱ 池化层</a><a href="#1123-iii" class="toc-level-2">1.1.2.3 Ⅲ 激活层</a><a href="#1124-iv" class="toc-level-2">1.1.2.4 Ⅳ 其他层</a><a href="#113-sequential" class="toc-level-2">1.1.3 Sequential</a><a href="#12" class="toc-level-1">1.2 损失&amp;优化</a><a href="#121" class="toc-level-2">1.2.1 损失函数</a><a href="#122" class="toc-level-2">1.2.2 反向传播</a><a href="#123" class="toc-level-2">1.2.3 优化器</a></nav></div><nav class="post-neighbors" aria-label="Adjacent posts"><a class="post-neighbor previous" href="/blog/pytorch-quickstart-data/"><span class="post-neighbor-label"><i class="link-arrow link-arrow-left" aria-hidden="true"></i>Previous post</span><strong>PyTorch 入门 02：数据处理</strong></a><a class="post-neighbor next" href="/blog/pytorch-quickstart-training-workflow/"><span class="post-neighbor-label">Next post<i class="link-arrow" aria-hidden="true"></i></span><strong>PyTorch 入门 04：模型训练流程</strong></a></nav></main>
+<footer class="site-footer">
+  <div class="wrap footer-utility">
+    <a class="footer-license" href="https://github.com/FuTseYi/futseyi.github.io/blob/main/LICENSING.md" target="_blank" rel="noopener noreferrer"><span>Go ahead, steal it</span><span class="link-arrow" aria-hidden="true"></span><span>CC BY 4.0 &middot; Code MIT</span></a>
+    <a class="footer-back-top" href="#main">Back to top <span class="link-arrow link-arrow-up" aria-hidden="true"></span></a>
+  </div>
+  <div class="footer-divider"><div class="wrap footer-inner">
+    <a class="footer-brand" href="https://github.com/FuTseYi/futseyi.github.io" target="_blank" rel="noopener noreferrer">&copy; <time data-current-year datetime="2026">2026</time> <span>FuTseYi <span class="alias">(Shine)</span></span></a>
+    <nav class="hero-links footer-social" aria-label="Social links"><a href="mailto:hello@futseyi.com" aria-label="Email" title="Email"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 6 9 7 9-7"/></svg></a>
+<a href="https://github.com/FuTseYi" target="_blank" rel="noopener noreferrer" aria-label="GitHub" title="GitHub"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 19c-4.3 1.3-4.3-2.2-6-2.6m12 5v-3.4c0-1 .1-1.5-.5-2.1 3.3-.4 6.8-1.6 6.8-7.3a5.7 5.7 0 0 0-1.5-4c.2-.4.7-1.9-.2-3.9 0 0-1.2-.4-4 1.5a13.7 13.7 0 0 0-7.2 0C5.6.3 4.4.7 4.4.7c-.9 2-.4 3.5-.2 3.9a5.7 5.7 0 0 0-1.5 4c0 5.7 3.5 6.9 6.8 7.3-.5.5-.6 1.1-.5 2.1v3.4"/></svg></a>
+<a href="https://www.linkedin.com/in/futseyi" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" title="LinkedIn"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 10v7m0-10v.01M11 17v-7m0 3a3 3 0 0 1 6 0v4"/></svg></a>
+          <a href="https://x.com/FuTseYi" target="_blank" rel="noopener noreferrer" aria-label="X" title="X"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 4h4l12 16h-4L4 4ZM4 20 20 4"/></svg></a></nav>
+  </div></div>
+</footer>
+</body></html>

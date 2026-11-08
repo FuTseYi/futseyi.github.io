@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="同一台电脑、同一套 Clash Verge 配置，在手机热点下可以正常连接，切换到校园网后却出现大量节点连接失败。遇到这种反差时，很容易先怀疑订阅或节点失效，但网络环境、请求路由和代理模式同样值得检查。">
+<meta property="og:site_name" content="FuTseYi (Shine)">
+<meta property="og:title" content="Clash Verge 校园网代理连接异常排查">
+<meta property="og:description" content="同一台电脑、同一套 Clash Verge 配置，在手机热点下可以正常连接，切换到校园网后却出现大量节点连接失败。遇到这种反差时，很容易先怀疑订阅或节点失效，但网络环境、请求路由和代理模式同样值得检查。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.futseyi.com/blog/clash-verge-campus-network-proxy/">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.futseyi.com/assets/images/profile/me.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1378">
+<meta property="og:image:height" content="2065">
+<meta property="og:image:alt" content="FuTseYi&#x27;s profile photo">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:site" content="@FuTseYi">
+<meta name="twitter:title" content="Clash Verge 校园网代理连接异常排查">
+<meta name="twitter:description" content="同一台电脑、同一套 Clash Verge 配置，在手机热点下可以正常连接，切换到校园网后却出现大量节点连接失败。遇到这种反差时，很容易先怀疑订阅或节点失效，但网络环境、请求路由和代理模式同样值得检查。">
+<meta name="twitter:image" content="https://www.futseyi.com/assets/images/profile/me.jpg">
+<meta name="twitter:image:alt" content="FuTseYi&#x27;s profile photo">
+<meta property="article:tag" content="Clash Verge">
+<meta property="article:tag" content="Network">
+<meta property="article:tag" content="Proxy">
+<title>Clash Verge 校园网代理连接异常排查 · FuTseYi</title><link rel="canonical" href="https://www.futseyi.com/blog/clash-verge-campus-network-proxy/">
+<link rel="icon" href="/assets/icons/favicon.ico" sizes="any">
+<link rel="icon" href="/assets/icons/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="/assets/icons/site.webmanifest">
+<link rel="preload" href="/assets/fonts/caveat-handwriting.woff2" as="font" type="font/woff2" crossorigin>
+<script data-theme-init>
+    (() => {
+      document.documentElement.classList.add('js');
+      let theme = 'system';
+      try { theme = localStorage.getItem('site-theme') || 'system'; } catch {}
+      if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+    })();
+  </script>
+<link rel="stylesheet" href="/assets/css/style.css?v=525538209899"><script src="https://cdn.jsdelivr.net/npm/swup@4.10.0/dist/Swup.umd.js" defer></script>
+<script src="/assets/js/site.js?v=7c24c70d02eb" defer></script>
+<script src="/assets/js/atmosphere.js?v=a822ac798e30" defer></script>
+</head>
+<body class="blog-page article-page">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header" id="site-header">
+  <div class="header-inner">
+    <a class="brand" href="/" aria-label="FuTseYi (Shine) homepage"><img src="/assets/icons/favicon.svg" alt="" width="36" height="36"></a>
+    <button class="theme-control" type="button" aria-label="Color theme: System. Switch to Light" title="System theme. Click for Light" data-mode="system">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <g data-theme-icon="system"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></g>
+        <g data-theme-icon="light"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.4 1.4m11.2 11.2L19 19M5 19l1.4-1.4M17.6 6.4 19 5"/></g>
+        <g data-theme-icon="dark"><path d="M20.5 14A8.5 8.5 0 0 1 10 3.5 8.5 8.5 0 1 0 20.5 14Z"/></g>
+      </svg>
+    </button>
+    <button class="nav-toggle" type="button" aria-controls="primary-navigation" aria-expanded="false" aria-label="Open navigation menu">
+      <span class="menu-icon" aria-hidden="true"><span></span><span></span><span></span></span>
+    </button>
+    <nav class="nav-links" id="primary-navigation" aria-label="Main navigation">
+      <a href="/#about">About</a>
+      <a href="/#education">Education</a>
+
+      <a href="/#active-in">Active In</a>
+      <a href="/#contributions">Contributions</a>
+      <a href="/blog/" class="is-active" aria-current="page">Blog</a>
+
+    </nav>
+  </div>
+</header>
+<main class="blog-container wrap" id="main"><div class="article-layout"><div class="article-main"><a class="back-link" href="/blog/"><span class="link-arrow link-arrow-left" aria-hidden="true"></span>All posts</a><div class="article-head"><span class="blog-kicker">BLOG & NOTES</span><h1>Clash Verge 校园网代理连接异常排查</h1><div class="article-meta"><time class="post-date" datetime="2026-09-24">Sep 24, 2026</time><a class="post-date" href="https://github.com/FuTseYi/futseyi.github.io/edit/main/posts/clash-verge-campus-network-proxy/index.md" target="_blank" rel="noopener noreferrer"><em>Edit on GitHub</em></a></div><div class="post-tags"><a class="post-tag" href="/blog/tags/#tag-5ae28d1978cc"># Clash Verge</a><a class="post-tag" href="/blog/tags/#tag-53ebc572b4a4"># Network</a><a class="post-tag" href="/blog/tags/#tag-d1cea344353e"># Proxy</a></div></div><div class="article-toc-inline"><button class="article-toc-toggle" type="button" aria-expanded="false" aria-controls="article-toc-links">On this page</button><div class="article-toc-panel"><div class="article-toc-clip"><nav id="article-toc-links" aria-label="Article contents"><a href="#1" class="toc-level-1">1 问题现象</a><a href="#2" class="toc-level-1">2 为什么手机热点正常、校园网异常</a><a href="#3" class="toc-level-1">3 我的实际处理过程</a><a href="#4" class="toc-level-1">4 更有针对性的排查顺序</a><a href="#5" class="toc-level-1">5 总结</a></nav></div></div></div><article class="article" data-pagefind-body><h2 id="1">1 问题现象</h2>
+<p>同一台电脑、同一套 Clash Verge 配置，在手机热点下可以正常连接，切换到校园网后却出现大量节点连接失败。遇到这种反差时，很容易先怀疑订阅或节点失效，但网络环境、请求路由和代理模式同样值得检查。</p>
+<p>我在一次校园网使用过程中碰到了这个问题。下面记录当时的网络表现、日志线索和实际处理过程，并整理一套更有针对性的排查顺序。</p>
+<p>当时的情况比较明确：</p>
+<ul>
+<li>手机热点下，代理节点能够正常连接</li>
+<li>校园网不开代理时，国内网站访问正常</li>
+<li>校园网开启 Clash Verge 后，部分节点报错</li>
+<li>当时使用的是 <strong>TUN 关闭、系统代理开启</strong> 的模式</li>
+</ul>
+<p>日志中出现过类似信息：</p>
+<div class="codehilite"><pre><span></span><code>[TCP] dial DIRECT (match RuleSet/cn)
+127.0.0.1:9397 --&gt; p207-ckdatabase.icloud.com.cn:443
+error: dial tcp 36.110.170.240:443:
+connectex: A socket operation was attempted to an unreachable network
+</code></pre></div>
+
+<p>这说明当时至少有一部分请求在直连路径上遇到了网络不可达问题，但不能仅凭这一条日志就断定是节点失效。</p>
+<h2 id="2">2 为什么手机热点正常、校园网异常</h2>
+<p>同一台设备、同一个代理客户端，在不同网络下表现不同，说明问题不一定出在代理订阅或节点本身。</p>
+<p>校园网和移动热点可能在网络出口、DNS、IPv6、路由策略以及访问限制方面存在差异。代理客户端的规则也会影响请求究竟走代理还是 DIRECT。</p>
+<p>因此，排查时应该把网络环境、代理模式和规则命中情况分开看，而不是一味地刷新订阅或更换节点。</p>
+<h2 id="3">3 我的实际处理过程</h2>
+<p>当时我先保持原有配置，没有立即重置所有规则。</p>
+<p>在切换到校园网后，我退出 Clash Verge，再重新打开客户端。随后能够重新显示一部分正常节点，虽然可用节点仍然少于手机热点环境，但至少说明重新建立连接后，情况有所改善。</p>
+<p>这次观察到的有效操作是：</p>
+<ol>
+<li>切换到校园网</li>
+<li>完全退出 Clash Verge</li>
+<li>重新启动客户端</li>
+<li>等待节点和连接状态重新加载</li>
+<li>再测试目标服务</li>
+</ol>
+<p>此前我也曾在校园网环境下开启过 TUN 模式，并使用过 UWP 网络环回相关工具，因此排查时也把这些配置变化纳入考虑，但没有证据表明它们就是这次故障的唯一原因。</p>
+<h2 id="4">4 更有针对性的排查顺序</h2>
+<p>如果遇到相同现象，可以按以下顺序检查：</p>
+<p><strong>第一步：确认网络本身</strong></p>
+<p>先关闭代理，确认校园网是否能够正常访问国内网站。如果基础网络已经不可用，就应先处理校园网连接，而不是继续排查代理节点。</p>
+<p><strong>第二步：比较不同网络</strong></p>
+<p>在手机热点和校园网之间切换，使用相同节点进行测试。如果只有校园网异常，重点检查网络环境差异。</p>
+<p><strong>第三步：检查规则命中</strong></p>
+<p>查看 Clash Verge 日志，确认目标域名最终匹配的是 DIRECT 还是代理策略组。日志中的 <code>dial DIRECT</code> 表示该请求走的是直连路径，并不意味着代理节点本身发生故障。</p>
+<p><strong>第四步：重新建立客户端连接</strong></p>
+<p>切换网络后，可以完全退出并重新启动 Clash Verge，让客户端重新初始化连接和节点状态。</p>
+<p><strong>第五步：再考虑 TUN 与系统代理</strong></p>
+<p>如果部分应用不遵循系统代理，或者校园网下的路由行为不同，可以再测试 TUN 模式。但应一次只调整一个变量，避免同时更改 DNS、规则、TUN 和系统代理，导致无法判断真正原因。</p>
+<h2 id="5">5 总结</h2>
+<p>这次问题并没有一个适用于所有校园网的固定配置。我的实际经验是：<strong>当同一节点在移动热点正常、校园网异常时，应优先比较网络环境与请求路由，而不是直接认定节点失效。</strong></p>
+<p>保留日志、记录当前代理模式，并一次只调整一个配置项，会比反复重置客户端更容易找到问题所在。</p></article></div><nav class="page-toc article-toc is-visible" aria-label="On this page"><span class="toc-title">ON THIS PAGE</span><a href="#1" class="toc-level-1">1 问题现象</a><a href="#2" class="toc-level-1">2 为什么手机热点正常、校园网异常</a><a href="#3" class="toc-level-1">3 我的实际处理过程</a><a href="#4" class="toc-level-1">4 更有针对性的排查顺序</a><a href="#5" class="toc-level-1">5 总结</a></nav></div><nav class="post-neighbors" aria-label="Adjacent posts"><a class="post-neighbor previous" href="/blog/turkey-foreign-apple-id-chatgpt-plus-cross-region-family-sharing/"><span class="post-neighbor-label"><i class="link-arrow link-arrow-left" aria-hidden="true"></i>Previous post</span><strong>土耳其 Apple ID 注册与跨区家庭共享实践</strong></a><a class="post-neighbor next" href="/blog/onedrive-proxy-login-uwp/"><span class="post-neighbor-label">Next post<i class="link-arrow" aria-hidden="true"></i></span><strong>Windows 代理环境下 OneDrive 登录异常排查</strong></a></nav></main>
+<footer class="site-footer">
+  <div class="wrap footer-utility">
+    <a class="footer-license" href="https://github.com/FuTseYi/futseyi.github.io/blob/main/LICENSING.md" target="_blank" rel="noopener noreferrer"><span>Go ahead, steal it</span><span class="link-arrow" aria-hidden="true"></span><span>CC BY 4.0 &middot; Code MIT</span></a>
+    <a class="footer-back-top" href="#main">Back to top <span class="link-arrow link-arrow-up" aria-hidden="true"></span></a>
+  </div>
+  <div class="footer-divider"><div class="wrap footer-inner">
+    <a class="footer-brand" href="https://github.com/FuTseYi/futseyi.github.io" target="_blank" rel="noopener noreferrer">&copy; <time data-current-year datetime="2026">2026</time> <span>FuTseYi <span class="alias">(Shine)</span></span></a>
+    <nav class="hero-links footer-social" aria-label="Social links"><a href="mailto:hello@futseyi.com" aria-label="Email" title="Email"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 6 9 7 9-7"/></svg></a>
+<a href="https://github.com/FuTseYi" target="_blank" rel="noopener noreferrer" aria-label="GitHub" title="GitHub"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 19c-4.3 1.3-4.3-2.2-6-2.6m12 5v-3.4c0-1 .1-1.5-.5-2.1 3.3-.4 6.8-1.6 6.8-7.3a5.7 5.7 0 0 0-1.5-4c.2-.4.7-1.9-.2-3.9 0 0-1.2-.4-4 1.5a13.7 13.7 0 0 0-7.2 0C5.6.3 4.4.7 4.4.7c-.9 2-.4 3.5-.2 3.9a5.7 5.7 0 0 0-1.5 4c0 5.7 3.5 6.9 6.8 7.3-.5.5-.6 1.1-.5 2.1v3.4"/></svg></a>
+<a href="https://www.linkedin.com/in/futseyi" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" title="LinkedIn"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 10v7m0-10v.01M11 17v-7m0 3a3 3 0 0 1 6 0v4"/></svg></a>
+          <a href="https://x.com/FuTseYi" target="_blank" rel="noopener noreferrer" aria-label="X" title="X"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 4h4l12 16h-4L4 4ZM4 20 20 4"/></svg></a></nav>
+  </div></div>
+</footer>
+</body></html>

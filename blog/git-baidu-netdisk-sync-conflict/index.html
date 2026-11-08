@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="把 Git 仓库放进网盘同步目录，看起来可以同时获得跨设备访问和云端保存，但这并不等于为仓库建立了可靠备份。多数普通网盘同步工具主要依据文件变化进行同步，并不了解 Git 对 .git 目录中对象和引用的更新语义；如果两者同时读写同一仓库，就可能产生难以定位的异常。">
+<meta property="og:site_name" content="FuTseYi (Shine)">
+<meta property="og:title" content="Git 仓库与百度网盘同步冲突排查">
+<meta property="og:description" content="把 Git 仓库放进网盘同步目录，看起来可以同时获得跨设备访问和云端保存，但这并不等于为仓库建立了可靠备份。多数普通网盘同步工具主要依据文件变化进行同步，并不了解 Git 对 .git 目录中对象和引用的更新语义；如果两者同时读写同一仓库，就可能产生难以定位的异常。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.futseyi.com/blog/git-baidu-netdisk-sync-conflict/">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.futseyi.com/assets/images/profile/me.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1378">
+<meta property="og:image:height" content="2065">
+<meta property="og:image:alt" content="FuTseYi&#x27;s profile photo">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:site" content="@FuTseYi">
+<meta name="twitter:title" content="Git 仓库与百度网盘同步冲突排查">
+<meta name="twitter:description" content="把 Git 仓库放进网盘同步目录，看起来可以同时获得跨设备访问和云端保存，但这并不等于为仓库建立了可靠备份。多数普通网盘同步工具主要依据文件变化进行同步，并不了解 Git 对 .git 目录中对象和引用的更新语义；如果两者同时读写同一仓库，就可能产生难以定位的异常。">
+<meta name="twitter:image" content="https://www.futseyi.com/assets/images/profile/me.jpg">
+<meta name="twitter:image:alt" content="FuTseYi&#x27;s profile photo">
+<meta property="article:tag" content="Git">
+<meta property="article:tag" content="百度网盘">
+<meta property="article:tag" content="Troubleshooting">
+<title>Git 仓库与百度网盘同步冲突排查 · FuTseYi</title><link rel="canonical" href="https://www.futseyi.com/blog/git-baidu-netdisk-sync-conflict/">
+<link rel="icon" href="/assets/icons/favicon.ico" sizes="any">
+<link rel="icon" href="/assets/icons/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="/assets/icons/site.webmanifest">
+<link rel="preload" href="/assets/fonts/caveat-handwriting.woff2" as="font" type="font/woff2" crossorigin>
+<script data-theme-init>
+    (() => {
+      document.documentElement.classList.add('js');
+      let theme = 'system';
+      try { theme = localStorage.getItem('site-theme') || 'system'; } catch {}
+      if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+    })();
+  </script>
+<link rel="stylesheet" href="/assets/css/style.css?v=525538209899"><script src="https://cdn.jsdelivr.net/npm/swup@4.10.0/dist/Swup.umd.js" defer></script>
+<script src="/assets/js/site.js?v=7c24c70d02eb" defer></script>
+<script src="/assets/js/atmosphere.js?v=a822ac798e30" defer></script>
+</head>
+<body class="blog-page article-page">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header" id="site-header">
+  <div class="header-inner">
+    <a class="brand" href="/" aria-label="FuTseYi (Shine) homepage"><img src="/assets/icons/favicon.svg" alt="" width="36" height="36"></a>
+    <button class="theme-control" type="button" aria-label="Color theme: System. Switch to Light" title="System theme. Click for Light" data-mode="system">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <g data-theme-icon="system"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></g>
+        <g data-theme-icon="light"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.4 1.4m11.2 11.2L19 19M5 19l1.4-1.4M17.6 6.4 19 5"/></g>
+        <g data-theme-icon="dark"><path d="M20.5 14A8.5 8.5 0 0 1 10 3.5 8.5 8.5 0 1 0 20.5 14Z"/></g>
+      </svg>
+    </button>
+    <button class="nav-toggle" type="button" aria-controls="primary-navigation" aria-expanded="false" aria-label="Open navigation menu">
+      <span class="menu-icon" aria-hidden="true"><span></span><span></span><span></span></span>
+    </button>
+    <nav class="nav-links" id="primary-navigation" aria-label="Main navigation">
+      <a href="/#about">About</a>
+      <a href="/#education">Education</a>
+
+      <a href="/#active-in">Active In</a>
+      <a href="/#contributions">Contributions</a>
+      <a href="/blog/" class="is-active" aria-current="page">Blog</a>
+
+    </nav>
+  </div>
+</header>
+<main class="blog-container wrap" id="main"><div class="article-layout"><div class="article-main"><a class="back-link" href="/blog/"><span class="link-arrow link-arrow-left" aria-hidden="true"></span>All posts</a><div class="article-head"><span class="blog-kicker">BLOG & NOTES</span><h1>Git 仓库与百度网盘同步冲突排查</h1><div class="article-meta"><time class="post-date" datetime="2026-10-12">Oct 12, 2026</time><a class="post-date" href="https://github.com/FuTseYi/futseyi.github.io/edit/main/posts/git-baidu-netdisk-sync-conflict/index.md" target="_blank" rel="noopener noreferrer"><em>Edit on GitHub</em></a></div><div class="post-tags"><a class="post-tag" href="/blog/tags/#tag-5819778898df"># Git</a><a class="post-tag" href="/blog/tags/#tag-82071ba1957a"># 百度网盘</a><a class="post-tag" href="/blog/tags/#tag-285ec850c11d"># Troubleshooting</a></div></div><div class="article-toc-inline"><button class="article-toc-toggle" type="button" aria-expanded="false" aria-controls="article-toc-links">On this page</button><div class="article-toc-panel"><div class="article-toc-clip"><nav id="article-toc-links" aria-label="Article contents"><a href="#1" class="toc-level-1">1 问题背景</a><a href="#2" class="toc-level-1">2 遇到的错误</a><a href="#3" class="toc-level-1">3 原因与处理</a><a href="#4" class="toc-level-1">4 更稳妥的目录管理方式</a><a href="#5" class="toc-level-1">5 验证与日常检查</a><a href="#6" class="toc-level-1">6 总结</a></nav></div></div></div><article class="article" data-pagefind-body><h2 id="1">1 问题背景</h2>
+<p>把 Git 仓库放进网盘同步目录，看起来可以同时获得跨设备访问和云端保存，但这并不等于为仓库建立了可靠备份。多数普通网盘同步工具主要依据文件变化进行同步，并不了解 Git 对 <code>.git</code> 目录中对象和引用的更新语义；如果两者同时读写同一仓库，就可能产生难以定位的异常。</p>
+<p>我在整理个人归档目录时遇到了这类问题。下面结合当时的报错，说明它可能如何发生、我采取了什么处理，以及怎样划分同步、版本管理和备份的边界。</p>
+<h2 id="2">2 遇到的错误</h2>
+<p>2026 年 10 月 12 日，我在仓库中执行：</p>
+<div class="codehilite"><pre><span></span><code>git<span class="w"> </span>pull<span class="w"> </span>--tags<span class="w"> </span>origin<span class="w"> </span>main
+</code></pre></div>
+
+<p>Git 返回：</p>
+<div class="codehilite"><pre><span></span><code>fatal: bad object refs/heads/main.baiduyun.uploading.cfg
+error: https://github.com/FuTseYi/Personal_Folders.git did not send all necessary objects
+</code></pre></div>
+
+<p>其中值得注意的是：</p>
+<div class="codehilite"><pre><span></span><code>refs/heads/main.baiduyun.uploading.cfg
+</code></pre></div>
+
+<p>这个文件名带有百度网盘同步过程中的临时标记。问题并不是普通的远端分支冲突，而是 Git 读取本地引用时，遇到了同步客户端正在处理的文件。</p>
+<h2 id="3">3 原因与处理</h2>
+<p>Git 的 <code>.git</code> 目录保存提交对象、引用和索引等内部数据。网盘同步工具看到的只是普通文件，并不知道 Git 可能正在更新引用、写入对象或重建索引。</p>
+<p>如果同步客户端恰好在 Git 操作期间处理这些文件，就可能出现短暂的临时文件、引用状态不一致，甚至对象缺失等异常。</p>
+<p>这次我采用的处理方式很简单：</p>
+<ol>
+<li>暂停或退出百度网盘同步客户端，避免它继续处理仓库目录</li>
+<li>等待 Git 操作和文件写入完全停止</li>
+<li>重新启动同步客户端，让它完成当前同步状态的整理</li>
+<li>再次执行 Git 操作，确认仓库恢复正常</li>
+</ol>
+<p>当时关闭同步后重新同步，问题便不再出现。这个结果说明冲突与同步时序有关，但不应据此认定所有类似错误都由网盘造成。</p>
+<h2 id="4">4 更稳妥的目录管理方式</h2>
+<p>对于同时使用 Git 和网盘的个人归档，我更倾向于把两者的职责分开：</p>
+<ul>
+<li><strong>Git 仓库</strong>：负责代码版本、提交历史、分支和远端协作</li>
+<li><strong>网盘同步空间</strong>：负责普通文件在设备之间的同步</li>
+<li><strong>独立备份</strong>：负责保存可恢复的历史副本</li>
+</ul>
+<p>如果确实需要把仓库放在同步空间中，尽量避免多个设备同时操作同一个仓库，也不要让同步客户端在 Git 正在执行 pull、checkout、rebase 或 commit 时改写 <code>.git</code>。</p>
+<p>更稳妥的做法，是把正在开发的仓库放在本地普通目录，完成提交和推送后，再将需要归档的文件或仓库快照复制到网盘。若需要完整 Git 历史，可以使用 Git bundle 或镜像方式保存，而不只是下载源码 ZIP。</p>
+<h2 id="5">5 验证与日常检查</h2>
+<p>遇到类似问题时，可以先检查仓库状态：</p>
+<div class="codehilite"><pre><span></span><code>git<span class="w"> </span>status
+git<span class="w"> </span>branch<span class="w"> </span>-avv
+git<span class="w"> </span>fsck<span class="w"> </span>--full
+</code></pre></div>
+
+<p>其中 <code>git fsck --full</code> 可以帮助检查对象数据库的一致性。执行修复或清理前，建议先保留当前目录副本，不要直接删除不认识的 <code>.git</code> 文件。</p>
+<p>如果问题只在网盘同步期间出现，先暂停同步、确认 Git 状态，再恢复同步，比反复执行 pull 或 reset 更稳妥。</p>
+<h2 id="6">6 总结</h2>
+<p>这次排查让我更明确了一点：<strong>同步不等于版本控制，版本控制也不等于备份。</strong></p>
+<p>Git 需要对仓库内部状态进行有序、原子的更新，而普通网盘同步工具并不具备 Git 感知能力。把两者放在同一目录时，关键不是简单地让它们同时工作，而是明确操作边界和先后顺序。</p>
+<p>对需要长期维护的个人归档来说，让 Git 管理版本、让网盘管理普通文件同步，再单独保留可恢复的备份，会更容易维护。</p></article></div><nav class="page-toc article-toc is-visible" aria-label="On this page"><span class="toc-title">ON THIS PAGE</span><a href="#1" class="toc-level-1">1 问题背景</a><a href="#2" class="toc-level-1">2 遇到的错误</a><a href="#3" class="toc-level-1">3 原因与处理</a><a href="#4" class="toc-level-1">4 更稳妥的目录管理方式</a><a href="#5" class="toc-level-1">5 验证与日常检查</a><a href="#6" class="toc-level-1">6 总结</a></nav></div><nav class="post-neighbors" aria-label="Adjacent posts"><a class="post-neighbor previous" href="/blog/baidu-netdisk-onedrive-sync-backup/"><span class="post-neighbor-label"><i class="link-arrow link-arrow-left" aria-hidden="true"></i>Previous post</span><strong>百度网盘与 OneDrive 的文件同步与备份实践</strong></a><a class="post-neighbor next" href="/blog/cloudflare-email-routing-outlook-forwarding/"><span class="post-neighbor-label">Next post<i class="link-arrow" aria-hidden="true"></i></span><strong>Cloudflare Email Routing：自有域名邮件转发实践</strong></a></nav></main>
+<footer class="site-footer">
+  <div class="wrap footer-utility">
+    <a class="footer-license" href="https://github.com/FuTseYi/futseyi.github.io/blob/main/LICENSING.md" target="_blank" rel="noopener noreferrer"><span>Go ahead, steal it</span><span class="link-arrow" aria-hidden="true"></span><span>CC BY 4.0 &middot; Code MIT</span></a>
+    <a class="footer-back-top" href="#main">Back to top <span class="link-arrow link-arrow-up" aria-hidden="true"></span></a>
+  </div>
+  <div class="footer-divider"><div class="wrap footer-inner">
+    <a class="footer-brand" href="https://github.com/FuTseYi/futseyi.github.io" target="_blank" rel="noopener noreferrer">&copy; <time data-current-year datetime="2026">2026</time> <span>FuTseYi <span class="alias">(Shine)</span></span></a>
+    <nav class="hero-links footer-social" aria-label="Social links"><a href="mailto:hello@futseyi.com" aria-label="Email" title="Email"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 6 9 7 9-7"/></svg></a>
+<a href="https://github.com/FuTseYi" target="_blank" rel="noopener noreferrer" aria-label="GitHub" title="GitHub"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 19c-4.3 1.3-4.3-2.2-6-2.6m12 5v-3.4c0-1 .1-1.5-.5-2.1 3.3-.4 6.8-1.6 6.8-7.3a5.7 5.7 0 0 0-1.5-4c.2-.4.7-1.9-.2-3.9 0 0-1.2-.4-4 1.5a13.7 13.7 0 0 0-7.2 0C5.6.3 4.4.7 4.4.7c-.9 2-.4 3.5-.2 3.9a5.7 5.7 0 0 0-1.5 4c0 5.7 3.5 6.9 6.8 7.3-.5.5-.6 1.1-.5 2.1v3.4"/></svg></a>
+<a href="https://www.linkedin.com/in/futseyi" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" title="LinkedIn"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 10v7m0-10v.01M11 17v-7m0 3a3 3 0 0 1 6 0v4"/></svg></a>
+          <a href="https://x.com/FuTseYi" target="_blank" rel="noopener noreferrer" aria-label="X" title="X"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 4h4l12 16h-4L4 4ZM4 20 20 4"/></svg></a></nav>
+  </div></div>
+</footer>
+</body></html>

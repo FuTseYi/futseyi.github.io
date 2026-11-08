@@ -1,9 +1,0 @@
-__pycache__/
-*.py[cod]
-_site/
-.venv/
-sitemap.xml
-
-/blog/
-
-.preview-*/

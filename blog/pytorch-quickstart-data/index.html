@@ -1,0 +1,648 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="PyTorch 有关加载数据的，主要涉及 Dataset 和 DataLoader">
+<meta property="og:site_name" content="FuTseYi (Shine)">
+<meta property="og:title" content="PyTorch 入门 02：数据处理">
+<meta property="og:description" content="PyTorch 有关加载数据的，主要涉及 Dataset 和 DataLoader">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.futseyi.com/blog/pytorch-quickstart-data/">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.futseyi.com/assets/images/profile/me.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1378">
+<meta property="og:image:height" content="2065">
+<meta property="og:image:alt" content="FuTseYi&#x27;s profile photo">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:site" content="@FuTseYi">
+<meta name="twitter:title" content="PyTorch 入门 02：数据处理">
+<meta name="twitter:description" content="PyTorch 有关加载数据的，主要涉及 Dataset 和 DataLoader">
+<meta name="twitter:image" content="https://www.futseyi.com/assets/images/profile/me.jpg">
+<meta name="twitter:image:alt" content="FuTseYi&#x27;s profile photo">
+<meta property="article:tag" content="PyTorch">
+<meta property="article:tag" content="Deep Learning">
+<meta property="article:tag" content="Tutorial">
+<title>PyTorch 入门 02：数据处理 · FuTseYi</title><link rel="canonical" href="https://www.futseyi.com/blog/pytorch-quickstart-data/">
+<link rel="icon" href="/assets/icons/favicon.ico" sizes="any">
+<link rel="icon" href="/assets/icons/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="/assets/icons/site.webmanifest">
+<link rel="preload" href="/assets/fonts/caveat-handwriting.woff2" as="font" type="font/woff2" crossorigin>
+<script data-theme-init>
+    (() => {
+      document.documentElement.classList.add('js');
+      let theme = 'system';
+      try { theme = localStorage.getItem('site-theme') || 'system'; } catch {}
+      if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+    })();
+  </script>
+<link rel="stylesheet" href="/assets/css/style.css?v=525538209899"><script src="https://cdn.jsdelivr.net/npm/swup@4.10.0/dist/Swup.umd.js" defer></script>
+<script src="/assets/js/site.js?v=7c24c70d02eb" defer></script>
+<script src="/assets/js/atmosphere.js?v=a822ac798e30" defer></script>
+</head>
+<body class="blog-page article-page">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header" id="site-header">
+  <div class="header-inner">
+    <a class="brand" href="/" aria-label="FuTseYi (Shine) homepage"><img src="/assets/icons/favicon.svg" alt="" width="36" height="36"></a>
+    <button class="theme-control" type="button" aria-label="Color theme: System. Switch to Light" title="System theme. Click for Light" data-mode="system">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <g data-theme-icon="system"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></g>
+        <g data-theme-icon="light"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.4 1.4m11.2 11.2L19 19M5 19l1.4-1.4M17.6 6.4 19 5"/></g>
+        <g data-theme-icon="dark"><path d="M20.5 14A8.5 8.5 0 0 1 10 3.5 8.5 8.5 0 1 0 20.5 14Z"/></g>
+      </svg>
+    </button>
+    <button class="nav-toggle" type="button" aria-controls="primary-navigation" aria-expanded="false" aria-label="Open navigation menu">
+      <span class="menu-icon" aria-hidden="true"><span></span><span></span><span></span></span>
+    </button>
+    <nav class="nav-links" id="primary-navigation" aria-label="Main navigation">
+      <a href="/#about">About</a>
+      <a href="/#education">Education</a>
+
+      <a href="/#active-in">Active In</a>
+      <a href="/#contributions">Contributions</a>
+      <a href="/blog/" class="is-active" aria-current="page">Blog</a>
+
+    </nav>
+  </div>
+</header>
+<main class="blog-container wrap" id="main"><div class="article-layout"><div class="article-main"><a class="back-link" href="/blog/"><span class="link-arrow link-arrow-left" aria-hidden="true"></span>All posts</a><div class="article-head"><span class="blog-kicker">BLOG & NOTES</span><h1>PyTorch 入门 02：数据处理</h1><div class="article-meta"><time class="post-date" datetime="2025-07-14">Jul 14, 2025</time><a class="post-date" href="https://github.com/FuTseYi/futseyi.github.io/edit/main/posts/pytorch-quickstart-data/index.md" target="_blank" rel="noopener noreferrer"><em>Edit on GitHub</em></a></div><div class="post-tags"><a class="post-tag" href="/blog/tags/#tag-98a2e30eeb85"># PyTorch</a><a class="post-tag" href="/blog/tags/#tag-5b8059958504"># Deep Learning</a><a class="post-tag" href="/blog/tags/#tag-2701a94c0eb5"># Tutorial</a></div></div><div class="article-toc-inline"><button class="article-toc-toggle" type="button" aria-expanded="false" aria-controls="article-toc-links">On this page</button><div class="article-toc-panel"><div class="article-toc-clip"><nav id="article-toc-links" aria-label="Article contents"><a href="#02" class="toc-level-1">第 02 讲 数据📝</a><a href="#11" class="toc-level-1">1.1 加载数据</a><a href="#111-dataset" class="toc-level-2">1.1.1 Dataset</a><a href="#112-tensorboard" class="toc-level-2">1.1.2 TensorBoard</a><a href="#12" class="toc-level-1">1.2 转换数据</a><a href="#121-transforms" class="toc-level-2">1.2.1 Transforms(一个工具箱)</a><a href="#122-dataloader" class="toc-level-2">1.2.2 DataLoader</a></nav></div></div></div><article class="article" data-pagefind-body><h2 id="02">第 02 讲 数据📝</h2>
+<h2 id="11">1.1 加载数据</h2>
+<h3 id="111-dataset">1.1.1 Dataset</h3>
+<blockquote>
+<p>PyTorch 有关加载数据的，主要涉及 <strong>Dataset</strong> 和 <strong>DataLoader</strong></p>
+<p>前者主要告诉后者如何 <strong>获取数据</strong> ，后者主要用于 <strong>加载数据和为网络提供数据</strong></p>
+</blockquote>
+<p><img alt="" src="assets/35b6ed1c23fde4eb9b0751ad293963a2-uuhm5y0k-z1x1j93.webp" loading="lazy" decoding="async"  width="1703" height="791" /></p>
+<div class="codehilite"><pre><span></span><code>Dataset
+
+    需要继承抽象父类 \`Dataset\`
+
+    需要重写两个方法 
+
+        \`__getitem__\` 
+
+        \`__len__\`
+</code></pre></div>
+
+<blockquote>
+<p>read_data.py</p>
+</blockquote>
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dataset</span>  
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">PIL</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span>  
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>  
+
+
+
+<span class="c1"># 自己封装的 MyData类  </span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">MyData</span><span class="p">(</span><span class="n">Dataset</span><span class="p">):</span>  
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root_dir</span><span class="p">,</span> <span class="n">label_dir</span><span class="p">):</span>  
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">root_dir</span> <span class="o">=</span> <span class="n">root_dir</span>  
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">label_dir</span> <span class="o">=</span> <span class="n">label_dir</span>  
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_dir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">label_dir</span><span class="p">)</span>  
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">img_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>  
+
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>  
+
+        <span class="n">img_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">img_path</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>  
+
+        <span class="n">img_item_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_dir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">label_dir</span><span class="p">,</span> <span class="n">img_name</span><span class="p">)</span>  
+
+        <span class="n">img</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">img_item_path</span><span class="p">)</span>  
+
+        <span class="n">label</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">label_dir</span>  
+
+        <span class="k">return</span> <span class="n">img</span><span class="p">,</span> <span class="n">label</span>  
+
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  
+
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">img_path</span><span class="p">)</span>  
+
+
+
+<span class="n">root_dir</span> <span class="o">=</span> <span class="s2">"dataset/train"</span>  
+
+<span class="n">ants_label_dir</span> <span class="o">=</span> <span class="s2">"ants"</span>  
+
+<span class="n">bees_label_dir</span> <span class="o">=</span> <span class="s2">"bees"</span>  
+
+<span class="n">ants_dataset</span> <span class="o">=</span> <span class="n">MyData</span><span class="p">(</span><span class="n">root_dir</span><span class="p">,</span> <span class="n">ants_label_dir</span><span class="p">)</span>  
+
+<span class="n">bees_dataset</span> <span class="o">=</span> <span class="n">MyData</span><span class="p">(</span><span class="n">root_dir</span><span class="p">,</span> <span class="n">bees_label_dir</span><span class="p">)</span>  
+
+
+
+<span class="c1"># 第1种方式  </span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">ants_dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>  
+
+
+
+<span class="c1"># 第2种方式（根据上面返回的提示而修改）  </span>
+
+<span class="n">img</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="n">ants_dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  
+
+<span class="n">img</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>  
+
+
+
+<span class="c1"># 测试两个数据集的拼接 未改变顺序，ants在前 bees在后  </span>
+
+<span class="n">train_dataset</span> <span class="o">=</span> <span class="n">ants_dataset</span> <span class="o">+</span> <span class="n">bees_dataset</span>  
+
+<span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ants_dataset</span><span class="p">))</span>  
+
+<span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bees_dataset</span><span class="p">))</span>  
+
+<span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">train_dataset</span><span class="p">))</span>  
+
+
+
+<span class="n">img</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="n">train_dataset</span><span class="p">[</span><span class="mi">123</span><span class="p">]</span>  
+
+<span class="n">img</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>  
+
+<span class="n">img</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="n">train_dataset</span><span class="p">[</span><span class="mi">124</span><span class="p">]</span>  
+
+<span class="n">img</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+
+<h3 id="112-tensorboard">1.1.2 TensorBoard</h3>
+<blockquote>
+<p>我们不知道一个神经网络执行具体细节是什么，要人工调试十分困难</p>
+<p>TensorBoard 可以将程序的执行步骤都显示出来，对训练的参数（如损失值）统计并以图展现</p>
+</blockquote>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 在「pytorch」环境中安装（记得关闭梯子）</span>
+
+pip<span class="w"> </span>install<span class="w"> </span>tensorboard
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code>SummaryWriter类
+
+    创建一个事件文件，在给定的目录中添加摘要和事件
+
+        参数1 存放日志的文件夹名
+
+本节视频只用到两个方法
+
+    1. add_image()        
+
+        在事件文件中添加图片
+
+    2. add_scalar()    
+
+        在TensorBoard中添加标量数据
+
+        该方法可以用来添加训练过程中的损失值、准确率等指标，以便于在TensorBoard中进行可视化和比较
+</code></pre></div>
+
+<blockquote>
+<p>test_tb.py</p>
+</blockquote>
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.tensorboard</span><span class="w"> </span><span class="kn">import</span> <span class="n">SummaryWriter</span>  
+
+
+
+<span class="n">writer</span> <span class="o">=</span> <span class="n">SummaryWriter</span><span class="p">(</span><span class="s2">"logs"</span><span class="p">)</span>  <span class="c1">##存储到logs的文件夹</span>
+
+
+
+<span class="c1"># y = 2x  </span>
+
+<span class="c1"># 同一个图像标题下，重复修改y值会导致，新图会包含之前的旧图(是个bug,可以通过删除logs文件再创建)  </span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>  
+
+    <span class="n">writer</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span><span class="s2">"y = 2x"</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>  <span class="c1"># 2*i y轴    i x轴</span>
+
+<span class="n">writer</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</code></pre></div>
+
+<blockquote>
+<p>查看日志的命令</p>
+</blockquote>
+<div class="codehilite"><pre><span></span><code><span class="c1"># logdir=事件文件所在的 文件夹名</span>
+
+tensorboard<span class="w"> </span>--logdir<span class="o">=</span>logs
+
+<span class="c1"># 可以修改端口(原端口6006)</span>
+
+tensorboard<span class="w"> </span>--logdir<span class="o">=</span>logs<span class="w"> </span>--port<span class="o">=</span><span class="m">6007</span>
+</code></pre></div>
+
+<blockquote>
+<p>tensorboard.py</p>
+</blockquote>
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.tensorboard</span><span class="w"> </span><span class="kn">import</span> <span class="n">SummaryWriter</span>  
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">PIL</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span>  
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>  
+
+
+
+<span class="n">writer</span> <span class="o">=</span> <span class="n">SummaryWriter</span><span class="p">(</span><span class="s2">"logs"</span><span class="p">)</span>  
+
+
+
+<span class="c1"># 第1步  </span>
+
+<span class="c1"># image_path = "data/train/ants_image/0013035.jpg"  </span>
+
+<span class="c1"># 第2步  </span>
+
+<span class="n">image_path</span> <span class="o">=</span> <span class="s2">"data/train/bees_image/16838648_415acd9e3f.jpg"</span>  
+
+
+
+<span class="n">img_PIL</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">image_path</span><span class="p">)</span>  <span class="c1">##获取的图像为PIL型</span>
+
+<span class="n">img_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">img_PIL</span><span class="p">)</span>  <span class="c1">##从numpy转换图片类型格式,转为numpy.ndarray型</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">img_array</span><span class="p">))</span>  
+
+<span class="nb">print</span><span class="p">(</span><span class="n">img_array</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="c1">##查看格式为 "HWC"</span>
+
+
+
+<span class="c1"># 从PIL到Numpy，需要在add_image()中指定图像的每一维  </span>
+
+<span class="n">writer</span><span class="o">.</span><span class="n">add_image</span><span class="p">(</span><span class="s2">"test"</span><span class="p">,</span> <span class="n">img_array</span><span class="p">,</span> <span class="n">global_step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dataformats</span><span class="o">=</span><span class="s2">"HWC"</span><span class="p">)</span>
+    <span class="c1">##`global_step=1`就是告诉TensorBoard：“这张图是训练到第1步时的样子”。通过调整这个值，你能在TensorBoard中滑动查看训练过程中图像的演变。</span>
+    <span class="c1">##这里的dataformats="HWC"是格式,H代表高度,W代表宽度,C代表通道  </span>
+
+
+<span class="n">writer</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</code></pre></div>
+
+<h2 id="12">1.2 转换数据</h2>
+<h3 id="121-transforms">1.2.1 Transforms(一个工具箱)</h3>
+<blockquote>
+<p>Transforms 主要是用于图像变换的操作，可以对图像进行裁剪、标准化等</p>
+</blockquote>
+<p>其包括很多常用的图像处理方法，比如 <code>transforms.ToTensor()</code> <img alt="" src="assets/3faee1e71ef0c2eec74cea13a763c273-brfwqy8f-zmvgw1.webp" loading="lazy" decoding="async"  width="1386" height="913" /></p>
+<blockquote>
+<p><strong>为什么用 Tensor 数据类型？</strong>
+Tensor 类型中的很多属性我们都需要在神经网络中用到，如反向传播、梯度等</p>
+<p>test_tf.py</p>
+</blockquote>
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">PIL</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span>  
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.tensorboard</span><span class="w"> </span><span class="kn">import</span> <span class="n">SummaryWriter</span>  
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">torchvision</span><span class="w"> </span><span class="kn">import</span> <span class="n">transforms</span>  
+
+
+
+<span class="n">img_path</span> <span class="o">=</span> <span class="s2">"data/train/ants_image/0013035.jpg"</span>  
+
+<span class="n">img</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">img_path</span><span class="p">)</span>  
+
+<span class="nb">print</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>  
+
+
+
+<span class="c1"># 使用transforms  </span>
+
+
+
+<span class="o">&gt;</span> <span class="n">ToTensor</span><span class="p">()</span> <span class="n">可传入</span>\<span class="err">`</span><span class="n">PIL</span> <span class="n">Image</span>\<span class="err">`</span> <span class="n">和</span> \<span class="err">`</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span>\<span class="err">`</span> <span class="n">两种图片格式</span>  
+<span class="o">&gt;</span> 
+<span class="o">&gt;</span>     <span class="n">PIL</span> <span class="n">Image</span><span class="err">：</span><span class="n">即用PIL的Image工具打开图像的格式</span>  
+<span class="o">&gt;</span> 
+<span class="o">&gt;</span>     <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="err">：</span><span class="n">即用OpenCV打开图像的格式</span><span class="err">（</span><span class="n">所以一般用这种方式打开</span><span class="err">，</span><span class="n">不用再转换图像了</span><span class="err">）</span>  
+
+
+
+<span class="n">tensor_trans</span> <span class="o">=</span> <span class="n">transforms</span><span class="o">.</span><span class="n">ToTensor</span><span class="p">()</span> <span class="c1">##创建tensor_trans工具 </span>
+
+<span class="n">tensor_img</span> <span class="o">=</span> <span class="n">tensor_trans</span><span class="p">(</span><span class="n">img</span><span class="p">)</span> <span class="c1">##使用tensor_trans工具将img转为Tensor型img </span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">tensor_img</span><span class="p">)</span>  
+
+
+<span class="c1"># 创建tensorboard日志 可以使用tensorboard直观展示</span>
+
+<span class="n">writer</span> <span class="o">=</span> <span class="n">SummaryWriter</span><span class="p">(</span><span class="s2">"logs"</span><span class="p">)</span>  
+
+<span class="n">writer</span><span class="o">.</span><span class="n">add_image</span><span class="p">(</span><span class="s2">"Tensor_img"</span><span class="p">,</span> <span class="n">tensor_img</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>  
+
+<span class="n">writer</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</code></pre></div>
+
+<blockquote>
+<p>补充: 使用 opencv 读取图片</p>
+</blockquote>
+<div class="codehilite"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">cv2</span>
+
+<span class="n">cv_img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">img_path</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">cv_img</span><span class="p">)</span> <span class="c1">## 使用opencv读取图片,可以直接得到numpy.ndarray类型img</span>
+</code></pre></div>
+
+<blockquote>
+<p>多关注 <strong>「输入、输出」</strong> 类型，不会的多看 <strong>「官方文档」</strong>
+关注方法需要的 <strong>「参数」</strong> ，不知道返回值的时候 「Print」打印查看</p>
+<p>call.py
+展示 Python 中 <strong>call</strong> 的用法</p>
+</blockquote>
+<div class="codehilite"><pre><span></span><code><span class="c1"># __call__ 让对象可以直接当函数使用</span>
+
+<span class="c1"># 测试</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Person</span><span class="p">:</span>  
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>  
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">" Hello "</span><span class="o">+</span><span class="n">name</span><span class="p">)</span>  
+
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">hello</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>  
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"Hello "</span><span class="o">+</span><span class="n">name</span><span class="p">)</span>  
+
+
+
+<span class="n">person</span> <span class="o">=</span> <span class="n">Person</span><span class="p">()</span>  
+
+<span class="c1">#以下两种调用方式</span>
+<span class="n">person</span><span class="p">(</span><span class="s2">"zhangsan"</span><span class="p">)</span><span class="c1">## 调用的__call__</span>
+
+<span class="n">person</span><span class="o">.</span><span class="n">hello</span><span class="p">(</span><span class="s2">"lisi"</span><span class="p">)</span><span class="c1">## 调用的hello对象名</span>
+</code></pre></div>
+
+<blockquote>
+<p>useful_tf.py
+展示 transforms 的一些功能</p>
+</blockquote>
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">PIL</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span>  
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.tensorboard</span><span class="w"> </span><span class="kn">import</span> <span class="n">SummaryWriter</span>  
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">torchvision</span><span class="w"> </span><span class="kn">import</span> <span class="n">transforms</span>  
+
+
+
+<span class="n">writer</span> <span class="o">=</span> <span class="n">SummaryWriter</span><span class="p">(</span><span class="s2">"logs"</span><span class="p">)</span>  
+
+<span class="n">img</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">"images/0013035.jpg"</span><span class="p">)</span>  
+
+
+
+<span class="nb">print</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>  <span class="c1"># 打印后得知，图像为RGB三通道  </span>
+
+
+
+<span class="c1"># 01 transforms.ToTensor()  </span>
+
+<span class="n">trans_totensor</span> <span class="o">=</span> <span class="n">transforms</span><span class="o">.</span><span class="n">ToTensor</span><span class="p">()</span>  
+
+<span class="n">img_tensor</span> <span class="o">=</span> <span class="n">trans_totensor</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>  
+
+<span class="nb">print</span><span class="p">(</span><span class="n">img_tensor</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="c1">## 打印张量中第一个通道、第一行、第一列的像素值,这通常是一个介于0到1之间的浮点数  </span>
+
+<span class="n">writer</span><span class="o">.</span><span class="n">add_image</span><span class="p">(</span><span class="s2">"ToTensor"</span><span class="p">,</span> <span class="n">img_tensor</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="c1">##  0：全局步数(global step)，用于训练过程中跟踪不同步骤的图像  </span>
+
+
+
+<span class="c1"># 02 transforms.Normalize()</span>
+
+<span class="c1"># 是一种归一化,目的是将数据调整到特定的范围内，使其更适合模型训练或分析</span>
+<span class="c1"># 公式 output[channel] = (input[channel] - mean[channel]) / std[channel]  </span>
+
+<span class="n">trans_norm</span> <span class="o">=</span> <span class="n">transforms</span><span class="o">.</span><span class="n">Normalize</span><span class="p">(</span><span class="n">mean</span><span class="o">=</span><span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span> <span class="n">std</span><span class="o">=</span><span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">])</span> 
+<span class="c1">## mean平均值;std标准差  </span>
+<span class="c1">## 创建了一个标准化转换器，对RGB三个通道执行：减去均值0.5 ; 除以标准差0.5</span>
+<span class="c1">## 公式为：normalized = (input - mean) / std</span>
+
+<span class="n">img_norm</span> <span class="o">=</span> <span class="n">trans_norm</span><span class="p">(</span><span class="n">img_tensor</span><span class="p">)</span> <span class="c1">## 输入01得到的Tensor型img  </span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">img_norm</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>  
+
+<span class="n">writer</span><span class="o">.</span><span class="n">add_image</span><span class="p">(</span><span class="s2">"Normalize"</span><span class="p">,</span> <span class="n">img_norm</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>  
+
+
+
+<span class="c1"># 03 Resize  用于调整图像尺寸</span>
+
+<span class="c1"># 图像为PIL，经过Resize后，仍为PIL.设计初衷就是处理PIL图像，并保持相同的数据类型输出 </span>
+<span class="c1"># transforms.Resize()可以接受两种参数形式：1. 单个整数：将图像的短边缩放到该尺寸，长边按比例缩放 2. 元组(h,w)：将图像精确缩放到指定尺寸</span>
+
+<span class="n">trans_resize</span> <span class="o">=</span> <span class="n">transforms</span><span class="o">.</span><span class="n">Resize</span><span class="p">((</span><span class="mi">512</span><span class="p">,</span> <span class="mi">512</span><span class="p">))</span>  
+
+<span class="n">img_resize</span> <span class="o">=</span> <span class="n">trans_resize</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>  
+
+<span class="c1"># 将PIL转为Tensor  </span>
+
+<span class="n">img_resize</span> <span class="o">=</span> <span class="n">trans_totensor</span><span class="p">(</span><span class="n">img_resize</span><span class="p">)</span>  
+
+<span class="n">writer</span><span class="o">.</span><span class="n">add_image</span><span class="p">(</span><span class="s2">"Resize"</span><span class="p">,</span> <span class="n">img_resize</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>  
+
+
+
+<span class="c1"># 04 Compose 可以将几个转换组合在一起，先resize，再tensor</span>
+<span class="c1"># Compose中的操作顺序必须合理</span>
+
+<span class="n">trans_resize_2</span> <span class="o">=</span> <span class="n">transforms</span><span class="o">.</span><span class="n">Resize</span><span class="p">(</span><span class="mi">512</span><span class="p">)</span>  
+
+<span class="n">trans_compose</span> <span class="o">=</span> <span class="n">transforms</span><span class="o">.</span><span class="n">Compose</span><span class="p">([</span><span class="n">trans_resize_2</span><span class="p">,</span> <span class="n">trans_totensor</span><span class="p">])</span>  <span class="c1">##相当于合并两个过程</span>
+
+<span class="n">img_resize_2</span> <span class="o">=</span> <span class="n">trans_compose</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>  
+
+<span class="n">writer</span><span class="o">.</span><span class="n">add_image</span><span class="p">(</span><span class="s2">"Resize"</span><span class="p">,</span> <span class="n">img_resize_2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>  
+
+
+
+<span class="c1"># 05 RandomCrop  随机裁剪</span>
+
+<span class="n">trans_random</span> <span class="o">=</span> <span class="n">transforms</span><span class="o">.</span><span class="n">RandomCrop</span><span class="p">(</span><span class="mi">512</span><span class="p">)</span>  
+
+<span class="n">trans_compose_2</span> <span class="o">=</span> <span class="n">transforms</span><span class="o">.</span><span class="n">Compose</span><span class="p">([</span><span class="n">trans_random</span><span class="p">,</span> <span class="n">trans_totensor</span><span class="p">])</span>  
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>  <span class="c1">##随机裁剪十个</span>
+
+    <span class="n">img_crop</span> <span class="o">=</span> <span class="n">trans_compose_2</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>  
+
+    <span class="n">writer</span><span class="o">.</span><span class="n">add_image</span><span class="p">(</span><span class="s2">"RandomCrop"</span><span class="p">,</span> <span class="n">img_crop</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>  
+
+
+
+<span class="n">writer</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</code></pre></div>
+
+<blockquote>
+<p>dataset_tf.py
+展示 transform 与数据集使用</p>
+</blockquote>
+<div class="codehilite"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">torchvision</span>  
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.tensorboard</span><span class="w"> </span><span class="kn">import</span> <span class="n">SummaryWriter</span>  
+
+
+
+
+<span class="n">dataset_transforms</span> <span class="o">=</span> <span class="n">torchvision</span><span class="o">.</span><span class="n">transforms</span><span class="o">.</span><span class="n">Compose</span>
+<span class="p">([</span>  
+
+    <span class="n">torchvision</span><span class="o">.</span><span class="n">transforms</span><span class="o">.</span><span class="n">ToTensor</span><span class="p">()</span> 
+    <span class="c1">## 这里可以进行其他操作(比如resize等等)</span>
+
+<span class="p">])</span>  
+
+<span class="n">train_set</span> <span class="o">=</span> <span class="n">torchvision</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">CIFAR10</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="s1">'./dataset'</span><span class="p">,</span>
+
+                                        <span class="n">train</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+
+                                        <span class="n">transform</span><span class="o">=</span><span class="n">dataset_transforms</span><span class="p">,</span>
+
+                                        <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  
+
+<span class="n">test_set</span> <span class="o">=</span> <span class="n">torchvision</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">CIFAR10</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="s1">'./dataset'</span><span class="p">,</span>
+
+                                        <span class="n">train</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+
+                                        <span class="n">transform</span><span class="o">=</span><span class="n">dataset_transforms</span><span class="p">,</span>
+
+                                        <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  
+
+
+
+<span class="c1"># 01 查看一下数据信息  </span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">test_set</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>  
+
+<span class="c1">## 输出 (&lt;PIL.Image.Image image mode=RGB size=32x32 at 0x23653E11F60&gt;, 3)</span>
+
+<span class="n">img</span><span class="p">,</span> <span class="n">target</span> <span class="o">=</span> <span class="n">test_set</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  
+
+<span class="nb">print</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>  
+
+<span class="nb">print</span><span class="p">(</span><span class="n">target</span><span class="p">)</span> <span class="c1">## 标签也就是label</span>
+
+
+
+<span class="nb">print</span><span class="p">(</span><span class="n">test_set</span><span class="o">.</span><span class="n">classes</span><span class="p">)</span>  
+
+<span class="nb">print</span><span class="p">(</span><span class="n">test_set</span><span class="o">.</span><span class="n">classes</span><span class="p">[</span><span class="n">target</span><span class="p">])</span> <span class="c1"># 输出cat(对应3)  </span>
+
+<span class="n">img</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>  
+
+
+
+<span class="c1"># 02 通过tensorboard查看  </span>
+
+<span class="n">writer</span> <span class="o">=</span> <span class="n">SummaryWriter</span><span class="p">(</span><span class="s2">"logs"</span><span class="p">)</span>  
+
+
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>  
+
+    <span class="n">img</span><span class="p">,</span> <span class="n">target</span> <span class="o">=</span> <span class="n">train_set</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>  
+
+    <span class="n">writer</span><span class="o">.</span><span class="n">add_image</span><span class="p">(</span><span class="s2">"test_set"</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>  
+
+
+
+<span class="n">writer</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</code></pre></div>
+
+<blockquote>
+<p>查看 logs 日志</p>
+</blockquote>
+<div class="codehilite"><pre><span></span><code><span class="n">tensorboard</span> <span class="o">--</span><span class="n">logdir</span><span class="o">=</span><span class="s2">"logs"</span>
+</code></pre></div>
+
+<h3 id="122-dataloader">1.2.2 DataLoader</h3>
+<blockquote>
+<p>batch_size 取四个数据打包成 imgs.targets,相当于融合在一起</p>
+</blockquote>
+<p><img alt="取四个数据打包" src="assets/b1de2e29462999e32b32df0b2a7f49ab-bnwilfj9-zsy3nn.webp" loading="lazy" decoding="async"  width="1104" height="426" /></p>
+<blockquote>
+<p>dataloader.py</p>
+</blockquote>
+<div class="codehilite"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">torchvision</span>  
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataLoader</span>  
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.tensorboard</span><span class="w"> </span><span class="kn">import</span> <span class="n">SummaryWriter</span>  
+
+
+<span class="c1"># 准备测试集</span>
+<span class="n">test_data</span> <span class="o">=</span> <span class="n">torchvision</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">CIFAR10</span><span class="p">(</span><span class="s2">"./dataset"</span><span class="p">,</span> 
+
+                                        <span class="n">train</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+
+                                        <span class="n">transform</span><span class="o">=</span><span class="n">torchvision</span><span class="o">.</span><span class="n">transforms</span><span class="o">.</span><span class="n">ToTensor</span><span class="p">(),</span>
+
+                                        <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  
+
+<span class="c1"># 加载测试集</span>
+<span class="n">test_loader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">test_data</span><span class="p">,</span><span class="n">batch_size</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span><span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+
+                                                <span class="n">num_workers</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+
+                                                <span class="n">drop_last</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  
+<span class="c1">## shuffle=True表示在每次遍历数据集（即每个 epoch）前，将数据顺序打乱</span>
+<span class="c1">## num_workers=0 表示 使用主线程加载数据（加载将是同步进行的）</span>
+
+
+<span class="c1"># 查看测试数据集中第一张图片  </span>
+
+<span class="n">img</span><span class="p">,</span> <span class="n">target</span> <span class="o">=</span> <span class="n">test_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  
+
+<span class="nb">print</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>  
+
+<span class="nb">print</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>  
+
+
+
+<span class="n">writer</span> <span class="o">=</span> <span class="n">SummaryWriter</span><span class="p">(</span><span class="s2">"dataloader"</span><span class="p">)</span>  
+
+<span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>  <span class="c1">## 遍历两轮</span>
+
+    <span class="n">step</span> <span class="o">=</span> <span class="mi">0</span>  
+
+    <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">test_loader</span><span class="p">:</span>  
+
+        <span class="n">imgs</span><span class="p">,</span> <span class="n">targets</span> <span class="o">=</span> <span class="n">data</span>  
+
+        <span class="c1"># print(imgs.shape)  </span>
+
+        <span class="c1"># print(targets)        </span>
+
+        <span class="n">writer</span><span class="o">.</span><span class="n">add_images</span><span class="p">(</span><span class="s2">"Epoch:</span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">epoch</span><span class="p">),</span><span class="n">imgs</span><span class="p">,</span><span class="n">step</span><span class="p">)</span>  
+
+        <span class="n">step</span> <span class="o">=</span> <span class="n">step</span> <span class="o">+</span> <span class="mi">1</span>  
+
+
+
+<span class="n">writer</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</code></pre></div></article></div><nav class="page-toc article-toc is-visible" aria-label="On this page"><span class="toc-title">ON THIS PAGE</span><a href="#02" class="toc-level-1">第 02 讲 数据📝</a><a href="#11" class="toc-level-1">1.1 加载数据</a><a href="#111-dataset" class="toc-level-2">1.1.1 Dataset</a><a href="#112-tensorboard" class="toc-level-2">1.1.2 TensorBoard</a><a href="#12" class="toc-level-1">1.2 转换数据</a><a href="#121-transforms" class="toc-level-2">1.2.1 Transforms(一个工具箱)</a><a href="#122-dataloader" class="toc-level-2">1.2.2 DataLoader</a></nav></div><nav class="post-neighbors" aria-label="Adjacent posts"><a class="post-neighbor previous" href="/blog/pytorch-quickstart-configuration/"><span class="post-neighbor-label"><i class="link-arrow link-arrow-left" aria-hidden="true"></i>Previous post</span><strong>PyTorch 入门 01：环境配置</strong></a><a class="post-neighbor next" href="/blog/pytorch-quickstart-neural-networks/"><span class="post-neighbor-label">Next post<i class="link-arrow" aria-hidden="true"></i></span><strong>PyTorch 入门 03：神经网络</strong></a></nav></main>
+<footer class="site-footer">
+  <div class="wrap footer-utility">
+    <a class="footer-license" href="https://github.com/FuTseYi/futseyi.github.io/blob/main/LICENSING.md" target="_blank" rel="noopener noreferrer"><span>Go ahead, steal it</span><span class="link-arrow" aria-hidden="true"></span><span>CC BY 4.0 &middot; Code MIT</span></a>
+    <a class="footer-back-top" href="#main">Back to top <span class="link-arrow link-arrow-up" aria-hidden="true"></span></a>
+  </div>
+  <div class="footer-divider"><div class="wrap footer-inner">
+    <a class="footer-brand" href="https://github.com/FuTseYi/futseyi.github.io" target="_blank" rel="noopener noreferrer">&copy; <time data-current-year datetime="2026">2026</time> <span>FuTseYi <span class="alias">(Shine)</span></span></a>
+    <nav class="hero-links footer-social" aria-label="Social links"><a href="mailto:hello@futseyi.com" aria-label="Email" title="Email"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 6 9 7 9-7"/></svg></a>
+<a href="https://github.com/FuTseYi" target="_blank" rel="noopener noreferrer" aria-label="GitHub" title="GitHub"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 19c-4.3 1.3-4.3-2.2-6-2.6m12 5v-3.4c0-1 .1-1.5-.5-2.1 3.3-.4 6.8-1.6 6.8-7.3a5.7 5.7 0 0 0-1.5-4c.2-.4.7-1.9-.2-3.9 0 0-1.2-.4-4 1.5a13.7 13.7 0 0 0-7.2 0C5.6.3 4.4.7 4.4.7c-.9 2-.4 3.5-.2 3.9a5.7 5.7 0 0 0-1.5 4c0 5.7 3.5 6.9 6.8 7.3-.5.5-.6 1.1-.5 2.1v3.4"/></svg></a>
+<a href="https://www.linkedin.com/in/futseyi" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" title="LinkedIn"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 10v7m0-10v.01M11 17v-7m0 3a3 3 0 0 1 6 0v4"/></svg></a>
+          <a href="https://x.com/FuTseYi" target="_blank" rel="noopener noreferrer" aria-label="X" title="X"><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 4h4l12 16h-4L4 4ZM4 20 20 4"/></svg></a></nav>
+  </div></div>
+</footer>
+</body></html>
