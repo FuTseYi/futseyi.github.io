@@ -240,7 +240,7 @@ def write_source():
         if old.get("entries") == updated["entries"]:
             print("Contribution source unchanged.")
             return
-    SOURCE_SNAPSHOT.write_text(json.dumps(updated, ensure_ascii=False, indent=2) + "\\n",
+    SOURCE_SNAPSHOT.write_text(json.dumps(updated, ensure_ascii=False, indent=2) + "\n",
                                encoding="utf-8")
     print(f"Updated contribution source: {len(updated['entries'])} repositories.")
 
