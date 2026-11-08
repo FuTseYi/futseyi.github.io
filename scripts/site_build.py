@@ -4,12 +4,8 @@ import shutil
 import subprocess
 import sys
 
-SOURCE_FILES = ("index.html", "robots.txt")
+SOURCE_FILES = ("index.html", "robots.txt", "contributions.json")
 SOURCE_DIRS = ("posts",)
-
-
-def configure_parser(parser):
-    parser.add_argument("--refresh-activity", action="store_true", help="Refresh public GitHub activity")
 
 
 # Summarize routine build output; retain unrecognized messages.
@@ -41,7 +37,7 @@ def run(root, script, *args):
     return result.stdout
 
 
-def assemble(root, refresh_activity=False):
+def assemble(root):
     """Reuse the deployment builders inside an isolated source copy, returning a one-line summary."""
     site = root / "_site"
     log = run(root, "build.py")
@@ -52,7 +48,7 @@ def assemble(root, refresh_activity=False):
     for name in ("assets", "blog"):
         shutil.copytree(root / name, site / name)
     log += run(root, "sync_readme.py", "--update-site")
-    log += run(root, "sync_activity.py", *(("--refresh",) if refresh_activity else ()))
+    log += run(root, "sync_activity.py")
     origin = re.search(r'<link rel="canonical" href="([^"]+)"',
                        (root / "index.html").read_text(encoding="utf-8"))[1].rstrip("/")
     robots = site / "robots.txt"
@@ -83,10 +79,6 @@ def build(root, destination, options):
     for name in ("assets", "posts", "scripts"):
         shutil.copytree(root / name, candidate / name,
                         ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
-    snapshot = root / "_site/contributions.json"
-    if snapshot.is_file():
-        (candidate / "_site").mkdir()
-        shutil.copy2(snapshot, candidate / "_site/contributions.json")
-    summary = assemble(candidate, getattr(options, "refresh_activity", False))
+    summary = assemble(candidate)
     (candidate / "_site").rename(destination)
     return summary
