@@ -281,7 +281,8 @@
     document.querySelectorAll('[data-expandable]').forEach((list) => {
       const extra = [...list.querySelectorAll(':scope > .project-item')].slice(3);
       if (!extra.length) return;
-      const yearOf = (item) => item.querySelector('time[datetime]').getAttribute('datetime').slice(0, 4);
+      const dated = list.id === 'contribution-list';
+      const yearOf = (item) => dated ? item.querySelector('time[datetime]').getAttribute('datetime').slice(0, 4) : 'all';
       const years = [...new Set(extra.map(yearOf))];
       const panel = document.createElement('div');
       panel.className = 'expandable-panel';
@@ -302,7 +303,7 @@
         panel.inert = !expanded;
         extra.forEach((item) => { item.hidden = years.indexOf(yearOf(item)) >= revealed; });
         button.setAttribute('aria-expanded', String(expanded));
-        button.textContent = revealed === years.length ? 'Show less' : `Show more · ${years[revealed]}`;
+        button.textContent = revealed === years.length ? 'Show less' : dated ? `Show more · ${years[revealed]}` : 'Show more';
       };
       sync();
       button.addEventListener('click', () => {
