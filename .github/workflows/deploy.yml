@@ -54,8 +54,6 @@ jobs:
             fi
           fi
       - name: Build and verify complete website
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
         run: |
           python preview.py --build-only
           cmp contributions.json _site/contributions.json
