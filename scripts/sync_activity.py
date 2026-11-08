@@ -8,7 +8,6 @@ import re
 from datetime import datetime, timedelta, timezone
 from html import escape
 from pathlib import Path
-from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -20,7 +19,6 @@ EXCLUDED_REPOSITORIES = {"futseyi/futseyi.github.io", "futseyi/futseyi"}
 START = "<!-- CONTRIBUTIONS:START -->"
 END = "<!-- CONTRIBUTIONS:END -->"
 REPO_NAME = re.compile(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+\Z")
-API_ERRORS = (HTTPError, URLError, TimeoutError, OSError, ValueError, KeyError, TypeError)
 
 YEARS_QUERY = """
 query($login: String!) {
@@ -218,10 +216,10 @@ def render(snapshot):
 def load_snapshot():
     """Read an existing local snapshot, never another provider's website."""
     try:
-        data = json.loads(SNAPSHOT.read_text(encoding="utf-8"))
+        data = json.loads(SOURCE_SNAPSHOT.read_text(encoding="utf-8"))
         if timestamp(data["updated_at"]) > datetime.now(timezone.utc):
             return None
-        if not isinstance(data["entries"], list):
+        if not isinstance(data["entries"], list) or not data["entries"]:
             return None
         render(data)
         return data
@@ -247,36 +245,27 @@ def write_source():
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--refresh", action="store_true", help="Fetch official GitHub contributions")
-    parser.add_argument("--write-source", action="store_true", help="Update tracked contributions.json (CI only)")
+    parser.add_argument("--write-source", action="store_true",
+                        help="Update tracked contributions.json via GitHub Actions")
     options = parser.parse_args()
     if options.write_source:
         write_source()
         return
+
     page = ROOT / "_site/index.html"
     html = page.read_text(encoding="utf-8")
     if html.count(START) != 1 or html.count(END) != 1:
         raise ValueError("Missing or duplicate contributions slot")
     snapshot = load_snapshot()
-    if options.refresh or snapshot is None:
-        if os.environ.get("GITHUB_TOKEN"):
-            try:
-                snapshot = collect()
-            except API_ERRORS as error:
-                if options.refresh:
-                    raise RuntimeError("GitHub contribution refresh failed") from error
-                print(f"::warning::GitHub contributions unavailable ({type(error).__name__}).")
-        elif options.refresh:
-            raise ValueError("GITHUB_TOKEN is required for --refresh")
     if snapshot is None:
-        return  # Keep the homepage's existing GitHub activity link.
+        raise ValueError("Missing or invalid tracked contributions.json; run the Actions sync workflow")
     content = render(snapshot)
     html = re.sub(re.escape(START) + r".*?" + re.escape(END),
                   lambda _: START + "\n" + content + "\n" + END, html, flags=re.S)
     page.write_text(html, encoding="utf-8")
-    SNAPSHOT.write_text(json.dumps(snapshot, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    SNAPSHOT.write_text(json.dumps(snapshot, ensure_ascii=False, indent=2) + "\n",
+                        encoding="utf-8")
     print(f"Rendered {len(snapshot['entries'])} public contribution repositories.")
-
 
 if __name__ == "__main__":
     main()
