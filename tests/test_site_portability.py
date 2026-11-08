@@ -1,9 +1,7 @@
 """Verify portable site generation under an unrelated repository name and domain."""
-import json
 import shutil
 import tempfile
 import unittest
-from datetime import datetime, timezone
 from pathlib import Path
 
 from site_metadata import site_url
@@ -34,7 +32,7 @@ class SitePortabilityTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory) / "renamed-private-website"
             root.mkdir()
-            for name in ("index.html", "robots.txt"):
+            for name in ("index.html", "robots.txt", "contributions.json"):
                 shutil.copy2(ROOT / name, root / name)
             for name in ("posts", "assets", "scripts"):
                 shutil.copytree(ROOT / name, root / name)
@@ -42,11 +40,6 @@ class SitePortabilityTests(unittest.TestCase):
             home.write_text(home.read_text(encoding="utf-8").replace(
                 'href="' + site_url(root) + '/"',
                 'href="https://portable.example.org/"', 1), encoding="utf-8")
-            snapshot = root / "_site/contributions.json"
-            snapshot.parent.mkdir()
-            snapshot.write_text(json.dumps({
-                "updated_at": datetime.now(timezone.utc).isoformat(), "entries": []
-            }), encoding="utf-8")
             site_build.assemble(root)
             site = root / "_site"
             self.assertIn('https://portable.example.org/', (site / "index.html").read_text(encoding="utf-8"))
