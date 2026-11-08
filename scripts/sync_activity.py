@@ -15,6 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 USER = "FuTseYi"
 API = "https://api.github.com/graphql"
 SNAPSHOT = ROOT / "_site/contributions.json"
+SOURCE_SNAPSHOT = ROOT / "contributions.json"
 EXCLUDED_REPOSITORIES = {"futseyi/futseyi.github.io", "futseyi/futseyi"}
 START = "<!-- CONTRIBUTIONS:START -->"
 END = "<!-- CONTRIBUTIONS:END -->"
@@ -228,10 +229,30 @@ def load_snapshot():
         return None
 
 
+
+def write_source():
+    """Refresh the tracked canonical snapshot only when contribution content changes."""
+    updated = collect()
+    if not updated["entries"]:
+        raise ValueError("GitHub returned no qualifying public contributions")
+    if SOURCE_SNAPSHOT.is_file():
+        old = json.loads(SOURCE_SNAPSHOT.read_text(encoding="utf-8"))
+        if old.get("entries") == updated["entries"]:
+            print("Contribution source unchanged.")
+            return
+    SOURCE_SNAPSHOT.write_text(json.dumps(updated, ensure_ascii=False, indent=2) + "\n",
+                               encoding="utf-8")
+    print(f"Updated contribution source: {len(updated['entries'])} repositories.")
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--refresh", action="store_true", help="Fetch official GitHub contributions")
+    parser.add_argument("--write-source", action="store_true", help="Update tracked contributions.json (CI only)")
     options = parser.parse_args()
+    if options.write_source:
+        write_source()
+        return
     page = ROOT / "_site/index.html"
     html = page.read_text(encoding="utf-8")
     if html.count(START) != 1 or html.count(END) != 1:

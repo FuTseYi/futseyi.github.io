@@ -14,12 +14,12 @@ on:
     # Days 1 and 15 of each month, 09:17 Asia/Shanghai (01:17 UTC).
     - cron: '17 1 1,15 * *'
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 concurrency:
   group: "pages"
-  cancel-in-progress: true
+  cancel-in-progress: false
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -36,6 +36,23 @@ jobs:
       - name: Verify preview, README, and public activity helpers
         run: |
           python -m unittest discover -s tests -t . -p 'test_*.py' -v
+      - name: Bootstrap or refresh canonical contribution data
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          set -euo pipefail
+          if [[ "$EVENT_NAME" != "push" || ! -f contributions.json ]]; then
+            python scripts/sync_activity.py --write-source
+            if [[ -n "$(git status --porcelain -- contributions.json)" ]]; then
+              git config user.name "github-actions[bot]"
+              git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+              git add contributions.json
+              git commit -m "data: update public GitHub contributions"
+              git pull --rebase origin main
+              git push origin HEAD:main
+            fi
+          fi
       - name: Build and verify complete website
         env:
           GITHUB_TOKEN: ${{ github.token }}
@@ -47,19 +64,3 @@ jobs:
           include-hidden-files: true
       - id: deployment
         uses: actions/deploy-pages@v5
-  refresh-vercel:
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    needs: publish
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v7
-      - name: Trigger Vercel via refresh commit
-        run: |
-          git fetch origin main
-          git checkout -B main origin/main
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit --allow-empty -m "chore: refresh recent open contributions"
-          git push origin HEAD:main
