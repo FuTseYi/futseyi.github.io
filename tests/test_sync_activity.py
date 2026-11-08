@@ -201,6 +201,30 @@ class ContributionTests(unittest.TestCase):
             self.assertEqual(json.loads(cache.read_text(encoding="utf-8")), original)
             self.assertEqual(page.read_text(encoding="utf-8"), source)
 
+    def test_tracked_snapshot_changes_only_when_contributions_change(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "contributions.json"
+            payload = {"updated_at": NOW.isoformat(), "entries": [record()]}
+            with patch.object(activity, "SOURCE_SNAPSHOT", path), \
+                 patch.object(activity, "collect", return_value=payload):
+                activity.write_source()
+                self.assertEqual(json.loads(path.read_text(encoding="utf-8")), payload)
+                self.assertTrue(path.read_text(encoding="utf-8").endswith("\\n"))
+                first = path.read_bytes()
+                payload["updated_at"] = (NOW + timedelta(hours=3)).isoformat()
+                activity.write_source()
+                self.assertEqual(path.read_bytes(), first)
+
+    def test_empty_refresh_cannot_replace_tracked_snapshot(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "contributions.json"
+            path.write_text("original", encoding="utf-8")
+            with patch.object(activity, "SOURCE_SNAPSHOT", path), \
+                 patch.object(activity, "collect", return_value={"updated_at": NOW.isoformat(), "entries": []}):
+                with self.assertRaisesRegex(ValueError, "no qualifying"):
+                    activity.write_source()
+            self.assertEqual(path.read_text(encoding="utf-8"), "original")
+
     def test_missing_token_keeps_homepage_fallback_for_local_build(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
