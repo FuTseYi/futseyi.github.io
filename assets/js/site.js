@@ -125,32 +125,6 @@
     const timers = new Set();
     const listen = (target, type, callback, options = {}) =>
       target.addEventListener(type, callback, { ...options, signal: controller.signal });
-    const bindCopy = (button, value) => {
-      const label = button.getAttribute('aria-label');
-      let resetTimer;
-      listen(button, 'click', async () => {
-        clearTimeout(resetTimer);
-        timers.delete(resetTimer);
-        try {
-          await navigator.clipboard.writeText(value);
-          if (controller.signal.aborted) return;
-          button.textContent = 'Copied';
-        } catch {
-          if (controller.signal.aborted) return;
-          button.textContent = 'Copy failed';
-        }
-        button.setAttribute('aria-label', button.textContent);
-        resetTimer = setTimeout(() => {
-          timers.delete(resetTimer);
-          if (controller.signal.aborted) return;
-          button.textContent = 'Copy';
-          button.setAttribute('aria-label', label);
-        }, 2000);
-        timers.add(resetTimer);
-      });
-    };
-    const rssCopy = document.querySelector('.rss-copy');
-    if (rssCopy) bindCopy(rssCopy, rssCopy.parentElement.querySelector('a').textContent.trim());
     const article = document.querySelector('.article');
     const readingProgress = article && document.createElement('div');
     if (readingProgress) {
@@ -475,7 +449,27 @@
       copy.className = 'code-copy';
       copy.textContent = 'Copy';
       copy.setAttribute('aria-label', 'Copy code');
-      bindCopy(copy, original);
+      let resetTimer;
+      copy.addEventListener('click', async () => {
+        clearTimeout(resetTimer);
+        timers.delete(resetTimer);
+        try {
+          await navigator.clipboard.writeText(original);
+          if (controller.signal.aborted) return;
+          copy.textContent = 'Copied';
+        } catch {
+          if (controller.signal.aborted) return;
+          copy.textContent = 'Copy failed';
+        }
+        copy.setAttribute('aria-label', copy.textContent);
+        resetTimer = setTimeout(() => {
+          timers.delete(resetTimer);
+          if (controller.signal.aborted) return;
+          copy.textContent = 'Copy';
+          copy.setAttribute('aria-label', 'Copy code');
+        }, 2000);
+        timers.add(resetTimer);
+      });
       toolbar.append(copy);
       container.prepend(toolbar);
     });
@@ -494,7 +488,7 @@
     const home = location.pathname === '/' || location.pathname === '/index.html';
     header.querySelector('.brand')?.toggleAttribute('data-no-swup', home);
     header.querySelectorAll('.nav-links a').forEach(link => {
-      const active = link.pathname === '/blog/' && location.pathname.startsWith('/blog/');
+      const active = link.pathname === '/blog/' && !home;
       link.classList.toggle('is-active', active);
       if (active) link.setAttribute('aria-current', 'page');
       else link.removeAttribute('aria-current');
