@@ -784,6 +784,12 @@ html:not(.js) .search-open,html:not(.js) .search-dialog{display:none}
 .back-link:is(:hover,:focus-visible),.all-tags-link:is(:hover,:focus-visible),.blog-tags-mobile:is(:hover,:focus-visible){color:var(--gold-ink);text-decoration:none}
 .blog-layout{display:grid;grid-template-columns:minmax(0,1fr) 190px;gap:28px 40px;width:min(100%,1000px);margin:0 auto}
 .blog-list{grid-column:1;min-width:0;display:flow-root}
+.rss-view .blog-container{display:grid;place-items:center}
+.rss-page{width:min(100%,680px);text-align:center}
+.rss-address{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:12px 24px;margin-top:24px;padding:8px 0}
+.rss-address a{display:inline-block;overflow-wrap:anywhere;transition:transform .2s ease,color .3s ease}
+.rss-address a:is(:hover,:focus-visible){transform:translateY(-2px)}
+.rss-copy{padding:0;border:0;background:none;color:var(--ink-soft);font:inherit;cursor:pointer}
 .archive-year{container-type:inline-size;margin-top:64px}
 .archive-year:first-child{margin-top:40px}
 .archive-heading{position:relative;height:32px;pointer-events:none}
