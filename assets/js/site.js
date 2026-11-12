@@ -125,20 +125,6 @@
     const timers = new Set();
     const listen = (target, type, callback, options = {}) =>
       target.addEventListener(type, callback, { ...options, signal: controller.signal });
-    const rssCopy = document.querySelector('.rss-copy');
-    if (rssCopy) listen(rssCopy, 'click', async () => {
-      const label = rssCopy.parentElement.querySelector('a').textContent.trim();
-      try {
-        await navigator.clipboard.writeText(label);
-        if (controller.signal.aborted) return;
-        rssCopy.textContent = 'Copied';
-      } catch {
-        if (controller.signal.aborted) return;
-        rssCopy.textContent = 'Retry';
-      }
-      const timer = setTimeout(() => { if (!controller.signal.aborted) rssCopy.textContent = 'Copy'; }, 2000);
-      timers.add(timer);
-    });
     const article = document.querySelector('.article');
     const readingProgress = article && document.createElement('div');
     if (readingProgress) {
