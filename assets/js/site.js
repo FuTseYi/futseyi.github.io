@@ -125,6 +125,16 @@
     const timers = new Set();
     const listen = (target, type, callback, options = {}) =>
       target.addEventListener(type, callback, { ...options, signal: controller.signal });
+    const rssCopy = document.querySelector('.rss-copy');
+    if (rssCopy) listen(rssCopy, 'click', async () => {
+      const status = document.querySelector('.rss-copy-status');
+      try {
+        await navigator.clipboard.writeText(rssCopy.dataset.rssUrl);
+        status.textContent = 'RSS link copied.';
+      } catch {
+        status.textContent = 'Copy the feed URL from the link above.';
+      }
+    });
     const article = document.querySelector('.article');
     const readingProgress = article && document.createElement('div');
     if (readingProgress) {

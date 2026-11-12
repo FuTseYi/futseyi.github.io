@@ -784,6 +784,9 @@ html:not(.js) .search-open,html:not(.js) .search-dialog{display:none}
 .back-link:is(:hover,:focus-visible),.all-tags-link:is(:hover,:focus-visible),.blog-tags-mobile:is(:hover,:focus-visible){color:var(--gold-ink);text-decoration:none}
 .blog-layout{display:grid;grid-template-columns:minmax(0,1fr) 190px;gap:28px 40px;width:min(100%,1000px);margin:0 auto}
 .blog-list{grid-column:1;min-width:0;display:flow-root}
+.rss-copy{margin:12px 0 4px;padding:9px 14px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;cursor:pointer}
+.rss-copy:is(:hover,:focus-visible){color:var(--gold-ink)}
+.rss-copy-status{min-height:1.5em;color:var(--ink-faint);font-size:13px}
 .archive-year{container-type:inline-size;margin-top:64px}
 .archive-year:first-child{margin-top:40px}
 .archive-heading{position:relative;height:32px;pointer-events:none}
