@@ -127,13 +127,17 @@
       target.addEventListener(type, callback, { ...options, signal: controller.signal });
     const rssCopy = document.querySelector('.rss-copy');
     if (rssCopy) listen(rssCopy, 'click', async () => {
-      const status = document.querySelector('.rss-copy-status');
+      const label = rssCopy.parentElement.querySelector('a').textContent.trim();
       try {
-        await navigator.clipboard.writeText(rssCopy.dataset.rssUrl);
-        status.textContent = 'RSS link copied.';
+        await navigator.clipboard.writeText(label);
+        if (controller.signal.aborted) return;
+        rssCopy.textContent = 'Copied';
       } catch {
-        status.textContent = 'Copy the feed URL from the link above.';
+        if (controller.signal.aborted) return;
+        rssCopy.textContent = 'Retry';
       }
+      const timer = setTimeout(() => { if (!controller.signal.aborted) rssCopy.textContent = 'Copy'; }, 2000);
+      timers.add(timer);
     });
     const article = document.querySelector('.article');
     const readingProgress = article && document.createElement('div');
@@ -498,7 +502,7 @@
     const home = location.pathname === '/' || location.pathname === '/index.html';
     header.querySelector('.brand')?.toggleAttribute('data-no-swup', home);
     header.querySelectorAll('.nav-links a').forEach(link => {
-      const active = link.pathname === '/blog/' && !home;
+      const active = link.pathname === '/blog/' && location.pathname.startsWith('/blog/');
       link.classList.toggle('is-active', active);
       if (active) link.setAttribute('aria-current', 'page');
       else link.removeAttribute('aria-current');
