@@ -789,7 +789,7 @@ html:not(.js) .search-open,html:not(.js) .search-dialog{display:none}
 .rss-address{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:12px 24px;margin-top:24px;padding:8px 0}
 .rss-address a{display:inline-block;overflow-wrap:anywhere;transition:transform .2s ease,color .3s ease}
 .rss-address a:is(:hover,:focus-visible){transform:translateY(-2px)}
-.rss-copy{padding:0;border:0;background:none;color:var(--ink-soft);font:inherit;cursor:pointer}
+.rss-copy{width:11ch;padding:0;border:0;background:none;color:var(--ink-soft);font:inherit;text-align:left;cursor:pointer}
 .archive-year{container-type:inline-size;margin-top:64px}
 .archive-year:first-child{margin-top:40px}
 .archive-heading{position:relative;height:32px;pointer-events:none}
